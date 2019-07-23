@@ -1,0 +1,11 @@
+C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Logic\bin\Debug\SpeakingLanguage.Logic.dll
+C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Logic\bin\Debug\SpeakingLanguage.Logic.pdb
+C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Logic\bin\Debug\SpeakingLanguage.Library.dll
+C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Logic\bin\Debug\Newtonsoft.Json.dll
+C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Logic\bin\Debug\SpeakingLanguage.Library.pdb
+C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Logic\bin\Debug\Newtonsoft.Json.xml
+C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Logic\obj\Debug\SpeakingLanguage.Logic.csprojAssemblyReference.cache
+C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Logic\obj\Debug\SpeakingLanguage.Logic.csproj.CoreCompileInputs.cache
+C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Logic\obj\Debug\SpeakingLanguage.Logic.csproj.CopyComplete
+C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Logic\obj\Debug\SpeakingLanguage.Logic.dll
+C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Logic\obj\Debug\SpeakingLanguage.Logic.pdb

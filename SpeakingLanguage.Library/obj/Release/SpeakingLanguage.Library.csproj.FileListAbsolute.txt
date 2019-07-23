@@ -1,0 +1,8 @@
+C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Library\obj\Release\SpeakingLanguage.Library.csproj.CoreCompileInputs.cache
+C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Library\bin\Release\SpeakingLanguage.Library.dll
+C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Library\bin\Release\SpeakingLanguage.Library.pdb
+C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Library\bin\Release\Newtonsoft.Json.dll
+C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Library\bin\Release\Newtonsoft.Json.xml
+C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Library\obj\Release\SpeakingLanguage.Library.csproj.CopyComplete
+C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Library\obj\Release\SpeakingLanguage.Library.dll
+C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Library\obj\Release\SpeakingLanguage.Library.pdb
