@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Text;
 
 namespace SpeakingLanguage.Library
 {
@@ -87,6 +88,17 @@ namespace SpeakingLanguage.Library
         public int Count { get { return _root == null ? 0 : _root.count; } }
         public TValue this[int k] { get { return Find_Kth(k); } }
 
+        public static void Test()
+        {
+            var tree = new SplayBT<int, int>();
+            tree.Insert(435, 12311);
+            tree.Insert(34222, 12311);
+            tree.Insert(33, 412311);
+            tree.Insert(123566, 233);
+            tree.Insert(123, 122);
+            Console.WriteLine(tree.ToString());
+        }
+
         public SplayBT()
         {
         }
@@ -107,6 +119,23 @@ namespace SpeakingLanguage.Library
             _comparer = comparer;
         }
 
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+            sb.Append("[SplayBT] ");
+            sb.AppendFormat("count: {0} / ", Count.ToString());
+
+            sb.Append("elements: ");
+            var n = first();
+            while (n != null)
+            {
+                sb.AppendFormat("({0}, {1}), ", n.key.ToString(), n.value.ToString());
+                n = next(n);
+            }
+
+            return sb.ToString();
+        }
+
         public Enumerator GetEnumerator()
         {
             return new Enumerator(this);
@@ -124,7 +153,7 @@ namespace SpeakingLanguage.Library
 
         public void Clear()
         {
-
+            throw new NotImplementedException();
         }
 
         public void Insert(TKey key, TValue value)
@@ -155,12 +184,8 @@ namespace SpeakingLanguage.Library
         }
         
         #region PRIVATE
-        private Node next()
+        private Node next(Node x)
         {
-            if (null == _root)
-                return null;
-            
-            Node x = _root;
             if (null != x.r)
             {
                 x = x.r;
@@ -183,12 +208,8 @@ namespace SpeakingLanguage.Library
         }
 
 
-        private Node prev()
+        private Node prev(Node x)
         {
-            if (null == _root)
-                return null;
-
-            Node x = _root;
             if (null != x.l)
             {
                 x = x.l;

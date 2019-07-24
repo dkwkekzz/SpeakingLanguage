@@ -12,6 +12,8 @@ namespace Test
         {
             Console.WriteLine("============= test space =============");
 
+            SpeakingLanguage.Library.SplayBT<int, int>.Test();
+
             Console.ReadLine();
         }
     }
