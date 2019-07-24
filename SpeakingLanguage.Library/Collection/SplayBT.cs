@@ -1,11 +1,43 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace SpeakingLanguage.Library
 {
-    public sealed class SplayBT<TKey, TValue> where TKey : IComparable<TKey>
+    public sealed class SplayBT<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>, IEnumerable
+        where TKey : IComparable<TKey>
     {
+        public struct Enumerator : IEnumerator<KeyValuePair<TKey, TValue>>, IEnumerator
+        {
+            private SplayBT<TKey, TValue> splay;
+            private Node current;
+            
+            public Enumerator(SplayBT<TKey, TValue> splay)
+            {
+                this.splay = splay;
+                this.current = splay._root;
+            }
+
+            public KeyValuePair<TKey, TValue> Current { get { return new KeyValuePair<TKey, TValue> (current.key, current.value); } }
+            object IEnumerator.Current { get { return this.Current; } }
+
+            public void Dispose()
+            {
+            }
+
+            public bool MoveNext()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Reset()
+            {
+                throw new NotImplementedException();
+            }
+
+        }
+
         class Node
         {
             public Node l, r, p;
@@ -47,40 +79,52 @@ namespace SpeakingLanguage.Library
             }
         }
 
-        public struct Iterator
-        {
-            private Node root;
-
-            private Iterator(Node x)
-            {
-                root = x;
-            }
-
-            public TValue Current => root.value;
-        }
-
         private IFactory _factory;
         private IComparer<TKey> _comparer;
         private Node _root;
 
-        public int Capacity { get { return _factory.Capacity; } }
+        public int Capacity { get { return _factory == null ? _root.count : _factory.Capacity; } }
         public int Count { get { return _root == null ? 0 : _root.count; } }
         public TValue this[int k] { get { return Find_Kth(k); } }
 
         public SplayBT()
         {
-            _factory = new Heap(1 << 4);
         }
 
-        public SplayBT(int size)
+        public SplayBT(IComparer<TKey> comparer)
         {
-            _factory = new Heap(size);
-        }
-
-        public SplayBT(int size, IComparer<TKey> comparer)
-        {
-            _factory = new Heap(size);
             _comparer = comparer;
+        }
+
+        public SplayBT(int capacity)
+        {
+            _factory = new Heap(capacity);
+        }
+
+        public SplayBT(int capacity, IComparer<TKey> comparer)
+        {
+            _factory = new Heap(capacity);
+            _comparer = comparer;
+        }
+
+        public Enumerator GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
+
+        IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+
+        public void Clear()
+        {
+
         }
 
         public void Insert(TKey key, TValue value)
@@ -102,7 +146,86 @@ namespace SpeakingLanguage.Library
         {
             if (_root.count < k)
                 throw new OverflowException($"[Find_Kth] index overflow - root.count/k:{_root.count.ToString()}/{k.ToString()}");
+            
+            var x = find_Kth(k);
+            if (null == x)
+                return default(TValue);
 
+            return x.value;
+        }
+
+        public TValue FirstOrDefault()
+        {
+            var x = first();
+            if (null == x)
+                return default(TValue);
+
+            return x.value;
+        }
+
+        public TValue LastOrDefault()
+        {
+            var x = last();
+            if (null == x)
+                return default(TValue);
+
+            return x.value;
+        }
+
+        #region PRIVATE
+        private Node next()
+        {
+            if (null == _root)
+                return null;
+            
+            Node x = _root;
+            if (null != x.r)
+            {
+                x = x.r;
+                while (null != x.l)
+                    x = x.l;
+            }
+            else if (null != x.p)
+            {
+                var p = x.p;
+                while (null != p && p.r == x)
+                {
+                    x = p;
+                    p = p.p;
+                }
+            }
+            else
+                return null;
+            
+            return x;
+        }
+
+        private Node first()
+        {
+            if (null == _root)
+                return null;
+            
+            Node x = _root;
+            while (null != x.l)
+                x = x.l;
+            
+            return x;
+        }
+
+        private Node last()
+        {
+            if (null == _root)
+                return null;
+
+            Node x = _root;
+            while (null != x.r)
+                x = x.r;
+            
+            return x;
+        }
+
+        private Node find_Kth(int k)
+        {
             Node x = _root;
             while (true)
             {
@@ -117,27 +240,7 @@ namespace SpeakingLanguage.Library
 
             splay(x);
 
-            return _root.value;
-        }
-
-        #region PRIVATE
-        private Node createNode(ref TKey key, ref TValue value)
-        {
-            var x = _factory.GetObject();
-            x.key = key;
-            x.value = value;
-            x.count = 0;
-            return x;
-        }
-
-        private void destroyNode(Node x)
-        {
-            x.l = null;
-            x.p = null;
-            x.r = null;
-            x.key = default(TKey);
-            x.value = default(TValue);
-            _factory.PutObject(x);
+            return _root;
         }
 
         private void rotate(Node x)
@@ -339,6 +442,32 @@ namespace SpeakingLanguage.Library
             x.count = 1;
             if (null != x.l) x.count += x.l.count;
             if (null != x.r) x.count += x.r.count;
+        }
+
+        private Node createNode(ref TKey key, ref TValue value)
+        {
+            Node x;
+            if (null != _factory)
+                x = _factory.GetObject();
+            else
+                x = new Node();
+
+            x.key = key;
+            x.value = value;
+            x.count = 0;
+            return x;
+        }
+
+        private void destroyNode(Node x)
+        {
+            x.l = null;
+            x.p = null;
+            x.r = null;
+            x.key = default(TKey);
+            x.value = default(TValue);
+
+            if (null != _factory)
+                _factory.PutObject(x);
         }
         #endregion
     }
