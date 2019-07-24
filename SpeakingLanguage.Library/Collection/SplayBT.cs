@@ -153,25 +153,7 @@ namespace SpeakingLanguage.Library
 
             return x.value;
         }
-
-        public TValue FirstOrDefault()
-        {
-            var x = first();
-            if (null == x)
-                return default(TValue);
-
-            return x.value;
-        }
-
-        public TValue LastOrDefault()
-        {
-            var x = last();
-            if (null == x)
-                return default(TValue);
-
-            return x.value;
-        }
-
+        
         #region PRIVATE
         private Node next()
         {
@@ -197,6 +179,34 @@ namespace SpeakingLanguage.Library
             else
                 return null;
             
+            return x;
+        }
+
+
+        private Node prev()
+        {
+            if (null == _root)
+                return null;
+
+            Node x = _root;
+            if (null != x.l)
+            {
+                x = x.l;
+                while (null != x.r)
+                    x = x.r;
+            }
+            else if (null != x.p)
+            {
+                var p = x.p;
+                while (null != p && p.l == x)
+                {
+                    x = p;
+                    p = p.p;
+                }
+            }
+            else
+                return null;
+
             return x;
         }
 

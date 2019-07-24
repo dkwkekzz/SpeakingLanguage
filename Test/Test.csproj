@@ -49,5 +49,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SpeakingLanguage.Library\SpeakingLanguage.Library.csproj">
+      <Project>{aad28eed-2523-428d-af3c-59079f0ff3cf}</Project>
+      <Name>SpeakingLanguage.Library</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
