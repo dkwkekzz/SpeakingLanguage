@@ -23,7 +23,7 @@ namespace SpeakingLanguage.Library
                 current = null;
                 index = -1;
             }
-
+            
             public KeyValuePair<TKey, TValue> Current
             {
                 get
@@ -73,6 +73,54 @@ namespace SpeakingLanguage.Library
             {
                 current = null;
                 index = -1;
+            }
+        }
+
+        public struct BidirectEnumerator : IEnumerator<KeyValuePair<TKey, TValue>>, IEnumerator
+        {
+            private SplayBT<TKey, TValue> tree;
+            private Node current;
+
+            public BidirectEnumerator(SplayBT<TKey, TValue> t)
+            {
+                tree = t;
+                current = tree._root;
+            }
+
+            public KeyValuePair<TKey, TValue> Current
+            {
+                get
+                {
+                    return null == current ? default(KeyValuePair<TKey, TValue>) : new KeyValuePair<TKey, TValue>(current.key, current.value);
+                }
+            }
+            object IEnumerator.Current { get { return this.Current; } }
+
+            public void Dispose()
+            {
+            }
+
+            public bool MoveNext()
+            {
+                if (null == current)
+                    current = tree.first();
+                else
+                    current = tree.next(current);
+                return null != current;
+            }
+
+            public bool MovePrev()
+            {
+                if (null == current)
+                    current = tree.last();
+                else
+                    current = tree.prev(current);
+                return null != current;
+            }
+            
+            public void Reset()
+            {
+                current = null;
             }
         }
 
@@ -180,6 +228,15 @@ namespace SpeakingLanguage.Library
                 Console.WriteLine(iter.Current.ToString());
             else
                 Console.WriteLine("fail to advance...");
+
+            tree.Add(992, 77345);
+            Console.WriteLine("===BidirectEnumerator===");
+            SplayBT<int, int>.BidirectEnumerator biter;
+            tree.TryGetEnum(992, out biter);
+            while (biter.MoveNext())
+            {
+                Console.WriteLine(biter.Current.ToString());
+            }
             Console.WriteLine("=============");
 
             if (tree.ContainsKey(123566))
@@ -216,6 +273,8 @@ namespace SpeakingLanguage.Library
             Console.WriteLine("remove: 33");
             tree.Remove(33);
             Console.WriteLine(tree.ToString());
+
+            
         }
 
         public SplayBT() : this(null, null, true)
@@ -334,7 +393,20 @@ namespace SpeakingLanguage.Library
             value = n.value;
             return true;
         }
-        
+
+        public bool TryGetEnum(TKey key, out BidirectEnumerator iter)
+        {
+            var n = find(ref key);
+            if (null == n)
+            {
+                iter = default(BidirectEnumerator);
+                return false;
+            }
+
+            iter = new BidirectEnumerator(this);
+            return true;
+        }
+
         public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
         {
             throw new NotImplementedException();
