@@ -9,3 +9,7 @@ C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Logic\obj\Debug\Sp
 C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Logic\obj\Debug\SpeakingLanguage.Logic.csproj.CopyComplete
 C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Logic\obj\Debug\SpeakingLanguage.Logic.dll
 C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Logic\obj\Debug\SpeakingLanguage.Logic.pdb
+D:\develop\MyProject\SpeakingLanguage\SpeakingLanguage.Logic\obj\Debug\SpeakingLanguage.Logic.csprojAssemblyReference.cache
+D:\develop\MyProject\SpeakingLanguage\SpeakingLanguage.Logic\obj\Debug\SpeakingLanguage.Logic.csproj.CoreCompileInputs.cache
+D:\develop\MyProject\SpeakingLanguage\SpeakingLanguage.Logic\obj\Debug\SpeakingLanguage.Logic.dll
+D:\develop\MyProject\SpeakingLanguage\SpeakingLanguage.Logic\obj\Debug\SpeakingLanguage.Logic.pdb

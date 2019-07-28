@@ -8,29 +8,382 @@ using System.Text;
 namespace SpeakingLanguage.Library
 {
     [DebuggerDisplay("Count = {Count}")]
-    public sealed class SplayBT<TKey, TValue> : IDictionary<TKey, TValue>, IEnumerable<KeyValuePair<TKey, TValue>>, IEnumerable
-        where TKey : IComparable<TKey>
+    public sealed class SplayBT<TKey> : SplayBTBase<TKey>, IEnumerable<TKey>, IEnumerable
     {
-        public struct Enumerator : IEnumerator<KeyValuePair<TKey, TValue>>, IEnumerator
+        sealed class BaseComparer : IComparer<TKey>
         {
-            private SplayBT<TKey, TValue> tree;
+            public int Compare(TKey x, TKey y)
+            {
+                var cmp = y as IComparable<TKey>;
+                if (null == cmp)
+                    return -1;
+
+                return cmp.CompareTo(x);
+            }
+        }
+        
+        public SplayBT() : base(null, new BaseComparer())
+        {
+        }
+
+        public SplayBT(IComparer<TKey> comparer) : base(null, comparer)
+        {
+        }
+
+        public SplayBT(int capacity) : base(createPool(capacity), new BaseComparer())
+        {
+        }
+
+        public SplayBT(int capacity, IComparer<TKey> comparer) : base(createPool(capacity), comparer)
+        {
+        }
+        
+        public Enumerator GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
+
+        IEnumerator<TKey> IEnumerable<TKey>.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+
+        public BidirectEnumerator GetEnumerator(TKey key)
+        {
+            var n = find(ref key);
+            if (null == n)
+                return default(BidirectEnumerator);
+            
+            return new BidirectEnumerator(this);
+        }
+        
+        public bool ContainsKey(TKey key)
+        {
+            return null != find(ref key);
+        }
+
+        public void Add(TKey key)
+        {
+            insert(ref key, false);
+        }
+
+        public void Add(TKey key, bool overlap)
+        {
+            insert(ref key, overlap);
+        }
+
+        public bool TryAdd(TKey key)
+        {
+            return insert(ref key, false);
+        }
+
+        public bool Remove(TKey key)
+        {
+            return delete(ref key);
+        }
+        
+        public bool TryFind_Kth(int kth, out TKey key)
+        {
+            if (Count < kth)
+                throw new OverflowException($"[Find_Kth] index overflow - root.count/k:{Count.ToString()}/{kth.ToString()}");
+
+            var x = find_Kth(kth);
+            if (null == x)
+            {
+                key = default(TKey);
+                return false;
+            }
+
+            key = x.key;
+            return true;
+        }
+    }
+
+    [DebuggerDisplay("Count = {Count}")]
+    public sealed class SplayBT<TKey, TValue> : SplayBTBase<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>>, IEnumerable
+    {
+        sealed class BaseComparer : IComparer<KeyValuePair<TKey, TValue>>
+        {
+            public int Compare(KeyValuePair<TKey, TValue> x, KeyValuePair<TKey, TValue> y)
+            {
+                var cmp = y.Key as IComparable<TKey>;
+                if (null == cmp)
+                    return -1;
+
+                return cmp.CompareTo(x.Key);
+            }
+        }
+
+        sealed class WrapedComparer : IComparer<KeyValuePair<TKey, TValue>>
+        {
+            private IComparer<TKey> _comparer;
+
+            public WrapedComparer(IComparer<TKey> comparer)
+            {
+                _comparer = comparer;
+            }
+
+            public int Compare(KeyValuePair<TKey, TValue> x, KeyValuePair<TKey, TValue> y)
+            {
+                return _comparer.Compare(x.Key, y.Key);
+            }
+        }
+
+        public TValue this[TKey key]
+        {
+            get
+            {
+                var pairNoValue = new KeyValuePair<TKey, TValue>(key, default(TValue));
+                var n = find(ref pairNoValue);
+                if (null == n)
+                    throw new KeyNotFoundException();
+                return n.key.Value;
+            }
+            set
+            {
+                var pair = new KeyValuePair<TKey, TValue>(key, value);
+                insert(ref pair, true);
+            }
+        }
+
+        public SplayBT() : base(null, new BaseComparer())
+        {
+        }
+
+        public SplayBT(IComparer<TKey> comparer) : base(null, new WrapedComparer(comparer))
+        {
+        }
+
+        public SplayBT(IComparer<KeyValuePair<TKey, TValue>> comparer) : base(null, comparer)
+        {
+        }
+
+        public SplayBT(int capacity) : base(createPool(capacity), new BaseComparer())
+        {
+        }
+
+        public SplayBT(int capacity, IComparer<TKey> comparer) : base(createPool(capacity), new WrapedComparer(comparer))
+        {
+        }
+
+        public SplayBT(int capacity, IComparer<KeyValuePair<TKey, TValue>> comparer) : base(createPool(capacity), comparer)
+        {
+        }
+
+        public Enumerator GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
+
+        IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+
+        public BidirectEnumerator GetEnumerator(TKey key)
+        {
+            var pairNoValue = new KeyValuePair<TKey, TValue>(key, default(TValue));
+            var n = find(ref pairNoValue);
+            if (null == n)
+                return default(BidirectEnumerator);
+            
+            return new BidirectEnumerator(this);
+        }
+        
+        public bool ContainsKey(TKey key)
+        {
+            var pairNoValue = new KeyValuePair<TKey, TValue>(key, default(TValue));
+            return null != find(ref pairNoValue);
+        }
+
+        public void Add(TKey key, TValue value)
+        {
+            var pair = new KeyValuePair<TKey, TValue>(key, value);
+            insert(ref pair, false);
+        }
+
+        public void Add(TKey key, TValue value, bool overlap)
+        {
+            var pair = new KeyValuePair<TKey, TValue>(key, value);
+            insert(ref pair, overlap);
+        }
+
+        public bool TryAdd(TKey key, TValue value)
+        {
+            var pair = new KeyValuePair<TKey, TValue>(key, value);
+            return insert(ref pair, false);
+        }
+
+        public bool Remove(TKey key)
+        {
+            var pairNoValue = new KeyValuePair<TKey, TValue>(key, default(TValue));
+            bool exist = false;
+            while (delete(ref pairNoValue))
+                exist = true;
+            return exist;
+        }
+        
+        public bool TryGetValue(TKey key, out TValue value)
+        {
+            var pairNoValue = new KeyValuePair<TKey, TValue>(key, default(TValue));
+            var n = find(ref pairNoValue);
+            if (null == n)
+            {
+                value = default(TValue);
+                return false;
+            }
+
+            value = n.key.Value;
+            return true;
+        }
+        
+        public bool TryFind_Kth(int kth, out TKey key)
+        {
+            if (Count < kth)
+                throw new OverflowException($"[Find_Kth] index overflow - root.count/k:{Count.ToString()}/{kth.ToString()}");
+
+            var x = find_Kth(kth);
+            if (null == x)
+            {
+                key = default(TKey);
+                return false;
+            }
+
+            key = x.key.Key;
+            return true;
+        }
+
+        public bool TryFind_Kth(int kth, out TKey key, out TValue value)
+        {
+            if (Count < kth)
+                throw new OverflowException($"[Find_Kth] index overflow - root.count/k:{Count.ToString()}/{kth.ToString()}");
+
+            var x = find_Kth(kth);
+            if (null == x)
+            {
+                key = default(TKey);
+                value = default(TValue);
+                return false;
+            }
+
+            key = x.key.Key;
+            value = x.key.Value;
+            return true;
+        }
+
+        public static void Test()
+        {
+            var tree = new SplayBT<int, int>();
+            tree.Add(435, 12311);
+            tree.Add(34222, 12311);
+            tree.Add(33, 412311);
+            tree.Add(123566, 233);
+            tree.Add(123, 122);
+            Console.WriteLine(tree.ToString());
+            tree.Remove(123);
+            Console.WriteLine(tree.ToString());
+            tree.Add(33, 3333);
+            tree.TryAdd(33, 9999);
+            Console.WriteLine(tree.ToString());
+            tree.Add(33, 7777);
+            Console.WriteLine(tree.ToString());
+            tree.Add(33, 7778);
+            Console.WriteLine(tree.ToString());
+            tree.Add(33, 7777);
+            Console.WriteLine(tree.ToString());
+            tree.Add(124, 12332);
+            tree.Add(3, 12332);
+
+            Console.WriteLine("===iterate===");
+            var iter = tree.GetEnumerator();
+            while (iter.MoveNext())
+            {
+                Console.WriteLine(iter.Current.ToString());
+            }
+
+            Console.WriteLine("===backiterate===");
+            while (iter.MovePrev())
+            {
+                Console.WriteLine(iter.Current.ToString());
+            }
+            Console.WriteLine("===randomiterate===");
+            if (iter.Advance(4))
+                Console.WriteLine(iter.Current.ToString());
+            else
+                Console.WriteLine("fail to advance...");
+
+            tree.Add(992, 77345);
+            Console.WriteLine("===BidirectEnumerator===");
+            var bidIter = tree.GetEnumerator(33);
+            while (bidIter.MoveNext())
+            {
+                Console.WriteLine(bidIter.Current.ToString());
+            }
+            Console.WriteLine("=============");
+
+            if (tree.ContainsKey(123566))
+            {
+                Console.WriteLine("found: 123566");
+            }
+            Console.WriteLine(tree.ToString());
+
+            int v;
+            if (tree.TryGetValue(34222, out v))
+            {
+                Console.WriteLine(string.Format("found: 34222, {0}", v.ToString()));
+            }
+            Console.WriteLine(tree.ToString());
+
+            Console.WriteLine("remove: 34222");
+            tree.Remove(34222);
+            Console.WriteLine(tree.ToString());
+
+            //Console.WriteLine("removeone: 123566");
+            //tree.RemoveOne(123566, 233);
+            //Console.WriteLine(tree.ToString());
+            //
+            //Console.WriteLine("removeone: 33");
+            //tree.RemoveOne(33, 9999);
+            //Console.WriteLine(tree.ToString());
+            //
+            //Console.WriteLine("delete: 33");
+            //int key = 33;
+            //int value = 7777;
+            //tree.delete(ref key, ref value);
+            //Console.WriteLine(tree.ToString());
+
+            Console.WriteLine("remove: 33");
+            tree.Remove(33);
+            Console.WriteLine(tree.ToString());
+        }
+    }
+
+    public abstract class SplayBTBase<TKey>
+    {
+        public struct Enumerator : IEnumerator<TKey>, IEnumerator
+        {
+            private SplayBTBase<TKey> tree;
             private Node current;
             private int index;
 
-            public Enumerator(SplayBT<TKey, TValue> t)
+            public Enumerator(SplayBTBase<TKey> t)
             {
                 tree = t;
                 current = null;
                 index = -1;
             }
-            
-            public KeyValuePair<TKey, TValue> Current
-            {
-                get
-                {
-                    return null == current ? default(KeyValuePair<TKey, TValue>) : new KeyValuePair<TKey, TValue>(current.key, current.value);
-                }
-            }
+
+            public TKey Current { get { return current.key; } }
             object IEnumerator.Current { get { return this.Current; } }
 
             public void Dispose()
@@ -39,28 +392,114 @@ namespace SpeakingLanguage.Library
 
             public bool MoveNext()
             {
-                if (null == current)
-                    current = tree.first();
-                else
-                    current = tree.next(current);
-
                 index++;
-                return null != current;
+                return EnumeratorHelper.MoveNext(ref current, tree);
             }
 
             public bool MovePrev()
             {
-                if (null == current)
-                    current = tree.last();
-                else
-                    current = tree.prev(current);
-
                 index--;
-                return null != current;
+                return EnumeratorHelper.MovePrev(ref current, tree);
             }
 
             public bool Advance(int ofs)
             {
+                return EnumeratorHelper.Advance(ref current, tree, ref index, ofs);
+            }
+
+            public void Reset()
+            {
+                current = null;
+                index = -1;
+            }
+        }
+
+        public struct BidirectEnumerator : IEnumerator<TKey>, IEnumerator
+        {
+            private SplayBTBase<TKey> tree;
+            private Node current;
+
+            public BidirectEnumerator(SplayBTBase<TKey> t)
+            {
+                tree = t;
+                current = t.Root;
+                EnumeratorHelper.GetFirstKey(ref current, t);
+            }
+
+            public TKey Current { get { return current.key; } }
+            object IEnumerator.Current { get { return this.Current; } }
+
+            public void Dispose()
+            {
+            }
+
+            public bool MoveNext()
+            {
+                return EnumeratorHelper.MoveNext(ref current, tree);
+            }
+
+            public bool MovePrev()
+            {
+                return EnumeratorHelper.MovePrev(ref current, tree);
+            }
+
+            public void Reset()
+            {
+                current = null;
+            }
+        }
+
+        static class EnumeratorHelper
+        {
+            public static void GetFirstKey(ref Node current, SplayBTBase<TKey> tree)
+            {
+                if (null == current || null == tree)
+                    return;
+
+                var targetKey = current.key;
+                while (current != null && tree.compareKeys(ref current.key, ref targetKey) == 0)
+                    current = tree.prev(current);
+            }
+
+            public static bool MoveNext(ref Node current, SplayBTBase<TKey> tree)
+            {
+                if (null == tree)
+                {
+                    current = null;
+                    return false;
+                }
+
+                if (null == current)
+                    current = tree.first();
+                else
+                    current = tree.next(current);
+                return null != current;
+            }
+
+            public static bool MovePrev(ref Node current, SplayBTBase<TKey> tree)
+            {
+                if (null == tree)
+                {
+                    current = null;
+                    return false;
+                }
+
+                if (null == current)
+                    current = tree.last();
+                else
+                    current = tree.prev(current);
+                return null != current;
+            }
+
+            public static bool Advance(ref Node current, SplayBTBase<TKey> tree, ref int index, int ofs)
+            {
+                if (null == tree)
+                {
+                    current = null;
+                    index = -1;
+                    return false;
+                }
+
                 index += ofs;
                 if (index <= 0 || index >= tree.Count)
                     throw new OverflowException($"[Advance] index overflow - root.count/index:{tree.Count.ToString()}/{index.ToString()}");
@@ -68,86 +507,29 @@ namespace SpeakingLanguage.Library
                 current = tree.find_Kth(index);
                 return null != current;
             }
-
-            public void Reset()
-            {
-                current = null;
-                index = -1;
-            }
         }
 
-        public struct BidirectEnumerator : IEnumerator<KeyValuePair<TKey, TValue>>, IEnumerator
+        protected interface IFactory
         {
-            private SplayBT<TKey, TValue> tree;
-            private Node current;
-
-            public BidirectEnumerator(SplayBT<TKey, TValue> t)
-            {
-                tree = t;
-                current = tree._root;
-            }
-
-            public KeyValuePair<TKey, TValue> Current
-            {
-                get
-                {
-                    return null == current ? default(KeyValuePair<TKey, TValue>) : new KeyValuePair<TKey, TValue>(current.key, current.value);
-                }
-            }
-            object IEnumerator.Current { get { return this.Current; } }
-
-            public void Dispose()
-            {
-            }
-
-            public bool MoveNext()
-            {
-                if (null == current)
-                    current = tree.first();
-                else
-                    current = tree.next(current);
-                return null != current;
-            }
-
-            public bool MovePrev()
-            {
-                if (null == current)
-                    current = tree.last();
-                else
-                    current = tree.prev(current);
-                return null != current;
-            }
-            
-            public void Reset()
-            {
-                current = null;
-            }
+            Node GetObject();
+            void PutObject(Node x);
         }
 
-        class Node
+        protected class Node
         {
             public Node l, r, p;
             public TKey key;
-            public TValue value;
             public int count;
 
             public override string ToString()
             {
-                return string.Format("({0}, {1})", key.ToString(), value.ToString());
+                return string.Format("({0})", key.ToString());
             }
-        }
-
-        interface IFactory
-        {
-            int Capacity { get; }
-            Node GetObject();
-            void PutObject(Node x);
         }
 
         class Heap : IFactory
         {
             private ConcurrentBag<Node> _pool = new ConcurrentBag<Node>();
-            public int Capacity { get { return _pool.Count; } }
 
             public Heap(int sz)
             {
@@ -173,138 +555,19 @@ namespace SpeakingLanguage.Library
         private IFactory _factory;
         private IComparer<TKey> _comparer;
         private Node _root;
-        private readonly bool _multiKey = true;
         
         public int Count { get { return _root == null ? 0 : _root.count; } }
         public bool IsReadOnly { get { return false; } }
-        public ICollection<TKey> Keys { get { throw new NotImplementedException(); } }
-        public ICollection<TValue> Values { get { throw new NotImplementedException(); } }
 
-        public TValue this[TKey key]
-        {
-            get
-            {
-                var n = find(ref key);
-                if (null == n)
-                    throw new KeyNotFoundException();
-                return n.value;
-            }
-            set
-            {
-                insert(ref key, ref value, true);
-            }
-        }
-        
-        public static void Test()
-        {
-            var tree = new SplayBT<int, int>();
-            tree.Add(435, 12311);
-            tree.Add(34222, 12311);
-            tree.Add(33, 412311);
-            tree.Add(123566, 233);
-            tree.Add(123, 122);
-            Console.WriteLine(tree.ToString());
-            tree.Remove(123);
-            Console.WriteLine(tree.ToString());
-            tree.Add(33, 3333);
-            tree.TryAdd(33, 9999);
-            Console.WriteLine(tree.ToString());
-            tree.Add(33, 7777);
+        protected Node Root { get { return _root; } }
 
-            Console.WriteLine("===iterate===");
-            var iter = tree.GetEnumerator();
-            while (iter.MoveNext())
-            {
-                Console.WriteLine(iter.Current.ToString());
-            }
-
-            Console.WriteLine("===backiterate===");
-            while (iter.MovePrev())
-            {
-                Console.WriteLine(iter.Current.ToString());
-            }
-            Console.WriteLine("===randomiterate===");
-            if (iter.Advance(4))
-                Console.WriteLine(iter.Current.ToString());
-            else
-                Console.WriteLine("fail to advance...");
-
-            tree.Add(992, 77345);
-            Console.WriteLine("===BidirectEnumerator===");
-            SplayBT<int, int>.BidirectEnumerator biter;
-            tree.TryGetEnum(992, out biter);
-            while (biter.MoveNext())
-            {
-                Console.WriteLine(biter.Current.ToString());
-            }
-            Console.WriteLine("=============");
-
-            if (tree.ContainsKey(123566))
-            {
-                Console.WriteLine("found: 123566");
-            }
-            Console.WriteLine(tree.ToString());
-
-            int v;
-            if (tree.TryGetValue(34222, out v))
-            {
-                Console.WriteLine(string.Format("found: 34222, {0}", v.ToString()));
-            }
-            Console.WriteLine(tree.ToString());
-
-            Console.WriteLine("remove: 34222");
-            tree.Remove(34222);
-            Console.WriteLine(tree.ToString());
-
-            Console.WriteLine("removeone: 123566");
-            tree.RemoveOne(123566, 233);
-            Console.WriteLine(tree.ToString());
-
-            Console.WriteLine("removeone: 33");
-            tree.RemoveOne(33, 9999);
-            Console.WriteLine(tree.ToString());
-
-            Console.WriteLine("delete: 33");
-            int key = 33;
-            int value = 7777;
-            tree.delete(ref key);
-            Console.WriteLine(tree.ToString());
-
-            Console.WriteLine("remove: 33");
-            tree.Remove(33);
-            Console.WriteLine(tree.ToString());
-
-            
-        }
-
-        public SplayBT() : this(null, null, true)
-        {
-        }
-        
-        public SplayBT(IComparer<TKey> comparer) : this(null, comparer, true)
-        {
-        }
-
-        public SplayBT(int capacity) : this(createPool(capacity), null, true)
-        {
-        }
-
-        public SplayBT(int capacity, IComparer<TKey> comparer) : this(createPool(capacity), comparer, true)
-        {
-        }
-
-        public SplayBT(int capacity, IComparer<TKey> comparer, bool multiKey) : this(createPool(capacity), comparer, multiKey)
-        {
-        }
-
-        private SplayBT(IFactory factory, IComparer<TKey> comparer, bool multiKey)
+        protected SplayBTBase(IFactory factory, IComparer<TKey> comparer)
         {
             _factory = factory;
             _comparer = comparer;
-            _multiKey = multiKey;
         }
 
-        private static IFactory createPool(int sz)
+        protected static IFactory createPool(int sz)
         {
             if (sz == 0)
                 return null;
@@ -328,127 +591,13 @@ namespace SpeakingLanguage.Library
             return sb.ToString();
         }
 
-        public Enumerator GetEnumerator()
-        {
-            return new Enumerator(this);
-        }
-
-        IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
-        {
-            return this.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
-        }
-
         public void Clear()
         {
             _root = null;
         }
 
-        public bool ContainsKey(TKey key)
-        {
-            return null != find(ref key);
-        }
-
-        public void Add(TKey key, TValue value)
-        {
-            insert(ref key, ref value, false);
-        }
-
-        public void Add(TKey key, TValue value, bool overlap)
-        {
-            insert(ref key, ref value, overlap);
-        }
-
-        public bool TryAdd(TKey key, TValue value)
-        {
-            return insert(ref key, ref value, false);
-        }
-
-        public bool Remove(TKey key)
-        {
-            bool exist = false;
-            while (delete(ref key))
-                exist = true;
-            return exist;
-        }
-
-        public bool RemoveOne(TKey key, TValue value)
-        {
-            return delete(ref key, ref value);
-        }
-
-        public bool TryGetValue(TKey key, out TValue value)
-        {
-            var n = find(ref key);
-            if (null == n)
-            {
-                value = default(TValue);
-                return false;
-            }
-
-            value = n.value;
-            return true;
-        }
-
-        public bool TryGetEnum(TKey key, out BidirectEnumerator iter)
-        {
-            var n = find(ref key);
-            if (null == n)
-            {
-                iter = default(BidirectEnumerator);
-                return false;
-            }
-
-            iter = new BidirectEnumerator(this);
-            return true;
-        }
-
-        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
-        {
-            throw new NotImplementedException();
-        }
-        
-        public bool TryFind_Kth(int kth, out TValue value)
-        {
-            if (_root.count < kth)
-                throw new OverflowException($"[Find_Kth] index overflow - root.count/k:{_root.count.ToString()}/{kth.ToString()}");
-            
-            var x = find_Kth(kth);
-            if (null == x)
-            {
-                value = default(TValue);
-                return false;
-            }
-
-            value = x.value;
-            return true;
-        }
-
-        public void Add(KeyValuePair<TKey, TValue> item)
-        {
-            var key = item.Key;
-            var value = item.Value;
-            insert(ref key, ref value, false);
-        }
-
-        public bool Contains(KeyValuePair<TKey, TValue> item)
-        {
-            var key = item.Key;
-            var value = item.Value;
-            return null != find(ref key, ref value);
-        }
-
-        public bool Remove(KeyValuePair<TKey, TValue> item)
-        {
-            return Remove(item.Key);
-        }
-
-        #region PRIVATE
-        private Node next(Node x)
+        #region PROTECTED
+        protected Node next(Node x)
         {
             if (null != x.r)
             {
@@ -467,8 +616,8 @@ namespace SpeakingLanguage.Library
 
             return p;
         }
-        
-        private Node prev(Node x)
+
+        protected Node prev(Node x)
         {
             if (null != x.l)
             {
@@ -488,7 +637,7 @@ namespace SpeakingLanguage.Library
             return p;
         }
 
-        private Node first()
+        protected Node first()
         {
             if (null == _root)
                 return null;
@@ -500,7 +649,7 @@ namespace SpeakingLanguage.Library
             return x;
         }
 
-        private Node last()
+        protected Node last()
         {
             if (null == _root)
                 return null;
@@ -512,7 +661,7 @@ namespace SpeakingLanguage.Library
             return x;
         }
 
-        private Node find_Kth(int k)
+        protected Node find_Kth(int k)
         {
             Node x = _root;
             while (true)
@@ -531,34 +680,26 @@ namespace SpeakingLanguage.Library
             return _root;
         }
 
-        private bool insert(ref TKey key, ref TValue value, bool overlap)
+        protected bool insert(ref TKey key, bool overlap)
         {
             Node p = _root;
             if (null == p)
             {
-                _root = createNode(ref key, ref value);
+                _root = createNode(ref key);
                 return true;
             }
 
             bool left;
             while (true)
             {
-                int ret;
-                if (null != _comparer)
-                    ret = _comparer.Compare(key, p.key);
-                else
-                    ret = p.key.CompareTo(key);
-
+                int ret = compareKeys(ref key, ref p.key);
                 if (0 == ret)
                 {
                     if (overlap)
                     {
-                        p.value = value;
+                        p.key = key;
                         return true;
                     }
-
-                    if (!_multiKey)
-                        return false;
 
                     ret = -1;
                 }
@@ -583,7 +724,7 @@ namespace SpeakingLanguage.Library
                 }
             }
 
-            var x = createNode(ref key, ref value);
+            var x = createNode(ref key);
             if (left)
                 p.l = x;
             else
@@ -593,7 +734,7 @@ namespace SpeakingLanguage.Library
             return true;
         }
 
-        private Node find(ref TKey key)
+        protected Node find(ref TKey key)
         {
             Node p = _root;
             if (null == p)
@@ -601,11 +742,7 @@ namespace SpeakingLanguage.Library
 
             while (null != p)
             {
-                int ret;
-                if (null != _comparer)
-                    ret = _comparer.Compare(key, p.key);
-                else
-                    ret = p.key.CompareTo(key);
+                int ret = compareKeys(ref key, ref p.key);
                 if (ret == 0)
                     break;
                 if (ret == 1)
@@ -624,76 +761,14 @@ namespace SpeakingLanguage.Library
 
             splay(p);
 
-            bool equal;
-            if (null != _comparer)
-                equal = _comparer.Compare(key, p.key) == 0;
-            else
-                equal = p.key.CompareTo(key) == 0;
+            bool equal = compareKeys(ref key, ref p.key) == 0;
             if (!equal)
                 return null;
 
             return p;
         }
-
-        private Node find(ref TKey key, ref TValue value)
-        {
-            Node p = _root;
-            if (null == p)
-                return null;
-
-            IEquatable<TValue> valueEqual;
-            while (null != p)
-            {
-                int ret;
-                if (null != _comparer)
-                    ret = _comparer.Compare(key, p.key);
-                else
-                    ret = p.key.CompareTo(key);
-                if (ret == 0)
-                {
-                    valueEqual = p.value as IEquatable<TValue>;
-                    if (null != valueEqual && valueEqual.Equals(value))
-                        break;
-
-                    if (null != p.r)
-                        p = p.r;
-                    else if (null != p.l)
-                        p = p.l;
-                    continue;
-                }
-
-                if (ret == 1)
-                {
-                    if (null == p.l)
-                        break;
-                    p = p.l;
-                }
-                else
-                {
-                    if (null == p.r)
-                        break;
-                    p = p.r;
-                }
-            }
-
-            splay(p);
-
-            bool equal;
-            if (null != _comparer)
-                equal = _comparer.Compare(key, p.key) == 0;
-            else
-                equal = p.key.CompareTo(key) == 0;
-            if (!equal)
-                return null;
-
-            valueEqual = p.value as IEquatable<TValue>;
-            if (null == valueEqual || !valueEqual.Equals(value))
-                return null;
-
-            return p;
-        }
-
-        private bool delete(ref TKey key)
+        
+        protected bool delete(ref TKey key)
         {
             if (null == find(ref key))
                 return false;
@@ -702,15 +777,13 @@ namespace SpeakingLanguage.Library
             return true;
         }
 
-        private bool delete(ref TKey key, ref TValue value)
+        protected int compareKeys(ref TKey k1, ref TKey k2)
         {
-            if (null == find(ref key, ref value))
-                return false;
-
-            delete();
-            return true;
+            return _comparer.Compare(k1, k2);
         }
+        #endregion
 
+        #region PRIVATE
         private void delete()
         {
             Node p = _root;
@@ -726,13 +799,11 @@ namespace SpeakingLanguage.Library
                     x.r = p.r;
                     p.r.p = x;
                     splay(x);
-                    update(_root);
                     destroyNode(p);
                     return;
                 }
                 _root = p.l;
                 _root.p = null;
-                update(_root);
                 destroyNode(p);
                 return;
             }
@@ -741,7 +812,6 @@ namespace SpeakingLanguage.Library
             {
                 _root = p.r;
                 _root.p = null;
-                update(_root);
                 destroyNode(p);
                 return;
             }
@@ -814,7 +884,7 @@ namespace SpeakingLanguage.Library
             if (null != x.r) x.count += x.r.count;
         }
 
-        private Node createNode(ref TKey key, ref TValue value)
+        private Node createNode(ref TKey key)
         {
             Node x;
             if (null != _factory)
@@ -823,7 +893,6 @@ namespace SpeakingLanguage.Library
                 x = new Node();
 
             x.key = key;
-            x.value = value;
             x.count = 0;
             return x;
         }

@@ -6,3 +6,11 @@ C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Library\bin\Releas
 C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Library\obj\Release\SpeakingLanguage.Library.csproj.CopyComplete
 C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Library\obj\Release\SpeakingLanguage.Library.dll
 C:\Users\dkwke\source\repos\SpeakingLanguage\SpeakingLanguage.Library\obj\Release\SpeakingLanguage.Library.pdb
+D:\develop\MyProject\SpeakingLanguage\SpeakingLanguage.Library\bin\Release\SpeakingLanguage.Library.dll
+D:\develop\MyProject\SpeakingLanguage\SpeakingLanguage.Library\bin\Release\SpeakingLanguage.Library.pdb
+D:\develop\MyProject\SpeakingLanguage\SpeakingLanguage.Library\bin\Release\Newtonsoft.Json.xml
+D:\develop\MyProject\SpeakingLanguage\SpeakingLanguage.Library\obj\Release\SpeakingLanguage.Library.csprojAssemblyReference.cache
+D:\develop\MyProject\SpeakingLanguage\SpeakingLanguage.Library\obj\Release\SpeakingLanguage.Library.csproj.CoreCompileInputs.cache
+D:\develop\MyProject\SpeakingLanguage\SpeakingLanguage.Library\obj\Release\SpeakingLanguage.Library.csproj.CopyComplete
+D:\develop\MyProject\SpeakingLanguage\SpeakingLanguage.Library\obj\Release\SpeakingLanguage.Library.dll
+D:\develop\MyProject\SpeakingLanguage\SpeakingLanguage.Library\obj\Release\SpeakingLanguage.Library.pdb

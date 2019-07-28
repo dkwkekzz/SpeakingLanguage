@@ -46,9 +46,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BinaryStream.cs" />
     <Compile Include="Collection\ArrayEnumerator.cs" />
     <Compile Include="AssemblyHelper.cs" />
     <Compile Include="BoxedWriter.cs" />
+    <Compile Include="Collection\IAllocator.cs" />
+    <Compile Include="Collection\IumnFactory.cs" />
+    <Compile Include="Collection\umnArray.cs" />
+    <Compile Include="Collection\umnFactory.cs" />
+    <Compile Include="Collection\umnSplayBT.cs" />
     <Compile Include="SerializeHelper.cs" />
     <Compile Include="BitConverter.cs" />
     <Compile Include="CleanManager.cs" />
@@ -66,7 +72,6 @@
     <Compile Include="PoolingObject.cs" />
     <Compile Include="Reader.cs" />
     <Compile Include="Collection\SplayBT.cs" />
-    <Compile Include="Collection\_SplayBT.cs" />
     <Compile Include="Manager\TaskLogger.cs" />
     <Compile Include="Math.cs" />
     <Compile Include="KeyObjectPool.cs" />
@@ -81,8 +86,10 @@
     <Compile Include="StringRefComparer.cs" />
     <Compile Include="TextTraceListener.cs" />
     <Compile Include="Manager\Ticker.cs" />
+    <Compile Include="ThrowHelper.cs" />
     <Compile Include="TypeDictionary.cs" />
     <Compile Include="TypeHelper.cs" />
+    <Compile Include="UnmanagedHelper.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="Writer.cs" />
   </ItemGroup>

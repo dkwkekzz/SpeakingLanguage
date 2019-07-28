@@ -22,6 +22,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -42,12 +43,48 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Interactor.cs" />
-    <Compile Include="Observer\Observer.cs" />
+    <Compile Include="Config.cs" />
+    <Compile Include="Database.cs" />
+    <Compile Include="Define.cs" />
+    <Compile Include="Public\Event\Controller.cs" />
+    <Compile Include="Public\Event\Creation.cs" />
+    <Compile Include="Public\Event\Destruction.cs" />
+    <Compile Include="Public\Event\SelfInteraction.cs" />
+    <Compile Include="Public\Event\SimpleInteraction.cs" />
+    <Compile Include="Public\Event\Transform.cs" />
+    <Compile Include="FrameTicker.cs" />
+    <Compile Include="Interact\Observer\StateStack.cs" />
+    <Compile Include="Interact\Observer\StateMap.cs" />
+    <Compile Include="Public\BinaryCommand.cs" />
+    <Compile Include="Public\FrameAttribute.cs" />
+    <Compile Include="Interact\CallContext.cs" />
+    <Compile Include="Interact\Commander.cs" />
+    <Compile Include="Interact\Action\IAction.cs" />
+    <Compile Include="Interact\Action\ActionType.cs" />
+    <Compile Include="Interact\Action\InteractAction.cs" />
+    <Compile Include="Public\ICommander.cs" />
+    <Compile Include="Public\IEntityManager.cs" />
+    <Compile Include="Interact\Service.cs" />
+    <Compile Include="Interact\Action\SelfAction.cs" />
+    <Compile Include="Interact\Action\SimpleAction.cs" />
+    <Compile Include="Provider.cs" />
+    <Compile Include="Interact\Observer\Observer.cs" />
+    <Compile Include="Public\InteractionAttribute.cs" />
+    <Compile Include="Interact\InteractContext.cs" />
+    <Compile Include="Public\IServiceContext.cs" />
+    <Compile Include="Public\IState.cs" />
+    <Compile Include="Public\StartInfo.cs" />
+    <Compile Include="Public\StateValue.cs" />
+    <Compile Include="RegistHeap.cs" />
+    <Compile Include="Terminal.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UnmanagedStack.cs" />
+    <Compile Include="World\Cell.cs" />
+    <Compile Include="World\CellNode.cs" />
+    <Compile Include="World\Service.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Observer\EntityHeap.cs" />
+    <Compile Include="UnmanagedHeap.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SpeakingLanguage.Library\SpeakingLanguage.Library.csproj">
@@ -55,5 +92,6 @@
       <Name>SpeakingLanguage.Library</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
