@@ -69,7 +69,7 @@
     <Compile Include="Interact\Action\SelfAction.cs" />
     <Compile Include="Interact\Action\SimpleAction.cs" />
     <Compile Include="Provider.cs" />
-    <Compile Include="Interact\Observer\Observer.cs" />
+    <Compile Include="Interact\Observer\sObserver.cs" />
     <Compile Include="Public\Attribute\InteractionAttribute.cs" />
     <Compile Include="Interact\InteractContext.cs" />
     <Compile Include="Public\IPublicContext.cs" />

@@ -7,7 +7,9 @@ namespace SpeakingLanguage.Logic.Interact
     {
         private readonly Library.umnMarshal _marshal;
         private readonly Library.umnHeap _interacHeap;
-        
+        private readonly Library.umnFactory<Library.umnHeap, sObserver> _sfOb;
+        private readonly Library.umnSplayBT<Library.umnHeap, sObserver> _sbtOb;
+
         private readonly ActionTable _actionTable;
         private readonly TypeTable _typeTable;
         private readonly Commander _commander;
