@@ -46,10 +46,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="UnmanagedHeap.cs" />
     <None Include="TestAttribute.cs" />
     <None Include="TestClassStruct.cs" />
-    <Compile Include="TestSplaybt.cs" />
+    <Compile Include="TestHeap.cs" />
+    <None Include="TestSplaybt.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

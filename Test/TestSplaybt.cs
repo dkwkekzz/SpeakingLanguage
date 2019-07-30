@@ -64,9 +64,9 @@ namespace Test
 
         static unsafe void Test_umnsbtPerformance()
         {
-            var heap = new SpeakingLanguage.Logic.UnmanagedHeap(4000);
-            var fac = new SpeakingLanguage.Library.umnFactory<SpeakingLanguage.Library.sbtNode>(heap, 100);
-            var tree = new SpeakingLanguage.Library.umnSplayBT<Vector3>(fac, new VecComparer());
+            var marshal = new SpeakingLanguage.Library.umnMarshal();
+            var heap = new SpeakingLanguage.Library.umnHeap(marshal.Alloc(4000));
+            var tree = new SpeakingLanguage.Library.umnSplayBT<SpeakingLanguage.Library.umnHeap, Vector3>(&heap, 10, new VecComparer());
 
             Vector3 v1 = new Vector3(456);
             tree.Add(&v1);
