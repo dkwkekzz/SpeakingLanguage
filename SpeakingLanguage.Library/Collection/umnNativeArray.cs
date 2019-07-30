@@ -34,7 +34,7 @@ namespace SpeakingLanguage.Library
             }
         }
         
-        public static umnNativeArray Allocate_umnNativeArray<TAllocator, T>(TAllocator* allocator, int capacity)
+        public static umnNativeArray AllocateNew<TAllocator, T>(TAllocator* allocator, int capacity)
             where TAllocator : unmanaged, IumnAllocator
             where T : unmanaged
         {

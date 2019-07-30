@@ -4,8 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace SpeakingLanguage.Library
 {
-    public unsafe struct umnArray<TAllocator, T> : IDisposable
-        where TAllocator : unmanaged, IumnAllocator
+    public unsafe struct umnArray<T> : IDisposable
         where T : unmanaged
     {
         private readonly umnChunk* _chk;
@@ -36,10 +35,11 @@ namespace SpeakingLanguage.Library
             }
         }
         
-        public static umnArray<TAllocator, T> Allocate_umnArray(TAllocator* allocator, int capacity)
+        public static umnArray<T> AllocateNew<TAllocator>(TAllocator* allocator, int capacity)
+            where TAllocator : unmanaged, IumnAllocator
         {
             var chk = allocator->Calloc(capacity);
-            return new umnArray<TAllocator, T>(chk);
+            return new umnArray<T>(chk);
         }
 
         public umnArray(umnChunk* chk)

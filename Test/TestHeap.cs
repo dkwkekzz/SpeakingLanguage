@@ -24,7 +24,7 @@ namespace Test
         {
             var marshal = new SpeakingLanguage.Library.umnMarshal();
             var heap = new SpeakingLanguage.Library.umnHeap(marshal.Alloc(4000));
-            var narr = SpeakingLanguage.Library.umnNativeArray.Allocate_umnNativeArray<SpeakingLanguage.Library.umnHeap, Vector3>(&heap, 100);
+            var narr = SpeakingLanguage.Library.umnNativeArray.AllocateNew<SpeakingLanguage.Library.umnHeap, Vector3>(&heap, 100);
             var vec = new Vector3 { x = 1, y = 2, z = 3 };
             narr[3] = &vec;
             Console.WriteLine((*((Vector3*)narr[4])).ToString());

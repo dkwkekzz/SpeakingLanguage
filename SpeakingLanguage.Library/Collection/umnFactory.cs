@@ -10,13 +10,13 @@ namespace SpeakingLanguage.Library
     {
         private readonly TAllocator* _allocator;
         private readonly int _szNode;
-        private readonly umnArray<TAllocator, T> _temp;
+        private readonly umnArray<T> _temp;
 
         public umnFactory(TAllocator* allocator, int capacity)
         {
             _allocator = allocator;
             _szNode = Marshal.SizeOf(typeof(T));
-            _temp = umnArray<TAllocator, T>.Allocate_umnArray(_allocator, capacity);
+            _temp = umnArray<T>.AllocateNew(_allocator, capacity);
         }
 
         public T* GetObject()
