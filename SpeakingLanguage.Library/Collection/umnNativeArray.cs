@@ -8,10 +8,10 @@ namespace SpeakingLanguage.Library
     {
         private readonly umnChunk* _chk;
         private readonly int _szElement;
-        private int _length;
+        private int _index;
 
         public int Capacity => _chk->length;
-        public int Length => _length;
+        public int Length => _index;
 
         public void* this[int index]
         {
@@ -46,23 +46,32 @@ namespace SpeakingLanguage.Library
         {
             _chk = chk;
             _szElement = size;
-            _length = 0;
+            _index = 0;
         }
         
         public void PushBack(void* e)
         {
-            if (Capacity <= _szElement * _length)
+            if (Capacity <= _szElement * _index)
                 ThrowHelper.ThrowCapacityOverflow($"Capacity:{Capacity.ToString()}");
 
-            this[_length++] = e;
+            this[_index++] = e;
+        }
+
+        public void PushBack(void* e, int sz)
+        {
+            if (Capacity <= _szElement * (_index - 1) + sz)
+                ThrowHelper.ThrowCapacityOverflow($"Capacity:{Capacity.ToString()}");
+            
+            var ptr = _chk->ptr + sz;
+            Buffer.MemoryCopy(e, ptr.ToPointer(), sz, sz);
         }
 
         public void* PopBack()
         {
-            if (_length <= 0)
-                ThrowHelper.ThrowCapacityOverflow($"_length:{_length.ToString()}");
+            if (_index <= 0)
+                ThrowHelper.ThrowCapacityOverflow($"_length:{_index.ToString()}");
 
-            return this[--_length];
+            return this[--_index];
         }
 
         public void Dispose()

@@ -6,17 +6,15 @@ namespace SpeakingLanguage.Library
 {
     public unsafe struct umnMarshal : IumnAllocator, IDisposable
     {
-        private static readonly int SIZE_CHK = sizeof(umnChunk);
-
         private umnChunk* _rootChk;
         private umnChunk* _headChk;
 
         public umnChunk* Alloc(int size)
         {
-            var ptr = Marshal.AllocHGlobal(size + SIZE_CHK);
+            var ptr = Marshal.AllocHGlobal(size + StructSize.umnChunk);
 
             var chk = (umnChunk*)ptr;
-            chk->ptr = ptr + SIZE_CHK;
+            chk->ptr = ptr + StructSize.umnChunk;
             chk->next = null;
             chk->prev = null;
             chk->length = size;

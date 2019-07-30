@@ -29,6 +29,23 @@ namespace Test
             narr[3] = &vec;
             Console.WriteLine((*((Vector3*)narr[4])).ToString());
 
+            var sz = sizeof(Vector3);
+            var dynarr = SpeakingLanguage.Library.umnDynamicArray.AllocateNew(&heap, sz * 10);
+            dynarr.PushChunk(0);
+
+            Vector3* pVec = stackalloc Vector3[10];
+            for (int i = 0; i != 10; i++)
+            {
+                dynarr.PushBack(pVec, sz);
+                pVec++;
+            }
+
+            while (!dynarr.IsHead)
+            {
+                var pv = dynarr.PopBack(sz);
+                Console.WriteLine((*((Vector3*)pv)).ToString());
+            }
+
             Console.ReadLine();
         }
     }

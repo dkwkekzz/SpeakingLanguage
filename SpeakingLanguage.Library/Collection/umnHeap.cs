@@ -6,8 +6,6 @@ namespace SpeakingLanguage.Library
 {
     public unsafe struct umnHeap : IumnAllocator, IDisposable
     {
-        private static readonly int SIZE_CHK = sizeof(umnChunk);
-        
         private umnChunk* _rootChk;
         private umnChunk* _headChk;
         private IntPtr _head;
@@ -32,20 +30,6 @@ namespace SpeakingLanguage.Library
                 return tCapacity;
             }
         }
-        //public umnHeap(int capacity)
-        //{
-        //    _head = Marshal.AllocHGlobal(capacity + SIZE_CHK);
-        //
-        //    _rootChk = (umnChunk*)_head;
-        //    _rootChk->ptr = _head + SIZE_CHK;
-        //    _rootChk->next = null;
-        //    _rootChk->prev = null;
-        //    _rootChk->length = capacity;
-        //    _rootChk->dispose = false;
-        //
-        //    _head += SIZE_CHK;
-        //    _headChk = null;
-        //}
 
         public umnHeap(umnChunk* chk)
         {
@@ -65,10 +49,10 @@ namespace SpeakingLanguage.Library
             }
 
             var chk = (umnChunk*)_head;
-            chk->ptr = _head + SIZE_CHK;
+            chk->ptr = _head + StructSize.umnChunk;
             chk->length = size;
             chk->dispose = false;
-            _head += SIZE_CHK + size;
+            _head += StructSize.umnChunk + size;
 
             if (null != _headChk)
                 _headChk->next = chk;

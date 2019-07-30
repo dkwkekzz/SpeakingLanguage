@@ -52,6 +52,8 @@
     <Compile Include="BoxedWriter.cs" />
     <Compile Include="Collection\IumnAllocator.cs" />
     <Compile Include="Collection\IumnFactory.cs" />
+    <Compile Include="StructSize.cs" />
+    <Compile Include="Collection\umnDynamicArray.cs" />
     <Compile Include="Collection\umnNativeArray.cs" />
     <Compile Include="Collection\umnArray.cs" />
     <Compile Include="Collection\umnChunk.cs" />
