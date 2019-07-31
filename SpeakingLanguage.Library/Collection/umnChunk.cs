@@ -9,7 +9,7 @@ namespace SpeakingLanguage.Library
         public umnChunk* next;
         public umnChunk* prev;
         public int length;
-        public int typeIdx;
+        public IntPtr typeHandle;
         public bool dispose;
     }
 }

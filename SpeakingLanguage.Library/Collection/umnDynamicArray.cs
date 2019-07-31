@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 namespace SpeakingLanguage.Library
 {
@@ -13,27 +12,7 @@ namespace SpeakingLanguage.Library
         public int Capacity => _rootChk->length;
         public long Offset => _head.ToInt64() - _rootChk->ptr.ToInt64();
         public bool IsHead => _head == _headChk->ptr;
-        public int CurrentTypeIdx => _headChk->typeIdx;
-        //public void* this[int index]
-        //{
-        //    get
-        //    {
-        //        if (Capacity <= _szElement * index)
-        //            ThrowHelper.ThrowCapacityOverflow($"wrong index in Indexer_get:{Capacity.ToString()}");
-        //
-        //        var ofs = index * _szElement;
-        //        return (_chk->ptr + ofs).ToPointer();
-        //    }
-        //    set
-        //    {
-        //        if (Capacity <= _szElement * index)
-        //            ThrowHelper.ThrowCapacityOverflow($"wrong index in Indexer_set:{Capacity.ToString()}");
-        //
-        //        var ofs = index * _szElement;
-        //        var ptr = _chk->ptr + ofs;
-        //        Buffer.MemoryCopy(value, ptr.ToPointer(), _szElement, _szElement);
-        //    }
-        //}
+        public IntPtr CurrentTypeHandle => _headChk->typeHandle;
 
         public static umnDynamicArray AllocateNew<TAllocator>(TAllocator* allocator, int capacity)
             where TAllocator : unmanaged, IumnAllocator
@@ -42,6 +21,20 @@ namespace SpeakingLanguage.Library
             return new umnDynamicArray(chk);
         }
 
+        //public static umnDynamicArray* AllocateNew<TAllocator>(TAllocator* allocator, int capacity)
+        //    where TAllocator : unmanaged, IumnAllocator
+        //{
+        //    var szArr = sizeof(umnDynamicArray);
+        //    var arrChk = allocator->Alloc(szArr + sizeof(umnChunk));
+        //    var chk = allocator->Calloc(capacity);
+        //
+        //    var arr = new umnDynamicArray(chk);
+        //    var destPtr = arrChk->ptr.ToPointer();
+        //    Buffer.MemoryCopy(&arr, destPtr, szArr, szArr);
+        //
+        //    return (umnDynamicArray*)destPtr;
+        //}
+
         public umnDynamicArray(umnChunk* chk)
         {
             _rootChk = chk;
@@ -49,7 +42,7 @@ namespace SpeakingLanguage.Library
             _headChk = null;
         }
 
-        public void PushChunk(int typeIdx)
+        public void PushChunk(IntPtr typeHandle)
         {
             if (null != _headChk)
                 _headChk->length = (int)(_head.ToInt64() - _headChk->ptr.ToInt64());
@@ -58,7 +51,7 @@ namespace SpeakingLanguage.Library
             var chk = (umnChunk*)_head;
             chk->ptr = _head + chkSize;
             chk->length = 0;
-            chk->typeIdx = typeIdx;
+            chk->typeHandle = typeHandle;
             chk->dispose = false;
             _head += chkSize;
 

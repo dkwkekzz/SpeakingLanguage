@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SpeakingLanguage.Logic.Event
+namespace SpeakingLanguage.Property
 {
-    public struct Destruction
+    public struct Controller
     {
         public int type;
+        public int operation;
         public int value;
     }
 }

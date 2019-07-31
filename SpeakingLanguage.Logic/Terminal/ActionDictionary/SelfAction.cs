@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace SpeakingLanguage.Logic.Interact
+namespace SpeakingLanguage.Logic
 {
     internal unsafe sealed class SelfAction<T> : InteractAction, IAction where T : unmanaged
     {
@@ -16,12 +16,12 @@ namespace SpeakingLanguage.Logic.Interact
             base.Initialize(mth);
         }
 
-        public void Invoke(ref CallContext ctx)
+        public void Invoke(CallContext ctx)
         {
             if (!Vaild(ref ctx))
                 return;
 
-            _del((IPublicContext)ctx.args[0], (T*)ctx.src);
+            _del(ctx.itrCtx, (T*)ctx.src);
         }
     }
 }

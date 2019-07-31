@@ -34,12 +34,13 @@ namespace SpeakingLanguage.Library
             }
         }
         
-        public static umnNativeArray AllocateNew<TAllocator, T>(TAllocator* allocator, int capacity)
+        public static umnNativeArray AllocateNew<TAllocator, T>(TAllocator* allocator, int maxLength)
             where TAllocator : unmanaged, IumnAllocator
             where T : unmanaged
         {
-            var chk = allocator->Calloc(capacity);
-            return new umnNativeArray(chk, sizeof(T));
+            var sz = sizeof(T);
+            var chk = allocator->Calloc(maxLength * sz);
+            return new umnNativeArray(chk, sz);
         }
 
         public umnNativeArray(umnChunk* chk, int size)
@@ -47,6 +48,12 @@ namespace SpeakingLanguage.Library
             _chk = chk;
             _szElement = size;
             _index = 0;
+        }
+
+        public void Reset()
+        {
+            _index = 0;
+            UnmanagedHelper.Memset(_chk->ptr.ToPointer(), 0, Capacity);
         }
         
         public void PushBack(void* e)

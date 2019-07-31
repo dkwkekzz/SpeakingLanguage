@@ -31,7 +31,7 @@ namespace SpeakingLanguage.Logic
             MAX_COUNT_EVENT_TYPE = info.max_count_event_type;
             MAX_COUNT_STATE_BUFFER = info.max_count_state_buffer;
             MAX_COUNT_CELL = info.default_count_cell;
-            MAX_COUNT_OBSERVER = info.max_count_observer;
+            MAX_COUNT_OBSERVER = info.default_count_observer;
         }
     }
 }

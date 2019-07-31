@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace SpeakingLanguage.Logic.Interact
+namespace SpeakingLanguage.Logic
 {
     internal abstract class InteractAction
     {
@@ -23,7 +23,7 @@ namespace SpeakingLanguage.Logic.Interact
             if (_rate == 0)
                 return true;
 
-            _accumed += ctx.delta;
+            _accumed += ctx.itrCtx.Delta;
             if (_rate > _accumed)
                 return false;
 

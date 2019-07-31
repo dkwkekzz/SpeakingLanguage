@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace SpeakingLanguage.Logic.Interact
+namespace SpeakingLanguage.Logic
 {
     internal interface IAction
     {
         void Take(MethodInfo mth);
-        void Invoke(ref CallContext ctx);
+        void Invoke(CallContext ctx);
     }
 }

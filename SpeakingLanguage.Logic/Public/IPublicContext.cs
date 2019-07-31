@@ -3,13 +3,14 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Logic
 {
-    public interface IPublicContext
+    public unsafe interface IPublicContext
     {
         float Delta { get; }
         int Frame { get; }
         float FrameTick { get; }
-        IEntityManager This { get; }
-        ITypeTable TypeTable { get; }
+
+        WorldActor This { get; }
+        WorldActor Other { get; }
         ICommander<BinaryCommand> Commander { get; }
     }
 }

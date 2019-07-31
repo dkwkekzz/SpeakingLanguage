@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SpeakingLanguage.Logic.Event
+namespace SpeakingLanguage.Property
 {
-    public struct Creation
+    public struct LifeCycle
     {
-        public int type;
         public int value;
+        public long tick;
     }
 }

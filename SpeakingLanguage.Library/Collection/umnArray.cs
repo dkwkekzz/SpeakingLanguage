@@ -35,10 +35,11 @@ namespace SpeakingLanguage.Library
             }
         }
         
-        public static umnArray<T> AllocateNew<TAllocator>(TAllocator* allocator, int capacity)
+        public static umnArray<T> AllocateNew<TAllocator>(TAllocator* allocator, int maxLength)
             where TAllocator : unmanaged, IumnAllocator
         {
-            var chk = allocator->Calloc(capacity);
+            var sz = sizeof(T);
+            var chk = allocator->Calloc(maxLength * sz);
             return new umnArray<T>(chk);
         }
 

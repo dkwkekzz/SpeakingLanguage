@@ -38,6 +38,12 @@ namespace SpeakingLanguage.Library
             _headChk = null;
         }
 
+        public void Reset()
+        {
+            _head = _rootChk->ptr;
+            _headChk = null;
+        }
+
         public umnChunk* Alloc(int size)
         {
             var remained = Capacity - Offset;
