@@ -18,12 +18,12 @@ namespace SpeakingLanguage.Logic
             }
         }
         
-        protected bool Vaild(ref CallContext ctx)
+        protected bool Vaild(ref InteractContext ctx)
         {
             if (_rate == 0)
                 return true;
 
-            _accumed += ctx.itrCtx.Delta;
+            _accumed += ctx.Delta;
             if (_rate > _accumed)
                 return false;
 

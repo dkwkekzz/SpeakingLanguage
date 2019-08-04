@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SpeakingLanguage.Logic.Event
+namespace SpeakingLanguage.Entity
 {
-    public struct Transform
+    public struct Location
     {
-        public int handle;
         public int x;
         public int y;
+        public int z;
         public int layer;
     }
 }

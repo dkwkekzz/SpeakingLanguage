@@ -6,7 +6,7 @@ namespace SpeakingLanguage.Logic
 {
     internal unsafe sealed class SelfAction<T> : InteractAction, IAction where T : unmanaged
     {
-        private delegate void SelfDel(IPublicContext ctx, T* pa);
+        private delegate void SelfDel(InteractContext* ctx, T* pa);
         private SelfDel _del;
 
         public void Take(MethodInfo mth)
@@ -16,12 +16,12 @@ namespace SpeakingLanguage.Logic
             base.Initialize(mth);
         }
 
-        public void Invoke(CallContext ctx)
+        public void Invoke(InteractContext* ctx)
         {
-            if (!Vaild(ref ctx))
+            if (!Vaild(ctx))
                 return;
 
-            _del(ctx.itrCtx, (T*)ctx.src);
+            _del(ctx, (T*)ctx->src);
         }
     }
 }

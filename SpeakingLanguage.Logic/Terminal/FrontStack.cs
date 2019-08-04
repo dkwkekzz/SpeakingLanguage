@@ -85,9 +85,9 @@ namespace SpeakingLanguage.Logic
 
         private readonly Library.umnDynamicArray _stack;
 
-        public FrontStack(Library.umnHeap* allocator, int capacity)
+        public FrontStack(Library.umnChunk* chk)
         {
-            _stack = Library.umnDynamicArray.AllocateNew(allocator, capacity);
+            _stack = new Library.umnDynamicArray(chk);
         }
 
         public Poster<TEvent> GetPoster<TEvent>() where TEvent : unmanaged

@@ -7,6 +7,6 @@ namespace SpeakingLanguage.Logic
     internal interface IAction
     {
         void Take(MethodInfo mth);
-        void Invoke(CallContext ctx);
+        void Invoke(InteractContext* ctx);
     }
 }

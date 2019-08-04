@@ -9,56 +9,30 @@ namespace SpeakingLanguage.Logic
 
         private readonly Library.umnFactory<Library.umnHeap, sCell> _sfCell;
         private readonly Library.umnSplayBT<Library.umnHeap, sCellComparer, sCell.Key, sCell> _sbtCell;
-        private readonly Library.umnFactory<Library.umnHeap, sCellNode> _sfCellNode;
-        private readonly Library.umnSplayBT<Library.umnHeap, sCellNodeComparer, sCellNode.Key, sCellNode> _sbtCellNode;
-        
-        public CellDictionary(Library.umnHeap* allocator, int capacity, int defaultCellCount)
+
+        public int Count => _sbtCell.Count;
+        public int GenerateHandle => (int)(Library.Ticker.GlobalTicks << 4) | (_sbtCell.Count & 0xF);
+
+        public CellDictionary(Library.umnChunk* chk, int defaultCellCount)
         {
-            _cellHeap = new Library.umnHeap(allocator->Alloc(capacity));
+            _cellHeap = new Library.umnHeap(chk);
             fixed (Library.umnHeap* pHeap = &_cellHeap)
             {
                 _sfCell = new Library.umnFactory<Library.umnHeap, sCell>(pHeap, defaultCellCount);
                 _sbtCell = new Library.umnSplayBT<Library.umnHeap, sCellComparer, sCell.Key, sCell>(pHeap, defaultCellCount);
-                _sfCellNode = new Library.umnFactory<Library.umnHeap, sCellNode>(pHeap, defaultCellCount);
-                _sbtCellNode = new Library.umnSplayBT<Library.umnHeap, sCellNodeComparer, sCellNode.Key, sCellNode>(pHeap, defaultCellCount);
             }
         }
 
-        public Library.umnSplayBT<Library.umnHeap, sCellComparer, sCell.Key, sCell>.Enumerator GetCellEnumerator()
+        public Library.umnFactory<Library.umnHeap, sCell>.Enumerator GetEnumerator()
         {
-            return _sbtCell.GetEnumerator();
+            return _sfCell.GetEnumerator();
         }
-
-        public Library.umnSplayBT<Library.umnHeap, sCellNodeComparer, sCellNode.Key, sCellNode>.Enumerator GetCellNodeEnumerator()
-        {
-            return _sbtCellNode.GetEnumerator();
-        }
-
-        public sCellNode* CreateCellNode()
-        {
-            return _sfCellNode.GetObject();
-        }
-
-        public void Add(sCellNode* node)
-        {
-            _sbtCellNode.Add(node->ObHandle, node);
-        }
-
-        public bool TryGetValue(sCellNode.Key key, out sCellNode* value)
-        {
-            return _sbtCellNode.TryGetValue(key, out value);
-        }
-
-        public bool Remove(sCellNode* node)
-        {
-            node->Release();
-            _sfCellNode.PutObject(node);
-            return _sbtCellNode.Remove(node->ObHandle);
-        }
-
+        
         public sCell* CreateCell()
         {
-            return _sfCell.GetObject();
+            var pCell = _sfCell.GetObject();
+            pCell->Take(GenerateHandle);
+            return pCell;
         }
 
         public void Add(sCell* node)

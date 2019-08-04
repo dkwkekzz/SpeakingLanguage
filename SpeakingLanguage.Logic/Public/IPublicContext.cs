@@ -6,7 +6,7 @@ namespace SpeakingLanguage.Logic
     public unsafe interface IPublicContext
     {
         float Delta { get; }
-        int Frame { get; }
+        int FrameCount { get; }
         float FrameTick { get; }
 
         WorldActor This { get; }

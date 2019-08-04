@@ -7,6 +7,37 @@ namespace SpeakingLanguage.Library
     public unsafe struct umnArray<T> : IDisposable
         where T : unmanaged
     {
+        public struct Enumerator
+        {
+            private readonly umnChunk* _chk;
+            private readonly int _capacity;
+            private int _ofs;
+            private int _sz;
+
+            public Enumerator(umnChunk* chk, int len)
+            {
+                _sz = sizeof(T);
+                _capacity = len * _sz;
+                _chk = chk;
+                _ofs = -_sz;
+            }
+
+            public T* Current => (T*)(_chk->Ptr + _ofs);
+
+            public bool MoveNext()
+            {
+                _ofs += _sz;
+                if (_capacity <= _ofs)
+                    return false;
+                return true;
+            }
+
+            public void Reset()
+            {
+                _ofs = -_sz;
+            }
+        }
+
         private readonly umnChunk* _chk;
         private readonly int _szElement;
         private int _length;
@@ -22,7 +53,7 @@ namespace SpeakingLanguage.Library
                     ThrowHelper.ThrowCapacityOverflow($"wrong index in Indexer_get:{Capacity.ToString()}");
 
                 var ofs = index * _szElement;
-                return (T*)(_chk->ptr + ofs);
+                return (T*)(_chk->Ptr + ofs);
             }
             set
             {
@@ -30,7 +61,7 @@ namespace SpeakingLanguage.Library
                     ThrowHelper.ThrowCapacityOverflow($"wrong index in Indexer_set:{Capacity.ToString()}");
 
                 var ofs = index * _szElement;
-                var ptr = _chk->ptr + ofs;
+                var ptr = _chk->Ptr + ofs;
                 Buffer.MemoryCopy(value, ptr.ToPointer(), _szElement, _szElement);
             }
         }
@@ -50,6 +81,11 @@ namespace SpeakingLanguage.Library
             _length = 0;
         }
         
+        public Enumerator GetEnumerator()
+        {
+            return new Enumerator(_chk, _length);
+        }
+
         public void PushBack(T* e)
         {
             if (Capacity <= _szElement * _length)
@@ -68,7 +104,7 @@ namespace SpeakingLanguage.Library
 
         public void Dispose()
         {
-            _chk->dispose = true;
+            _chk->Disposed = true;
         }
     }
 }

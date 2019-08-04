@@ -21,7 +21,7 @@ namespace SpeakingLanguage.Library
                     ThrowHelper.ThrowCapacityOverflow($"wrong index in Indexer_get:{Capacity.ToString()}");
 
                 var ofs = index * _szElement;
-                return (_chk->ptr + ofs).ToPointer();
+                return (_chk->Ptr + ofs).ToPointer();
             }
             set
             {
@@ -29,7 +29,7 @@ namespace SpeakingLanguage.Library
                     ThrowHelper.ThrowCapacityOverflow($"wrong index in Indexer_set:{Capacity.ToString()}");
 
                 var ofs = index * _szElement;
-                var ptr = _chk->ptr + ofs;
+                var ptr = _chk->Ptr + ofs;
                 Buffer.MemoryCopy(value, ptr.ToPointer(), _szElement, _szElement);
             }
         }
@@ -53,7 +53,7 @@ namespace SpeakingLanguage.Library
         public void Reset()
         {
             _index = 0;
-            UnmanagedHelper.Memset(_chk->ptr.ToPointer(), 0, Capacity);
+            UnmanagedHelper.Memset(_chk->Ptr.ToPointer(), 0, Capacity);
         }
         
         public void PushBack(void* e)
@@ -69,7 +69,7 @@ namespace SpeakingLanguage.Library
             if (Capacity <= _szElement * (_index - 1) + sz)
                 ThrowHelper.ThrowCapacityOverflow($"Capacity:{Capacity.ToString()}");
             
-            var ptr = _chk->ptr + sz;
+            var ptr = _chk->Ptr + sz;
             Buffer.MemoryCopy(e, ptr.ToPointer(), sz, sz);
         }
 
@@ -83,7 +83,7 @@ namespace SpeakingLanguage.Library
 
         public void Dispose()
         {
-            _chk->dispose = true;
+            _chk->Disposed = true;
         }
     }
 }

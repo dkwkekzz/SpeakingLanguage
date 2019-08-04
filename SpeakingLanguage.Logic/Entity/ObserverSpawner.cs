@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SpeakingLanguage.Property
+namespace SpeakingLanguage.Entity
 {
     public unsafe struct ObserverSpawner
     {

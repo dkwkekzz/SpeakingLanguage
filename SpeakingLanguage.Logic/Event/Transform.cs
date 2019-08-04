@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SpeakingLanguage.Property
+namespace SpeakingLanguage.Logic.Event
 {
-    public struct Physics
+    internal unsafe struct Transform
     {
+        public slObject* actor;
+        public int handle;
         public int x;
         public int y;
-        public int z;
         public int layer;
     }
 }

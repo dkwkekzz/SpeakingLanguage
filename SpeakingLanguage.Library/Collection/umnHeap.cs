@@ -10,37 +10,23 @@ namespace SpeakingLanguage.Library
         private umnChunk* _headChk;
         private IntPtr _head;
 
+        public bool IsCreated => _rootChk != null;
         public int Capacity => _rootChk->length;
-        public IntPtr Root => _rootChk->ptr;
-        public long Offset => _head.ToInt64() - _rootChk->ptr.ToInt64();
-        public IntPtr Tail => _rootChk->ptr + _rootChk->length;
-        public bool IsEmpty => _rootChk->ptr == _head;
-        public int TotalCapacity
-        {
-            get
-            {
-                var tCapacity = 0;
-                var p = _rootChk;
-                while (p != null)
-                {
-                    tCapacity += p->length;
-                    p = p->prev;
-                }
-
-                return tCapacity;
-            }
-        }
+        public IntPtr Root => _rootChk->Ptr;
+        public long Offset => _head.ToInt64() - _rootChk->Ptr.ToInt64();
+        public IntPtr Tail => _rootChk->Ptr + _rootChk->length;
+        public bool IsEmpty => _rootChk->Ptr == _head;
 
         public umnHeap(umnChunk* chk)
         {
             _rootChk = chk;
-            _head = _rootChk->ptr;
+            _head = _rootChk->Ptr;
             _headChk = null;
         }
 
         public void Reset()
         {
-            _head = _rootChk->ptr;
+            _head = _rootChk->Ptr;
             _headChk = null;
         }
 
@@ -55,13 +41,9 @@ namespace SpeakingLanguage.Library
             }
 
             var chk = (umnChunk*)_head;
-            chk->ptr = _head + StructSize.umnChunk;
-            chk->length = size;
-            chk->dispose = false;
             _head += StructSize.umnChunk + size;
 
-            if (null != _headChk)
-                _headChk->next = chk;
+            chk->next = null;
             chk->prev = _headChk;
             _headChk = chk;
 
@@ -74,7 +56,7 @@ namespace SpeakingLanguage.Library
             if (null == chk)
                 return null;
 
-            UnmanagedHelper.Memset(chk->ptr.ToPointer(), 0, size);
+            UnmanagedHelper.Memset(chk->Ptr.ToPointer(), 0, size);
             return chk;
         }
 
@@ -94,7 +76,7 @@ namespace SpeakingLanguage.Library
         {
             while (_rootChk != null)
             {
-                _rootChk->dispose = true;
+                _rootChk->Disposed = true;
                 _rootChk = _rootChk->prev;
             }
         }
@@ -107,14 +89,6 @@ namespace SpeakingLanguage.Library
             Tracer.Write($"======================");
         }
         
-        public void Extend(umnChunk* chk)
-        {
-            _rootChk->next = chk;
-            chk->prev = _rootChk;
-            _rootChk = chk;
-            _head = _rootChk->ptr;
-        }
-
         private int _compactClean()
         {
             throw new NotImplementedException("implementing...");

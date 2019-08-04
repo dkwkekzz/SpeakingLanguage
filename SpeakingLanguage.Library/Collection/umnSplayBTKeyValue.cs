@@ -18,10 +18,47 @@ namespace SpeakingLanguage.Library
     [DebuggerDisplay("Count = {Count}")]
     public unsafe struct umnSplayBT<TAllocator, TComparer, TKey, TValue>
         where TAllocator : unmanaged, IumnAllocator
-        where TComparer : unmanaged, IComparer<TKey>
+        where TComparer : unmanaged, IumnComparer<TKey>
         where TKey : unmanaged
         where TValue : unmanaged
     {
+        public struct FastEnumerator
+        {
+            private sbtPairNode* root;
+            private sbtPairNode** current;
+            private sbtPairNode** tempBuffer;
+
+            public FastEnumerator(sbtPairNode* r, sbtPairNode** stackPtr)
+            {
+                root = r;
+                current = null;
+                tempBuffer = stackPtr;
+            }
+
+            public sbtPairNode* Current { get { return *current; } }
+
+            public bool MoveNext()
+            {
+                if (current == null)
+                {
+                    *tempBuffer = root;
+                    current = tempBuffer;
+                }
+                else
+                    current++;
+
+                if ((*current) == null)
+                    return false;
+
+                if ((*current)->l != null)
+                    *(++tempBuffer) = (*current)->l;
+                if ((*current)->r != null)
+                    *(++tempBuffer) = (*current)->r;
+
+                return true;
+            }
+        }
+
         public struct Enumerator
         {
             private sbtPairNode* _root;
@@ -134,7 +171,7 @@ namespace SpeakingLanguage.Library
         public int Count { get { return _root == null ? 0 : _root->count; } }
         public bool IsReadOnly { get { return false; } }
         
-        public umnSplayBT(TAllocator* allocator, int capacity)
+        public umnSplayBT(TAllocator* allocator, int capacity = 0)
         {
             _factory = new umnFactory<TAllocator, sbtPairNode>(allocator, capacity);
             _comparer = new TComparer();
@@ -163,6 +200,11 @@ namespace SpeakingLanguage.Library
             return new Enumerator(_root, null);
         }
         
+        public FastEnumerator GetFastEnumerator(sbtPairNode** stackPtr)
+        {
+            return new FastEnumerator(_root, stackPtr);
+        }
+
         public Enumerator GetEnumerator(TKey key)
         {
             return GetEnumerator(&key);
@@ -174,7 +216,7 @@ namespace SpeakingLanguage.Library
             if (null == n)
                 return default(Enumerator);
             
-            while (n != null && _comparer.Compare(*(TKey*)n->key, *key) == 0)
+            while (n != null && _comparer.Compare((TKey*)n->key, key) == 0)
                 n = umnSplayBTEnumerateHelper.prev(n);
 
             return new Enumerator(_root, n);
@@ -302,7 +344,7 @@ namespace SpeakingLanguage.Library
 
             while (null != p)
             {
-                int ret = _comparer.Compare(*key, *(TKey*)p->key);
+                int ret = _comparer.Compare(key, (TKey*)p->key);
                 if (ret == 0)
                     break;
                 if (ret == 1)
@@ -321,7 +363,7 @@ namespace SpeakingLanguage.Library
 
             splay(p);
 
-            bool equal = _comparer.Compare(*key, *(TKey*)p->key) == 0;
+            bool equal = _comparer.Compare(key, (TKey*)p->key) == 0;
             if (!equal)
                 return null;
 
@@ -340,7 +382,7 @@ namespace SpeakingLanguage.Library
             bool left;
             while (true)
             {
-                int ret = _comparer.Compare(*key, *(TKey*)p->key);
+                int ret = _comparer.Compare(key, (TKey*)p->key);
                 if (0 == ret)
                 {
                     if (overlap)

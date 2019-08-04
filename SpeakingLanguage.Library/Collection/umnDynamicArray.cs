@@ -10,8 +10,8 @@ namespace SpeakingLanguage.Library
         private IntPtr _head;
 
         public int Capacity => _rootChk->length;
-        public long Offset => _head.ToInt64() - _rootChk->ptr.ToInt64();
-        public bool IsHead => _head == _headChk->ptr;
+        public long Offset => _head.ToInt64() - _rootChk->Ptr.ToInt64();
+        public bool IsHead => _head == _headChk->Ptr;
         public IntPtr CurrentTypeHandle => _headChk->typeHandle;
 
         public static umnDynamicArray AllocateNew<TAllocator>(TAllocator* allocator, int capacity)
@@ -38,21 +38,18 @@ namespace SpeakingLanguage.Library
         public umnDynamicArray(umnChunk* chk)
         {
             _rootChk = chk;
-            _head = _rootChk->ptr;
+            _head = _rootChk->Ptr;
             _headChk = null;
         }
 
         public void PushChunk(IntPtr typeHandle)
         {
             if (null != _headChk)
-                _headChk->length = (int)(_head.ToInt64() - _headChk->ptr.ToInt64());
+                _headChk->length = (int)(_head.ToInt64() - _headChk->Ptr.ToInt64());
 
             var chkSize = StructSize.umnChunk;
             var chk = (umnChunk*)_head;
-            chk->ptr = _head + chkSize;
-            chk->length = 0;
             chk->typeHandle = typeHandle;
-            chk->dispose = false;
             _head += chkSize;
 
             if (null != _headChk)
@@ -67,11 +64,11 @@ namespace SpeakingLanguage.Library
                 ThrowHelper.ThrowWrongState("Please call Begin first.");
 
             var prevChk = _headChk;
-            prevChk->dispose = true;
+            prevChk->Disposed = true;
 
             _headChk = prevChk->prev;
             _headChk->next = null;
-            _head = _headChk->ptr + _headChk->length;
+            _head = _headChk->Ptr + _headChk->length;
         }
 
         public void PushBack(void* e, int sz)
@@ -90,7 +87,7 @@ namespace SpeakingLanguage.Library
             if (null == _headChk)
                 ThrowHelper.ThrowWrongState("Please call Begin first.");
 
-            if (_head == _headChk->ptr)
+            if (_head == _headChk->Ptr)
                 return null;
 
             _head -= sz;
@@ -99,7 +96,7 @@ namespace SpeakingLanguage.Library
 
         public void Dispose()
         {
-            _rootChk->dispose = true;
+            _rootChk->Disposed = true;
         }
     }
 }

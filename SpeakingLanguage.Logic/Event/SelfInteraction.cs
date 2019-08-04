@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Logic.Event
 {
-    public struct SelfInteraction
+    internal struct SelfInteraction
     {
         public int lhs;
     }

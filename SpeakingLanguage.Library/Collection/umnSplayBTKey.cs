@@ -17,7 +17,7 @@ namespace SpeakingLanguage.Library
     [DebuggerDisplay("Count = {Count}")]
     public unsafe struct umnSplayBT<TAllocator, TComparer, TKey>
         where TAllocator : unmanaged, IumnAllocator
-        where TComparer : unmanaged, IComparer<TKey>
+        where TComparer : unmanaged, IumnComparer<TKey>
         where TKey : unmanaged
     {
         public struct FastEnumerator
@@ -168,7 +168,7 @@ namespace SpeakingLanguage.Library
         public int Count { get { return _root == null ? 0 : _root->count; } }
         public bool IsReadOnly { get { return false; } }
         
-        public umnSplayBT(TAllocator* allocator, int capacity)
+        public umnSplayBT(TAllocator* allocator, int capacity = 0)
         {
             _factory = new umnFactory<TAllocator, sbtNode>(allocator, capacity);
             _comparer = new TComparer();
@@ -213,7 +213,7 @@ namespace SpeakingLanguage.Library
             if (null == n)
                 return default(Enumerator);
             
-            while (n != null && _comparer.Compare(*(TKey*)n->key, *key) == 0)
+            while (n != null && _comparer.Compare((TKey*)n->key, key) == 0)
                 n = umnSplayBTEnumerateHelper.prev(n);
 
             return new Enumerator(_root, n);
@@ -329,7 +329,7 @@ namespace SpeakingLanguage.Library
 
             while (null != p)
             {
-                int ret = _comparer.Compare(*key, *(TKey*)p->key);
+                int ret = _comparer.Compare(key, (TKey*)p->key);
                 if (ret == 0)
                     break;
                 if (ret == 1)
@@ -348,7 +348,7 @@ namespace SpeakingLanguage.Library
 
             splay(p);
 
-            bool equal = _comparer.Compare(*key, *(TKey*)p->key) == 0;
+            bool equal = _comparer.Compare(key, (TKey*)p->key) == 0;
             if (!equal)
                 return null;
 
@@ -367,7 +367,7 @@ namespace SpeakingLanguage.Library
             bool left;
             while (true)
             {
-                int ret = _comparer.Compare(*key, *(TKey*)p->key);
+                int ret = _comparer.Compare(key, (TKey*)p->key);
                 if (0 == ret)
                 {
                     if (overlap)

@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SpeakingLanguage.Property
+namespace SpeakingLanguage.Entity
 {
-    public struct Controller
+    public struct ObserverInfo
     {
         public int type;
-        public int operation;
         public int value;
     }
 }
