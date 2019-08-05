@@ -51,6 +51,7 @@
     <Compile Include="AssemblyHelper.cs" />
     <Compile Include="BoxedWriter.cs" />
     <Compile Include="Collection\IumnAllocator.cs" />
+    <Compile Include="Collection\IumnComparer.cs" />
     <Compile Include="Collection\IumnFactory.cs" />
     <Compile Include="Collection\umnSplayBTKeyValue.cs" />
     <Compile Include="Collection\umnSplayBTKey.cs" />

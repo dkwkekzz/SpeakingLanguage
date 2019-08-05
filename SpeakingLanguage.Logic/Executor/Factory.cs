@@ -13,7 +13,7 @@ namespace SpeakingLanguage.Logic.Executor
             while (obIter.MoveNext())
             {
                 var ob = obIter.Current;
-                var spawner = ob->GetEntity<Entity.ObserverSpawner>();
+                var spawner = ob->GetEntity<Entity.Spawner>();
                 if (null != spawner)
                 {
                     int count = spawner->count;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Entity
 {
-    public struct Location
+    public struct Position
     {
         public int x;
         public int y;

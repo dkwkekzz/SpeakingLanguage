@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Entity
 {
-    public struct ObserverInfo
+    public unsafe struct Observer
     {
-        public int type;
-        public int value;
+        public int targetHandle;
+        public int distance;
     }
 }

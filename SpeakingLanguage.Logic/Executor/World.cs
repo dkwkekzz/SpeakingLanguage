@@ -5,44 +5,54 @@ namespace SpeakingLanguage.Logic.Executor
 {
     internal static class World
     {
-        public static unsafe void Execute(Locator terminal)
+        struct Constants
         {
-            var obDic = terminal.ObserverDictionary;
-            var obIter = obDic.GetEnumerator();
-            while (obIter.MoveNext())
-            {
-                var ob = obIter.Current;
-                var det = ob->GetEntity<Entity.Detection>();
-                if (null == det)
-                    continue;
-
-            }
-
-            //_popTransformAndExchangeCell(terminal);
-            //
-            //_pushSimpleInteraction(terminal);
-            //
-            //_pushSelfInteraction(terminal);
+            public const int WORLD = 1;
+            public const int UI = 2;
         }
 
-        private static unsafe void _interactOnDetect(slObject* here, Entity.Detection* det, int ofsX, int ofsY)
+        public static unsafe void Execute(slObject* src, slObject* dest)
         {
-            var inter = here->GetEntity<Entity.Interaction>();
-            while (null != inter)
-            {
-                var disX = ofsX + inter->ofs_d_x + inter->dis_x;
-                var disY = ofsY + inter->ofs_d_y + inter->dis_y;
-                if (det->disX > disX && det->disY > disY)
+            var pos = src->GetEntity<Entity.Position>();
+            var obs = src->GetEntity<Entity.Observer>();
+            if (null == pos || null == obs)
+                return;
+            
+            var tgPos = dest->GetEntity<Entity.Position>();
+            if (null == tgPos)
+                return;
+
+            if (pos->layer == Constants.WORLD &&
+                tgPos->layer == Constants.WORLD)
+            {   // world
+                var ofsx = pos->x - tgPos->x;
+                var ofsy = pos->y - tgPos->y;
+                var dist = obs->distance;
+                if (dist * dist > ofsx * ofsx + ofsy * ofsy)
                 {
-                    // interact src x inter->dest
-                    // ...
 
-                    _interactOnDetect(inter->dest, det, disX + inter->ofs_d_x, disY + inter->ofs_d_y);
                 }
-
-                inter = here->NextEntity<Entity.Interaction>();
             }
         }
+
+        //private static unsafe void _interactOnDetect(slObject* here, Entity.Detection* det, int ofsX, int ofsY)
+        //{
+        //    var inter = here->GetEntity<Entity.Interaction>();
+        //    while (null != inter)
+        //    {
+        //        var disX = ofsX + inter->ofs_d_x + inter->dis_x;
+        //        var disY = ofsY + inter->ofs_d_y + inter->dis_y;
+        //        if (det->disX > disX && det->disY > disY)
+        //        {
+        //            // interact src x inter->dest
+        //            // ...
+        //
+        //            _interactOnDetect(inter->dest, det, disX + inter->ofs_d_x, disY + inter->ofs_d_y);
+        //        }
+        //
+        //        inter = here->NextEntity<Entity.Interaction>();
+        //    }
+        //}
 
         //private unsafe static void _popTransformAndExchangeCell(Locator terminal)
         //{
