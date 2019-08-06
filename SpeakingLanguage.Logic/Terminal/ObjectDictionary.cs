@@ -21,6 +21,7 @@ namespace SpeakingLanguage.Logic
 
         private readonly Library.umnHeap _obHeap;
 
+        // 펙토리 구현 단순화시켜야함... 즉 롤백,
         private readonly Library.umnFactory<Library.umnHeap, slObject> _sfOb;
         private readonly Library.umnArray<_slPtr> _arrPtr;
         //private readonly Library.umnSplayBT<Library.umnHeap, _sloComparer, slObject.Key, slObject> _sbtOb;
@@ -40,16 +41,19 @@ namespace SpeakingLanguage.Logic
             }
         }
 
-        public Library.umnFactory<Library.umnHeap, slObject>.Enumerator GetEnumerator()
-        {
-            return _sfOb.GetEnumerator();
-        }
+        //public Library.umnFactory<Library.umnHeap, slObject>.Enumerator GetEnumerator()
+        //{
+        //    return _sfOb.GetEnumerator();
+        //}
         
         public slObject* CreateObserver(int szBlock)
         {
             var ob = _sfOb.GetObject();
             ob->Take(GenerateHandle, _obHeap.Alloc(szBlock));
-            // arr에 추가하는 구현 필요
+
+            var ptr = new _slPtr { ptr = ob };
+            _arrPtr.PushBack(&ptr);
+
             return ob;
         }
 
@@ -71,7 +75,7 @@ namespace SpeakingLanguage.Logic
         {
             node->Release();
             _sfOb.PutObject(node);
-            // arr에 제거하는 구현 필요. 표시만 해두었다가 한번에 제거해야 한다.
+            // arr에 제거하는 구현 필요. 표시만 해두었다가 한번에 제거해야 한다. 혹은 체크했다 재할당받을 수 있어야 한다.
             //return _sbtOb.Remove(node->Handle);
             return true;
         }
