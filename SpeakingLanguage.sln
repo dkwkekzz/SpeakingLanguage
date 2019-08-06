@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeakingLanguage.Library", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeakingLanguage.Logic", "SpeakingLanguage.Logic\SpeakingLanguage.Logic.csproj", "{4A3A227D-6679-4AC3-BC63-5EB8438FCF61}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeakingLanguage.Table", "SpeakingLanguage.Table\SpeakingLanguage.Table.csproj", "{221DB2E7-9886-4C54-997E-489169872184}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{4A3A227D-6679-4AC3-BC63-5EB8438FCF61}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4A3A227D-6679-4AC3-BC63-5EB8438FCF61}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4A3A227D-6679-4AC3-BC63-5EB8438FCF61}.Release|Any CPU.Build.0 = Release|Any CPU
+		{221DB2E7-9886-4C54-997E-489169872184}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{221DB2E7-9886-4C54-997E-489169872184}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{221DB2E7-9886-4C54-997E-489169872184}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{221DB2E7-9886-4C54-997E-489169872184}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
