@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Logic
 {
-    public unsafe struct slObject2 : IDisposable
+    public unsafe struct slObject : IDisposable
     {
         public struct Key
         {
@@ -20,14 +20,6 @@ namespace SpeakingLanguage.Logic
 
         public int Handle { get; private set; }
         public Library.umnChunk* EntityHead => _head;
-
-        public slObject2(int handle, Library.umnChunk* chk)
-        {
-            Handle = handle;
-
-            _heap = new Library.umnHeap(chk);
-            _head = null;
-        }
 
         public void Take(int handle, Library.umnChunk* chk)
         {

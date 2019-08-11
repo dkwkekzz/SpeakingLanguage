@@ -34,8 +34,6 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -48,8 +46,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="TestTable.cs" />
-    <Compile Include="TestAttribute.cs" />
+    <Compile Include="TestTable.cs" />
+    <None Include="TestAttribute.cs" />
     <None Include="TestClassStruct.cs" />
     <None Include="TestHeap.cs" />
     <None Include="TestSplaybt.cs" />
@@ -59,9 +57,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SpeakingLanguage.Library\SpeakingLanguage.Library.csproj">
-      <Project>{aad28eed-2523-428d-af3c-59079f0ff3cf}</Project>
-      <Name>SpeakingLanguage.Library</Name>
+    <ProjectReference Include="..\SpeakingLanguage.Table\SpeakingLanguage.Table.csproj">
+      <Project>{221db2e7-9886-4c54-997e-489169872184}</Project>
+      <Name>SpeakingLanguage.Table</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

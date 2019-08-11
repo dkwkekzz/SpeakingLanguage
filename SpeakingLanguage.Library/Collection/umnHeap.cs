@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace SpeakingLanguage.Library
 {
@@ -7,46 +8,44 @@ namespace SpeakingLanguage.Library
     {
         private umnChunk* _rootChk;
         private umnChunk* _headChk;
-
-        public int Capacity => (int)((long)_rootChk->next - (long)_rootChk) - umnSize.umnChunk;
+        private IntPtr _head;
 
         public bool IsCreated => _rootChk != null;
-        public umnChunk* Root => (umnChunk*)((IntPtr)_rootChk + umnSize.umnChunk);
-        public long Offset => (long)_headChk - (long)_rootChk + umnSize.umnChunk;
+        public int Capacity => _rootChk->length;
+        public IntPtr Root => _rootChk->Ptr;
+        public long Offset => _head.ToInt64() - _rootChk->Ptr.ToInt64();
+        public IntPtr Tail => _rootChk->Ptr + _rootChk->length;
+        public bool IsEmpty => _rootChk->Ptr == _head;
 
         public umnHeap(umnChunk* chk)
         {
             _rootChk = chk;
-            _headChk = _rootChk + umnSize.umnChunk;
-            _headChk->next = null;
+            _head = _rootChk->Ptr;
+            _headChk = null;
         }
 
         public void Reset()
         {
-            _headChk = _rootChk + umnSize.umnChunk;
+            _head = _rootChk->Ptr;
+            _headChk = null;
         }
 
         public umnChunk* Alloc(int size)
         {
-            var szChk = umnSize.umnChunk;
-            var head = (long)_headChk;
-            var tail = (long)_rootChk->next;
-
-            var remained = tail - head;
-            if (remained < size + szChk)
+            var remained = Capacity - Offset;
+            if (remained < size)
             {
                 remained = _compactClean();
                 if (remained < size)
                     return null;
             }
-            
-            var endChk = (umnChunk*)(head + size);
-            endChk->next = null;
-            
-            var chk = _headChk;
-            chk->next = endChk;
-            
-            _headChk = endChk;
+
+            var chk = (umnChunk*)_head;
+            _head += StructSize.umnChunk + size;
+
+            chk->next = null;
+            chk->prev = _headChk;
+            _headChk = chk;
 
             return chk;
         }
@@ -64,20 +63,22 @@ namespace SpeakingLanguage.Library
         public void CopyTo(void* dest)
         {
             var ofs = Offset;
-            var ptr = umnChunk.GetPtr(Root);
-            Buffer.MemoryCopy(ptr.ToPointer(), dest, ofs, ofs);
+            Buffer.MemoryCopy(Root.ToPointer(), dest, ofs, ofs);
         }
 
         public void CopyTo(IntPtr dest)
         {
             var ofs = Offset;
-            var ptr = umnChunk.GetPtr(Root);
-            Buffer.MemoryCopy(ptr.ToPointer(), dest.ToPointer(), ofs, ofs);
+            Buffer.MemoryCopy(Root.ToPointer(), dest.ToPointer(), ofs, ofs);
         }
         
         public void Dispose()
         {
-            _rootChk->Disposed = true;
+            while (_rootChk != null)
+            {
+                _rootChk->Disposed = true;
+                _rootChk = _rootChk->prev;
+            }
         }
 
         public void Display()

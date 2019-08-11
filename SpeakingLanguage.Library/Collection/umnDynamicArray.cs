@@ -3,20 +3,16 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Library
 {
-    public unsafe struct umnDynamicArray
+    public unsafe struct umnDynamicArray : IDisposable
     {
-        private struct _token
-        {
-            public long prevEP;
-            public IntPtr typeHandle;
-        }
-
-        private readonly IntPtr _root;
+        private readonly umnChunk* _rootChk;
+        private umnChunk* _headChk;
         private IntPtr _head;
-        private long _EP;
 
-        public int Capacity { get; }
-        public int Offset => (int)((long)_head - (long)_root);
+        public int Capacity => _rootChk->length;
+        public long Offset => _head.ToInt64() - _rootChk->Ptr.ToInt64();
+        public bool IsHead => _head == _headChk->Ptr;
+        public IntPtr CurrentTypeHandle => _headChk->typeHandle;
 
         public static umnDynamicArray AllocateNew<TAllocator>(TAllocator* allocator, int capacity)
             where TAllocator : unmanaged, IumnAllocator
@@ -25,60 +21,82 @@ namespace SpeakingLanguage.Library
             return new umnDynamicArray(chk);
         }
 
+        //public static umnDynamicArray* AllocateNew<TAllocator>(TAllocator* allocator, int capacity)
+        //    where TAllocator : unmanaged, IumnAllocator
+        //{
+        //    var szArr = sizeof(umnDynamicArray);
+        //    var arrChk = allocator->Alloc(szArr + sizeof(umnChunk));
+        //    var chk = allocator->Calloc(capacity);
+        //
+        //    var arr = new umnDynamicArray(chk);
+        //    var destPtr = arrChk->ptr.ToPointer();
+        //    Buffer.MemoryCopy(&arr, destPtr, szArr, szArr);
+        //
+        //    return (umnDynamicArray*)destPtr;
+        //}
+
         public umnDynamicArray(umnChunk* chk)
         {
-            _root = umnChunk.GetPtr(chk);
-            _head = _root;
-            _EP = (long)_head;
-            Capacity = umnChunk.GetLength(chk);
+            _rootChk = chk;
+            _head = _rootChk->Ptr;
+            _headChk = null;
         }
 
-        public void Reset()
+        public void PushChunk(IntPtr typeHandle)
         {
-            UnmanagedHelper.Memset(_root.ToPointer(), 0, Capacity);
+            if (null != _headChk)
+                _headChk->length = (int)(_head.ToInt64() - _headChk->Ptr.ToInt64());
+
+            var chkSize = StructSize.umnChunk;
+            var chk = (umnChunk*)_head;
+            chk->typeHandle = typeHandle;
+            _head += chkSize;
+
+            if (null != _headChk)
+                _headChk->next = chk;
+            chk->prev = _headChk;
+            _headChk = chk;
         }
 
-        public void Entry<T>() where T : unmanaged
+        public void PopChunk()
         {
-            var ptkn = (_token*)_head;
-            ptkn->prevEP = _EP;
-            ptkn->typeHandle = typeof(T).TypeHandle.Value;
+            if (null == _headChk)
+                ThrowHelper.ThrowWrongState("Please call Begin first.");
 
-            var tsz = sizeof(_token);
-            _head += tsz;
-            _EP = (long)_head;
+            var prevChk = _headChk;
+            prevChk->Disposed = true;
+
+            _headChk = prevChk->prev;
+            _headChk->next = null;
+            _head = _headChk->Ptr + _headChk->length;
         }
 
-        public void Exit()
+        public void PushBack(void* e, int sz)
         {
-            var tsz = sizeof(_token);
-            _head -= tsz;
-
-            var ptkn = (_token*)_head;
-            _EP = ptkn->prevEP;
-        }
-
-        public void PushBack<T>(T* e) where T : unmanaged
-        {
-            var sz = sizeof(T);
-            if (Offset + sz > Capacity)
-                ThrowHelper.ThrowCapacityOverflow($"Offset:{Offset.ToString()} / Capacity:{Capacity.ToString()}");
-
+            if (null == _headChk)
+                ThrowHelper.ThrowWrongState("Please call Begin first.");
+            //if (Capacity <= Offset)
+            //    ThrowHelper.ThrowCapacityOverflow($"Capacity/Offset:{Capacity.ToString()}/{Offset.ToString()}");
+            
             Buffer.MemoryCopy(e, _head.ToPointer(), sz, sz);
             _head += sz;
         }
 
-        public T* PopBack<T>() where T : unmanaged
+        public void* PopBack(int sz)
         {
-            if (Offset <= 0)
-                ThrowHelper.ThrowCapacityOverflow($"Offset:{Offset.ToString()}");
+            if (null == _headChk)
+                ThrowHelper.ThrowWrongState("Please call Begin first.");
 
-            if (_EP == (long)_head)
+            if (_head == _headChk->Ptr)
                 return null;
 
-            var sz = sizeof(T);
             _head -= sz;
-            return (T*)_head;
+            return _head.ToPointer();
+        }
+
+        public void Dispose()
+        {
+            _rootChk->Disposed = true;
         }
     }
 }

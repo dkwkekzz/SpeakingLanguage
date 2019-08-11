@@ -1,53 +1,89 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace SpeakingLanguage.Library
 {
-    public unsafe struct umnNativeArray
+    public unsafe struct umnNativeArray : IDisposable
     {
-        private readonly IntPtr _root;
-        private IntPtr _head;
+        private readonly umnChunk* _chk;
+        private readonly int _szElement;
+        private int _index;
 
-        public int Capacity { get; }
-        public int Offset => (int)((long)_head - (long)_root);
-        
-        public static umnNativeArray AllocateNew<TAllocator>(TAllocator* allocator, int capacity)
-            where TAllocator : unmanaged, IumnAllocator
+        public int Capacity => _chk->length;
+        public int Length => _index;
+
+        public void* this[int index]
         {
-            var chk = allocator->Calloc(capacity);
-            return new umnNativeArray(chk);
+            get
+            {
+                if (Capacity <= _szElement * index)
+                    ThrowHelper.ThrowCapacityOverflow($"wrong index in Indexer_get:{Capacity.ToString()}");
+
+                var ofs = index * _szElement;
+                return (_chk->Ptr + ofs).ToPointer();
+            }
+            set
+            {
+                if (Capacity <= _szElement * index)
+                    ThrowHelper.ThrowCapacityOverflow($"wrong index in Indexer_set:{Capacity.ToString()}");
+
+                var ofs = index * _szElement;
+                var ptr = _chk->Ptr + ofs;
+                Buffer.MemoryCopy(value, ptr.ToPointer(), _szElement, _szElement);
+            }
+        }
+        
+        public static umnNativeArray AllocateNew<TAllocator, T>(TAllocator* allocator, int maxLength)
+            where TAllocator : unmanaged, IumnAllocator
+            where T : unmanaged
+        {
+            var sz = sizeof(T);
+            var chk = allocator->Calloc(maxLength * sz);
+            return new umnNativeArray(chk, sz);
         }
 
-        public umnNativeArray(umnChunk* chk)
+        public umnNativeArray(umnChunk* chk, int size)
         {
-            _root = umnChunk.GetPtr(chk);
-            _head = _root;
-            Capacity = umnChunk.GetLength( chk );
+            _chk = chk;
+            _szElement = size;
+            _index = 0;
         }
 
         public void Reset()
         {
-            UnmanagedHelper.Memset(_root.ToPointer(), 0, Capacity);
+            _index = 0;
+            UnmanagedHelper.Memset(_chk->Ptr.ToPointer(), 0, Capacity);
         }
         
-        public void PushBack<T>(T* e) where T : unmanaged
+        public void PushBack(void* e)
         {
-            var sz = sizeof(T);
-            if (Offset + sz > Capacity)
-                ThrowHelper.ThrowCapacityOverflow($"Offset:{Offset.ToString()} / Capacity:{Capacity.ToString()}");
-            
-            Buffer.MemoryCopy(e, _head.ToPointer(), sz, sz);
-            _head += sz;
+            if (Capacity <= _szElement * _index)
+                ThrowHelper.ThrowCapacityOverflow($"Capacity:{Capacity.ToString()}");
+
+            this[_index++] = e;
         }
 
-        public T* PopBack<T>() where T : unmanaged
+        public void PushBack(void* e, int sz)
         {
-            if (Offset <= 0)
-                ThrowHelper.ThrowCapacityOverflow($"Offset:{Offset.ToString()}");
+            if (Capacity <= _szElement * (_index - 1) + sz)
+                ThrowHelper.ThrowCapacityOverflow($"Capacity:{Capacity.ToString()}");
             
-            var sz = sizeof(T);
-            _head -= sz;
-            return (T*)_head;
+            var ptr = _chk->Ptr + sz;
+            Buffer.MemoryCopy(e, ptr.ToPointer(), sz, sz);
+        }
+
+        public void* PopBack()
+        {
+            if (_index <= 0)
+                ThrowHelper.ThrowCapacityOverflow($"_length:{_index.ToString()}");
+
+            return this[--_index];
+        }
+
+        public void Dispose()
+        {
+            _chk->Disposed = true;
         }
     }
 }

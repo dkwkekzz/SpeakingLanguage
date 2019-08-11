@@ -4,6 +4,7 @@ using System.Collections.Generic;
 namespace SpeakingLanguage.Logic
 {
     public unsafe struct StreamingContext
+<<<<<<< Updated upstream
     {
         public FrameManager frameManager;
         public Streamer streamer;
@@ -20,9 +21,18 @@ namespace SpeakingLanguage.Logic
         private readonly ActionCollection _colAct;
         private readonly ObjectCollection _colObj;
         private readonly StreamingContext _ctx;
+=======
+    {
+        public FrameManager frameManager;
+        public Streamer streamer;
+    }
+>>>>>>> Stashed changes
 
-        public Provider(StartInfo info)
+    public static class Provider
+    {
+        public unsafe void ExecuteFrame(ref Service service)
         {
+<<<<<<< Updated upstream
             unsafe
             {
                 _colAct = new ActionCollection();
@@ -68,6 +78,34 @@ namespace SpeakingLanguage.Logic
             }
 
 
+=======
+            fixed (StreamingContext* pCtx = &_ctx)
+            {
+                var objIter = _colObj.GetEnumerator();
+                while (objIter.MoveNext())
+                {
+                    var pObj = objIter.Current;
+                    var eIter = pObj->GetEnumerator();
+                    while (eIter.MoveNext())
+                    {
+                        var eChk = eIter.Current;
+                        // self or multi
+                        // 개수만 얻어오게 해서 stack으로 쌓자.
+                        // 맞는 엔터티가없으면, 다음액션으로 패스
+                    }
+                }
+
+                // slo에서 entity를 뭔가 효과적인 방법으로 얻어와야...
+
+                // lhs의 entity를 순회, 동시에 actioncollection도 순회한다.
+                // actioncollection tag에 없으면 다음으로 스킵, 
+                // 여기서 비교할때, pObj->current_e < action iterhandle, next 이런식으로
+                // 
+
+            }
+
+
+>>>>>>> Stashed changes
         }
     }
 }

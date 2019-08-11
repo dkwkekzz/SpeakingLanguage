@@ -9,7 +9,7 @@ namespace SpeakingLanguage.Logic
         private float _rate = 0f;
         private float _accumed = 0f;
 
-        public void Initialize(MethodInfo mth)
+        protected void Initialize(MethodInfo mth)
         {
             var frameAttr = Attribute.GetCustomAttribute(mth, typeof(FrameAttribute)) as FrameAttribute;
             if (null != frameAttr)
