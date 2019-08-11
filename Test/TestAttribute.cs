@@ -26,9 +26,10 @@ namespace Test
     class MyWorld
     {
         [InteractionAttribute(typeof(Archer))]
-        public unsafe static void SimpleInteract(Archer* a, Observer ob)
+        public unsafe static void SimpleInteract(Archer* a, Monster* m)
         {
-            Console.WriteLine($"battle! {a->power.ToString()} vs. {ob.power.ToString()}");
+            a->power = 9999;
+            Console.WriteLine($"battle! {a->power.ToString()} vs. {m->power.ToString()}");
         }
     }
 
@@ -51,12 +52,14 @@ namespace Test
     unsafe interface IAction
     {
         void Take(MethodInfo mth);
-        void Invoke(void* a, Observer ob);
+        void Invoke(void* a, void* b);
     }
     
-    unsafe class InteractAction<T> : IAction where T : unmanaged
+    unsafe class InteractAction<T1, T2> : IAction 
+        where T1 : unmanaged
+        where T2 : unmanaged
     {
-        private delegate void SimpleDel(T* pa, Observer ob);
+        private delegate void SimpleDel(T1* src1, T2* src2);
         private SimpleDel _del;
         
         public void Take(MethodInfo mth)
@@ -64,27 +67,27 @@ namespace Test
             _del = (SimpleDel)mth.CreateDelegate(typeof(SimpleDel));
         }
 
-        public void Invoke(void* a, Observer ob)
+        public void Invoke(void* a, void* b)
         {
-            _del((T*)a, ob);
+            _del((T1*)a, (T2*)b);
         }
     }
 
-    unsafe class SimpleAction : IAction
-    {
-        private delegate void SimpleDel(void* pa, Observer ob);
-        private SimpleDel _del;
-
-        public void Take(MethodInfo mth)
-        {
-            _del = (SimpleDel)mth.CreateDelegate(typeof(SimpleDel));
-        }
-
-        public void Invoke(void* a, Observer ob)
-        {
-            _del(a, ob);
-        }
-    }
+    //unsafe class SimpleAction : IAction
+    //{
+    //    private delegate void SimpleDel(void* pa, Observer ob);
+    //    private SimpleDel _del;
+    //
+    //    public void Take(MethodInfo mth)
+    //    {
+    //        _del = (SimpleDel)mth.CreateDelegate(typeof(SimpleDel));
+    //    }
+    //
+    //    public void Invoke(void* a, Observer ob)
+    //    {
+    //        _del(a, ob);
+    //    }
+    //}
 
 
     static unsafe class TestAttribute
@@ -111,18 +114,17 @@ namespace Test
                         for (int j = 0; j != paramInfos.Length; j++)
                             paramTypes[j] = paramInfos[j].ParameterType;
 
-                        var action = new SimpleAction();
-                        action.Take(mth);
-                        _dicActions.Add(paramTypes[0], action);
-
-                        //Type actionType = typeof(InteractAction<>);
-                        //Type[] typeArgs = { interAttr.SrcType };
-                        //Type constructed = actionType.MakeGenericType(typeArgs);
-                        //
-                        //var action = Activator.CreateInstance(constructed) as IAction;
+                        //var action = new SimpleAction();
                         //action.Take(mth);
-                        //
-                        //_dicActions.Add(interAttr.SrcType, action);
+                        //_dicActions.Add(paramTypes[0], action);
+
+                        Type actionType = typeof(InteractAction<,>);
+                        Type constructed = actionType.MakeGenericType(paramTypes);
+                        
+                        var action = Activator.CreateInstance(constructed) as IAction;
+                        action.Take(mth);
+                        
+                        _dicActions.Add(interAttr.SrcType, action);
 
 
                     }
@@ -130,14 +132,16 @@ namespace Test
             }
         }
 
-        static Type at = typeof(Archer*);
+        static Type at = typeof(Archer);
 
         static void Execute()
         {
             var a = new Archer();
+            var m = new Monster();
             var ob = new Observer();
             var pa = &a;
-            _dicActions[at].Invoke(pa, ob);
+            var pm = &m;
+            _dicActions[at].Invoke(pa, pm);
 
         }
 

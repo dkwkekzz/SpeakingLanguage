@@ -40,26 +40,19 @@ namespace SpeakingLanguage.Library
 
         private readonly umnChunk* _chk;
         private readonly int _szElement;
-        private int _length;
 
-        public int Capacity => _chk->length;
-        public int Length => _length;
+        public int Capacity { get; }
+        public int Length { get; private set; }
 
         public T* this[int index]
         {
             get
             {
-                if (Capacity <= _szElement * index)
-                    ThrowHelper.ThrowCapacityOverflow($"wrong index in Indexer_get:{Capacity.ToString()}");
-
                 var ofs = index * _szElement;
                 return (T*)(_chk->Ptr + ofs);
             }
             set
             {
-                if (Capacity <= _szElement * index)
-                    ThrowHelper.ThrowCapacityOverflow($"wrong index in Indexer_set:{Capacity.ToString()}");
-
                 var ofs = index * _szElement;
                 var ptr = _chk->Ptr + ofs;
                 Buffer.MemoryCopy(value, ptr.ToPointer(), _szElement, _szElement);
@@ -78,28 +71,45 @@ namespace SpeakingLanguage.Library
         {
             _chk = chk;
             _szElement = Marshal.SizeOf(typeof(T));
-            _length = 0;
+            Length = 0;
+
+            Capacity = chk->Length;
         }
         
         public Enumerator GetEnumerator()
         {
-            return new Enumerator(_chk, _length);
+            return new Enumerator(_chk, Length);
         }
 
-        public void PushBack(T* e)
+        public T* PushBack(T* e)
         {
-            if (Capacity <= _szElement * _length)
+            if (Capacity <= _szElement * Length)
                 ThrowHelper.ThrowCapacityOverflow($"Capacity:{Capacity.ToString()}");
 
-            this[_length++] = e;
+            var ofs = Length++ * _szElement;
+            var ptr = _chk->Ptr + ofs;
+            Buffer.MemoryCopy(e, ptr.ToPointer(), _szElement, _szElement);
+            return (T*)ptr;
+        }
+
+        public T* EmplaceBack(T* e)
+        {
+            if (Capacity <= _szElement * Length)
+                ThrowHelper.ThrowCapacityOverflow($"Capacity:{Capacity.ToString()}");
+
+            var ofs = Length++ * _szElement;
+            var ptr = _chk->Ptr + ofs;
+            UnmanagedHelper.MoveMemory(ptr.ToPointer(), e, _szElement);
+            return (T*)ptr;
         }
 
         public T* PopBack()
         {
-            if (_length <= 0)
-                ThrowHelper.ThrowCapacityOverflow($"_length:{_length.ToString()}");
+            if (Length <= 0)
+                ThrowHelper.ThrowCapacityOverflow($"Length:{Length.ToString()}");
 
-            return this[--_length];
+            var ofs = --Length * _szElement;
+            return (T*)(_chk->Ptr + ofs);
         }
 
         public void Dispose()

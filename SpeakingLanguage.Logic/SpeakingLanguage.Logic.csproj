@@ -43,46 +43,49 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Action\ComplexAction.cs" />
     <Compile Include="Entity\Observer.cs" />
-    <Compile Include="Entity\Interaction.cs" />
+    <Compile Include="Streamer.cs" />
     <Compile Include="Entity\Position.cs" />
-    <Compile Include="Executor\Factory.cs" />
-    <Compile Include="Executor\Interaction.cs" />
-    <Compile Include="Structure\InteractContext.cs" />
-    <Compile Include="Terminal\ActionDictionary.cs" />
-    <Compile Include="Define.cs" />
+    <Compile Include="_old\Executor\Factory.cs" />
+    <Compile Include="_old\Executor\Interaction.cs" />
+    <Compile Include="_old\Structure\InteractContext.cs" />
+    <Compile Include="_old\Structure\slObject2.cs" />
+    <Compile Include="Action\ActionCollection.cs" />
+    <Compile Include="_old\Define.cs" />
     <Compile Include="Entity\Controller.cs" />
     <Compile Include="Entity\Spawner.cs" />
     <Compile Include="Entity\LifeCycle.cs" />
+    <Compile Include="ObjectCollection.cs" />
     <Compile Include="_old\Event\SelfInteraction.cs" />
     <Compile Include="_old\Event\SimpleInteraction.cs" />
     <Compile Include="_old\Event\Transform.cs" />
-    <Compile Include="Terminal\ObjectDictionary.cs" />
+    <Compile Include="_old\Terminal\ObjectDictionary.cs" />
     <Compile Include="_old\CellDictionary.cs" />
-    <Compile Include="Terminal\FrameManager.cs" />
+    <Compile Include="FrameManager.cs" />
     <Compile Include="_old\BinaryCommand.cs" />
-    <Compile Include="Public\Attribute\FrameAttribute.cs" />
-    <Compile Include="Terminal\ActionDictionary\IAction.cs" />
-    <Compile Include="Terminal\ActionDictionary\InteractAction.cs" />
+    <Compile Include="Attribute\FrameAttribute.cs" />
+    <Compile Include="Action\IAction.cs" />
+    <Compile Include="Action\InteractAction.cs" />
     <Compile Include="_old\ICommander.cs" />
     <Compile Include="_old\IEntityManager.cs" />
-    <Compile Include="Terminal\ActionDictionary\SelfAction.cs" />
+    <Compile Include="Action\SelfAction.cs" />
     <Compile Include="Provider.cs" />
-    <Compile Include="Structure\slObject.cs" />
-    <Compile Include="Public\Attribute\InteractionAttribute.cs" />
+    <Compile Include="slObject.cs" />
+    <Compile Include="Attribute\InteractionAttribute.cs" />
     <Compile Include="_old\IPublicContext.cs" />
     <Compile Include="_old\IState.cs" />
-    <Compile Include="Public\StartInfo.cs" />
+    <Compile Include="StartInfo.cs" />
     <Compile Include="_old\StateValue.cs" />
     <Compile Include="_old\WorldActor.cs" />
     <Compile Include="_old\FrontStack.cs" />
-    <Compile Include="Terminal\Locator.cs" />
+    <Compile Include="_old\Terminal\Locator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="_old\sCell.cs" />
     <Compile Include="_old\sCellComparer.cs" />
     <Compile Include="_old\sCellNode.cs" />
     <Compile Include="_old\sCellNodeComparer.cs" />
-    <Compile Include="Executor\World.cs" />
+    <Compile Include="_old\Executor\World.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SpeakingLanguage.Library\SpeakingLanguage.Library.csproj">
@@ -90,6 +93,8 @@
       <Name>SpeakingLanguage.Library</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="_old\Public\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

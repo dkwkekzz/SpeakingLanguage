@@ -164,16 +164,42 @@ namespace SpeakingLanguage.Library
             }
         }
 
-        private umnFactory<TAllocator, sbtPairNode> _factory;
+        //private umnFactory<TAllocator, sbtPairNode> _factory;
+        private TAllocator* _allocator;
         private TComparer _comparer;
         private sbtPairNode* _root;
         
         public int Count { get { return _root == null ? 0 : _root->count; } }
         public bool IsReadOnly { get { return false; } }
         
+        public TValue* this[TKey* key]
+        {
+            get
+            {
+                var n = find(key);
+                if (null == n)
+                    return null;
+
+                return (TValue*)n->value;
+            }
+        }
+
+        public TValue* this[TKey key]
+        {
+            get
+            {
+                var n = find(&key);
+                if (null == n)
+                    return null;
+
+                return (TValue*)n->value;
+            }
+        }
+
         public umnSplayBT(TAllocator* allocator, int capacity = 0)
         {
-            _factory = new umnFactory<TAllocator, sbtPairNode>(allocator, capacity);
+            //_factory = new umnFactory<TAllocator, sbtPairNode>(allocator, capacity);
+            _allocator = allocator;
             _comparer = new TComparer();
             _root = null;
         }
@@ -537,7 +563,10 @@ namespace SpeakingLanguage.Library
 
         private sbtPairNode* createNode(TKey* key, TValue* value)
         {
-            sbtPairNode* x = _factory.GetObject();
+            var chk = _allocator->Alloc(umnSize.sbtPairNode);
+            chk->typeHandle = umnTypeHandle.sbtPairNode;
+
+            var x = umnChunk.GetPtr<sbtPairNode>(chk);
             x->key = key;
             x->value = value;
             x->count = 0;
@@ -549,7 +578,9 @@ namespace SpeakingLanguage.Library
             x->l = null;
             x->p = null;
             x->r = null;
-            _factory.PutObject(x);
+
+            var chk = umnChunk.GetChunk(x);
+            chk->Disposed = true;
         }
         #endregion
     }

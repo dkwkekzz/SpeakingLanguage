@@ -25,7 +25,7 @@ namespace SpeakingLanguage.Library
                 _current = null;
             }
 
-            public T* Current => (T*)(_current + sizeof(umnFactoryPtr));
+            public T* Current => (T*)(_current + umnSize.umnFactoryPtr);
 
             public bool MoveNext()
             {
@@ -70,18 +70,18 @@ namespace SpeakingLanguage.Library
             }
             else
             {
-                var chk = _allocator->Alloc(_szNode + sizeof(umnFactoryPtr));
+                var chk = _allocator->Alloc(_szNode + umnSize.umnFactoryPtr);
                 cur = (umnFactoryPtr*)chk->Ptr;
             }
             
             _putTail(ref _used, ref cur);
 
-            return (T*)(cur + sizeof(umnFactoryPtr));
+            return (T*)(cur + umnSize.umnFactoryPtr);
         }
 
         public void PutObject(T* x)
         {
-            var cur = (umnFactoryPtr*)((IntPtr)x - sizeof(umnFactoryPtr));
+            var cur = (umnFactoryPtr*)((IntPtr)x - umnSize.umnFactoryPtr);
             _delete(ref _used, ref cur);
             _putTail(ref _unused, ref cur);
         }
