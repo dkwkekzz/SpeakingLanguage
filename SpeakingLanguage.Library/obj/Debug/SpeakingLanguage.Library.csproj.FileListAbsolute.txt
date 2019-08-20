@@ -24,7 +24,6 @@ D:\mydevelop\MyLibrary\SpeakingLanguage\SpeakingLanguage.Library\obj\Debug\Speak
 D:\mydevelop\MyLibrary\SpeakingLanguage\SpeakingLanguage.Library\obj\Debug\SpeakingLanguage.Library.pdb
 D:\develop\MyProject\SpeakingLanguage\SpeakingLanguage.Library\bin\Debug\SpeakingLanguage.Library.dll
 D:\develop\MyProject\SpeakingLanguage\SpeakingLanguage.Library\bin\Debug\SpeakingLanguage.Library.pdb
-D:\develop\MyProject\SpeakingLanguage\SpeakingLanguage.Library\bin\Debug\Newtonsoft.Json.xml
 D:\develop\MyProject\SpeakingLanguage\SpeakingLanguage.Library\obj\Debug\SpeakingLanguage.Library.csprojAssemblyReference.cache
 D:\develop\MyProject\SpeakingLanguage\SpeakingLanguage.Library\obj\Debug\SpeakingLanguage.Library.csproj.CoreCompileInputs.cache
 D:\develop\MyProject\SpeakingLanguage\SpeakingLanguage.Library\obj\Debug\SpeakingLanguage.Library.csproj.CopyComplete

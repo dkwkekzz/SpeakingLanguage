@@ -5,6 +5,14 @@ namespace SpeakingLanguage.Library
 {
     public static class ThrowHelper
     {
+        public sealed class StateOverflowException : Exception
+        {
+            private string _msg;
+            public override string Message => _msg;
+
+            public StateOverflowException(string msg) { _msg = msg; }
+        }
+
         public sealed class CapacityOverflowException : Exception
         {
             private string _msg;
@@ -39,6 +47,11 @@ namespace SpeakingLanguage.Library
         public static void ThrowOutOfMemory(string msg = "")
         {
             throw new OutOfMemoryException(msg);
+        }
+
+        public static void ThrowStateOverflow(string msg = "")
+        {
+            throw new StateOverflowException(msg);
         }
     }
 }

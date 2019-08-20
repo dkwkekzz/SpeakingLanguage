@@ -5,32 +5,100 @@ namespace SpeakingLanguage.Logic
 {
     public unsafe struct Service : IDisposable
     {
-        private readonly Library.umnMarshal _umnAllocator;
+        public struct Poster<TEvent>
+            where TEvent : unmanaged
+        {
+            private readonly Library.umnDynamicArray* pStreamer;
 
-        private readonly ActionCollection _colAct;
-        private readonly ObjectCollection _colObj;
-        private readonly StreamingContext _ctx;
+            public Poster(Library.umnDynamicArray* stream)
+            {
+                pStreamer = stream;
+                pStreamer->Entry<TEvent>();
+            }
+            
+            public void Push(TEvent st)
+            {
+                pStreamer->PushBack(&st);
+            }
 
+            public void Push(TEvent* st)
+            {
+                pStreamer->PushBack(st);
+            }
+
+            public void Push(void* ptr, int len)
+            {
+                pStreamer->PushBack(ptr, len);
+            }
+        }
+
+        internal struct Requester<TEvent> : IDisposable 
+            where TEvent : unmanaged
+        {
+            private readonly Library.umnDynamicArray* pStreamer;
+
+            public Requester(Library.umnDynamicArray* stream)
+            {
+                pStreamer = stream;
+            }
+
+            public void Dispose()
+            {
+                pStreamer->Exit();
+            }
+
+            public bool TryPop(out TEvent stInter)
+            {
+                var pInter = pStreamer->PopBack<TEvent>();
+                if (null == pInter)
+                {
+                    stInter = default;
+                    return false;
+                }
+
+                stInter = *pInter;
+                return true;
+            }
+        }
+        
+        private readonly Library.umnMarshal umnAllocator;
+        private readonly Library.umnDynamicArray stEventStream;
+
+        internal readonly ActionCollection colAct;
+        internal readonly ObjectCollection colObj;
+        internal readonly FrameManager frameManager;
+        
         public Service(StartInfo info) : this(ref info)
         {
         }
 
         public Service(ref StartInfo info)
         {
-            _umnAllocator = new Library.umnMarshal();
-            _colAct = new ActionCollection();
-            _colObj = new ObjectCollection(_umnAllocator.Alloc(info.max_byte_objectcollection));
-            _ctx = new StreamingContext
-            {
-                frameManager = new FrameManager(info.startFrame),
-                streamer = new Streamer(_umnAllocator.Calloc(info.max_byte_streamer)),
-            };
+            umnAllocator = new Library.umnMarshal();
+            stEventStream = new Library.umnDynamicArray(umnAllocator.Calloc(info.max_byte_streamer));
+
+            colAct = new ActionCollection();
+            colObj = new ObjectCollection(umnAllocator.Alloc(info.max_byte_objectcollection));
+            frameManager = new FrameManager(info.startFrame);
         }
 
         public void Dispose()
         {
-            _umnAllocator.Dispose();
+            umnAllocator.Dispose();
         }
 
+        public Poster<TEvent> GetPoster<TEvent>()
+            where TEvent : unmanaged
+        {
+            fixed (Library.umnDynamicArray* pStrm = &stEventStream)
+                return new Poster<TEvent>(pStrm);
+        }
+
+        internal Requester<TEvent> GetRequester<TEvent>()
+            where TEvent : unmanaged
+        {
+            fixed (Library.umnDynamicArray* pStrm = &stEventStream)
+                return new Requester<TEvent>(pStrm);
+        }
     }
 }

@@ -14,7 +14,7 @@ namespace SpeakingLanguage.Library
         public void* value;
         public int count;
     }
-
+    
     [DebuggerDisplay("Count = {Count}")]
     public unsafe struct umnSplayBT<TAllocator, TComparer, TKey, TValue>
         where TAllocator : unmanaged, IumnAllocator
@@ -164,16 +164,42 @@ namespace SpeakingLanguage.Library
             }
         }
 
-        private umnFactory<TAllocator, sbtPairNode> _factory;
+        //private umnFactory<TAllocator, sbtPairNode> _factory;
+        private TAllocator* _allocator;
         private TComparer _comparer;
         private sbtPairNode* _root;
         
         public int Count { get { return _root == null ? 0 : _root->count; } }
         public bool IsReadOnly { get { return false; } }
         
-        public umnSplayBT(TAllocator* allocator, int capacity = 0)
+        public TValue* this[TKey* key]
         {
-            _factory = new umnFactory<TAllocator, sbtPairNode>(allocator, capacity);
+            get
+            {
+                var n = find(key);
+                if (null == n)
+                    return null;
+
+                return (TValue*)n->value;
+            }
+        }
+
+        public TValue* this[TKey key]
+        {
+            get
+            {
+                var n = find(&key);
+                if (null == n)
+                    return null;
+
+                return (TValue*)n->value;
+            }
+        }
+        
+        public umnSplayBT(TAllocator* allocator)
+        {
+            //_factory = new umnFactory<TAllocator, sbtPairNode>(allocator, capacity);
+            _allocator = allocator;
             _comparer = new TComparer();
             _root = null;
         }
@@ -245,6 +271,13 @@ namespace SpeakingLanguage.Library
         public void Add(TKey* key, TValue* value, bool overlap)
         {
             insert(key, value, overlap);
+        }
+
+        public void Add(sbtPairNode* node)
+        {
+            var key = (TKey*)node->key;
+            var value = (TValue*)node->value;
+            insert(key, value, false, node);
         }
 
         public bool TryAdd(TKey key, TValue* value)
@@ -370,12 +403,16 @@ namespace SpeakingLanguage.Library
             return p;
         }
         
-        private bool insert(TKey* key, TValue* value, bool overlap)
+        private bool insert(TKey* key, TValue* value, bool overlap, sbtPairNode* x = null)
         {
             sbtPairNode* p = _root;
             if (null == p)
             {
-                _root = createNode(key, value);
+                if (null != _allocator)
+                    _root = createNode(key, value);
+                else
+                    _root = x;
+
                 return true;
             }
 
@@ -414,8 +451,9 @@ namespace SpeakingLanguage.Library
                     p = p->r;
                 }
             }
-
-            var x = createNode(key, value);
+            
+            if (null != _allocator)
+                x = createNode(key, value);
 
             if (left)
                 p->l = x;
@@ -537,7 +575,10 @@ namespace SpeakingLanguage.Library
 
         private sbtPairNode* createNode(TKey* key, TValue* value)
         {
-            sbtPairNode* x = _factory.GetObject();
+            var chk = _allocator->Alloc(umnSize.sbtPairNode);
+            chk->typeHandle = TypeCollection.sbtPairNode.key;
+
+            var x = umnChunk.GetPtr<sbtPairNode>(chk);
             x->key = key;
             x->value = value;
             x->count = 0;
@@ -549,7 +590,9 @@ namespace SpeakingLanguage.Library
             x->l = null;
             x->p = null;
             x->r = null;
-            _factory.PutObject(x);
+
+            var chk = umnChunk.GetChunk(x);
+            chk->Disposed = true;
         }
         #endregion
     }
