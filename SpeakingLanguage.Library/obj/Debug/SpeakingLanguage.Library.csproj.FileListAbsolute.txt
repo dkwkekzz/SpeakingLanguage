@@ -29,3 +29,10 @@ D:\develop\MyProject\SpeakingLanguage\SpeakingLanguage.Library\obj\Debug\Speakin
 D:\develop\MyProject\SpeakingLanguage\SpeakingLanguage.Library\obj\Debug\SpeakingLanguage.Library.csproj.CopyComplete
 D:\develop\MyProject\SpeakingLanguage\SpeakingLanguage.Library\obj\Debug\SpeakingLanguage.Library.dll
 D:\develop\MyProject\SpeakingLanguage\SpeakingLanguage.Library\obj\Debug\SpeakingLanguage.Library.pdb
+D:\develop\myProject2\SpeakingLanguage\SpeakingLanguage.Library\obj\Debug\SpeakingLanguage.Library.csprojAssemblyReference.cache
+D:\develop\myProject2\SpeakingLanguage\SpeakingLanguage.Library\obj\Debug\SpeakingLanguage.Library.csproj.CoreCompileInputs.cache
+D:\develop\myProject2\SpeakingLanguage\SpeakingLanguage.Library\obj\Debug\SpeakingLanguage.Library.dll
+D:\develop\myProject2\SpeakingLanguage\SpeakingLanguage.Library\obj\Debug\SpeakingLanguage.Library.pdb
+D:\develop\myProject2\SpeakingLanguage\SpeakingLanguage.Library\bin\Debug\SpeakingLanguage.Library.dll
+D:\develop\myProject2\SpeakingLanguage\SpeakingLanguage.Library\bin\Debug\SpeakingLanguage.Library.pdb
+D:\develop\myProject2\SpeakingLanguage\SpeakingLanguage.Library\obj\Debug\SpeakingLanguage.Library.csproj.CopyComplete

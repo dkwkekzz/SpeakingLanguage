@@ -57,6 +57,15 @@ namespace SpeakingLanguage.Library
             return chk;
         }
 
+        public umnChunk* DupAlloc(umnChunk* chk)
+        {
+
+            var retChk = Alloc(umnChunk.GetLength(chk));
+            retChk->typeHandle = chk->typeHandle;
+
+            var originPtr = umnChunk.GetPtr()
+        }
+
         public void CopyTo(void* dest)
         {
             var ofs = Offset;

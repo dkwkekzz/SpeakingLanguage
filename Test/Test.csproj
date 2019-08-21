@@ -49,11 +49,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="TestComparer.cs" />
-    <Compile Include="TestSwapBuffer.cs" />
+    <None Include="TestSwapBuffer.cs" />
     <None Include="TestTable.cs" />
     <None Include="TestAttribute.cs" />
     <None Include="TestClassStruct.cs" />
     <None Include="TestHeap.cs" />
+    <Compile Include="TestHashMap.cs" />
     <None Include="TestSplaybt.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

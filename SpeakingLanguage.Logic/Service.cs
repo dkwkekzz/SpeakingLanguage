@@ -65,7 +65,7 @@ namespace SpeakingLanguage.Logic
         private readonly Library.umnDynamicArray stEventStream;
 
         internal readonly ActionCollection colAct;
-        internal readonly ObjectCollection colObj;
+        internal readonly ObjectCollection2 colObj;
         internal readonly FrameManager frameManager;
         
         public Service(StartInfo info) : this(ref info)
@@ -78,7 +78,7 @@ namespace SpeakingLanguage.Logic
             stEventStream = new Library.umnDynamicArray(umnAllocator.Calloc(info.max_byte_streamer));
 
             colAct = new ActionCollection();
-            colObj = new ObjectCollection(umnAllocator.Alloc(info.max_byte_objectcollection));
+            colObj = new ObjectCollection2(info.default_objectcount);
             frameManager = new FrameManager(info.startFrame);
         }
 

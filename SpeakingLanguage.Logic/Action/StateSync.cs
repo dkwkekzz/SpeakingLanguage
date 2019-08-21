@@ -35,7 +35,7 @@ namespace SpeakingLanguage.Logic
                 && (other.sync01 & sync03) != 0
                 && (other.sync01 & sync04) != 0;
         }
-
+        
         public void Insert(int idx)
         {
             if (idx < 32)

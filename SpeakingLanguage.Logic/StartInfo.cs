@@ -8,6 +8,8 @@ namespace SpeakingLanguage.Logic
         public long startTick;
         public int startFrame;
 
+        public int default_objectcount;
+
         public int max_byte_objectcollection;
         public int max_byte_streamer;
 

@@ -15,7 +15,7 @@ namespace SpeakingLanguage.Logic
                 var pSelf = objIter.Current;
                 var selfStateSync = StateSync.Create(pSelf->GetEnumerator());
 
-                Library.umnChunk** stateChks = stackalloc Library.umnChunk*[128];
+                Library.umnChunk** selfStateLookup = stackalloc Library.umnChunk*[128];
 
                 var stateIter = pSelf->GetEnumerator();
                 var stateTypeHandle = -1;
@@ -26,12 +26,12 @@ namespace SpeakingLanguage.Logic
                         continue;
 
                     stateTypeHandle = chk->typeHandle;
-                    stateChks[stateTypeHandle] = chk;
+                    selfStateLookup[stateTypeHandle] = chk;
                 }
 
                 var actionCtx = new ActionContext
                 {
-                    subject = new StateContext(pSelf->handle, stateChks),
+                    subject = colObj.GetStateManager(pSelf, selfStateLookup),
                     delta = service.frameManager.Delta,
                 };
 
@@ -55,18 +55,11 @@ namespace SpeakingLanguage.Logic
                     continue;
                 }
 
-                var dupStateFlag = DupStateSync.Create(pSubject->GetEnumerator(), pTarget->GetEnumerator());
+                var dupStateSync = new DupStateSync();
 
                 Library.umnChunk** subjectStateChks = stackalloc Library.umnChunk*[128];
                 Library.umnChunk** targetStateChks = stackalloc Library.umnChunk*[128];
-
-                var subjectStateIter = pSubject->GetEnumerator();
-                while (subjectStateIter.MoveNext())
-                {
-                    var chk = subjectStateIter.Current;
-                    subjectStateChks[chk->typeHandle] = chk;
-                }
-
+                
                 var subjectIter = pSubject->GetEnumerator();
                 var subjectStateTypeHandle = -1;
                 while (subjectIter.MoveNext())
@@ -77,6 +70,8 @@ namespace SpeakingLanguage.Logic
 
                     subjectStateTypeHandle = chk->typeHandle;
                     subjectStateChks[subjectStateTypeHandle] = chk;
+
+                    dupStateSync.subject.Insert(subjectStateTypeHandle);
                 }
 
                 var targetStateIter = pTarget->GetEnumerator();
@@ -89,16 +84,22 @@ namespace SpeakingLanguage.Logic
 
                     targetStateTypeHandle = chk->typeHandle;
                     targetStateChks[targetStateTypeHandle] = chk;
+
+                    dupStateSync.target.Insert(subjectStateTypeHandle);
                 }
 
+                using (var subject = colObj.GetStateManager(pSubject, subjectStateChks),
+                        var target = colObj.GetStateManager(pTarget, targetStateChks))
                 var actionCtx = new ActionContext
                 {
-                    subject = new StateContext(stInter.lhs, subjectStateChks),
-                    target = new StateContext(stInter.rhs, targetStateChks),
                     delta = service.frameManager.Delta,
                 };
 
-                colAct.InvokeComplex(ref actionCtx, ref dupStateFlag);
+                // 각자는 아직 self를 진행하지 않았다면 진행해야 한다.
+                colAct.InvokeSelf(ref actionCtx, ref dupStateSync.subject);
+                //colAct.InvokeSelf(ref actionCtx, ref dupStateSync.target);
+
+                colAct.InvokeComplex(ref actionCtx, ref dupStateSync);
             }
 
             requester.Dispose();

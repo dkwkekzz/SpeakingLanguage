@@ -28,7 +28,7 @@ namespace SpeakingLanguage.Library
         {
             comparer = new TComparer();
             buckets = new umnArray<int>(bucketChk);
-            for (int i = 0; i < buckets.Length; i++) *(buckets[i]) = -1;
+            for (int i = 0; i < size; i++) *(buckets[i]) = -1;
             entries = new umnArray<HashEntry>(entryChk);
             maxLength = size;
             count = 0;
@@ -70,7 +70,7 @@ namespace SpeakingLanguage.Library
         {
             if (count > 0)
             {
-                for (int i = 0; i < buckets.Length; i++) *buckets[i] = -1;
+                for (int i = 0; i < maxLength; i++) *buckets[i] = -1;
                 entries.Clear();
                 freeList = -1;
                 count = 0;
@@ -187,6 +187,7 @@ namespace SpeakingLanguage.Library
             entry->next = *(buckets[targetBucket]);
             entry->key = key;
             entry->value = value;
+            *buckets[targetBucket] = index;
         }
 
         private void _resize(int newSize)

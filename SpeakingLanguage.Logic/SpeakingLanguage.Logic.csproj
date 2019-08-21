@@ -46,8 +46,10 @@
     <Compile Include="Action\ActionContext.cs" />
     <Compile Include="Action\slAction.cs" />
     <Compile Include="Attribute\TargetAttribute.cs" />
+    <Compile Include="Object\slObjectEqualityComparer.cs" />
     <Compile Include="Object\slObjectComparer.cs" />
     <Compile Include="Object\slObjectHandle.cs" />
+    <Compile Include="Object\StateManager.cs" />
     <Compile Include="StateCollection.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Interactor.cs" />
@@ -62,7 +64,6 @@
     <Compile Include="_old\Executor\Factory.cs" />
     <Compile Include="_old\Executor\Interaction.cs" />
     <Compile Include="_old\InteractContext.cs" />
-    <Compile Include="_old\Structure\slObject2.cs" />
     <Compile Include="Action\ActionCollection.cs" />
     <Compile Include="_old\Define.cs" />
     <Compile Include="State\LifeCycle.cs" />
@@ -103,6 +104,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="_old\Public\" />
+    <Folder Include="_old\Structure\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

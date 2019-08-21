@@ -5,14 +5,14 @@ namespace SpeakingLanguage.Logic
 {
     public unsafe struct StateContext
     {
-        private slObjectHandle handle;
+        private slObject2* owner;
         private Library.umnChunk** stateChks;
 
-        public slObjectHandle Handle => handle;
+        public slObjectHandle Handle => owner->handle;
 
-        public StateContext(slObjectHandle hd, Library.umnChunk** chks)
+        public StateContext(slObject2* obj, Library.umnChunk** chks)
         {
-            handle = hd;
+            owner = obj;
             stateChks = chks;
         }
 

@@ -123,7 +123,6 @@ namespace Test
                 {
                     var st1 = (ProjectileStruct*)(buffer + i * sz);
                     UpdateProjectile(st1, 0.5f);
-                    *(ProjectileStruct*)(backBuffer + i * sz) = *st1;
                 }
 
                 for (int i = 0; i != count; i++)

@@ -1,13 +1,14 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace SpeakingLanguage.Library
 {
-    public unsafe struct umnArray<T> : IDisposable
+    public unsafe struct umnArray<T> : IEnumerable, IDisposable
         where T : unmanaged
     {
-        public struct Enumerator
+        public struct Enumerator : IEnumerator
         {
             private readonly umnChunk* _chk;
             private readonly int _capacity;
@@ -23,6 +24,7 @@ namespace SpeakingLanguage.Library
             }
 
             public T* Current => (T*)(_chk->Ptr + _ofs);
+            object IEnumerator.Current => *Current;
 
             public bool MoveNext()
             {
@@ -48,9 +50,6 @@ namespace SpeakingLanguage.Library
         {
             get
             {
-                if (Length <= index)
-                    return null;
-
                 var ofs = index * _szElement;
                 return (T*)(_chk->Ptr + ofs);
             }
@@ -94,6 +93,11 @@ namespace SpeakingLanguage.Library
         public Enumerator GetEnumerator()
         {
             return new Enumerator(_chk, Length);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
 
         public T* PushBack(T* e)
