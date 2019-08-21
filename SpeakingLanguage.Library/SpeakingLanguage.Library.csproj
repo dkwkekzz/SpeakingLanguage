@@ -51,10 +51,13 @@
     <Compile Include="AssemblyHelper.cs" />
     <Compile Include="BoxedWriter.cs" />
     <Compile Include="Collection\IumnAllocator.cs" />
+    <Compile Include="Collection\IumnEqualityComparer.cs" />
     <Compile Include="Collection\IumnComparer.cs" />
     <Compile Include="Collection\IumnFactory.cs" />
     <Compile Include="Collection\umnBidChunk.cs" />
     <Compile Include="Collection\umnFactory.cs" />
+    <Compile Include="Collection\umnHashMap.cs" />
+    <Compile Include="Collection\umnStack.cs" />
     <Compile Include="Collection\umnSplayBTKeyValue.cs" />
     <Compile Include="Collection\umnSplayBTKey.cs" />
     <Compile Include="Collection\umnDynamicArray.cs" />
@@ -64,6 +67,7 @@
     <Compile Include="Collection\umnHeap.cs" />
     <Compile Include="Collection\umnMarshal.cs" />
     <Compile Include="Collection\umnSize.cs" />
+    <Compile Include="HashHelper.cs" />
     <Compile Include="TypeCollection.cs" />
     <Compile Include="SerializeHelper.cs" />
     <Compile Include="BitConverter.cs" />

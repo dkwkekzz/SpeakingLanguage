@@ -31,12 +31,9 @@ namespace SpeakingLanguage.Event
         public EventCollection(Library.umnChunk* chk)
         {
             _heap = new Library.umnHeap(chk);
-            fixed (Library.umnHeap* ph = &_heap)
-            {
-                _arrChangeView = Library.umnArray<ChangeView>.AllocateNew(ph, 100);
-                _arrController = Library.umnArray<Controller>.AllocateNew(ph, 100);
-                _arrInteraction = Library.umnArray<Interaction>.AllocateNew(ph, 100);
-            }
+            _arrChangeView = Library.umnArray<ChangeView>.CreateNew(ref _heap, 100);
+            _arrController = Library.umnArray<Controller>.CreateNew(ref _heap, 100);
+            _arrInteraction = Library.umnArray<Interaction>.CreateNew(ref _heap, 100);
         }
         
         public void Insert(ChangeView st)

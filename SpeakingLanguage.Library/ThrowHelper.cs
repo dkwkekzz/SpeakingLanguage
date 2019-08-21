@@ -53,5 +53,10 @@ namespace SpeakingLanguage.Library
         {
             throw new StateOverflowException(msg);
         }
+
+        public static void ThrowWrongArgument(string msg = "")
+        {
+            throw new ArgumentException(msg);
+        }
     }
 }

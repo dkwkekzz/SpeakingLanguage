@@ -48,7 +48,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="TestComparer.cs" />
+    <None Include="TestComparer.cs" />
+    <Compile Include="TestSwapBuffer.cs" />
     <None Include="TestTable.cs" />
     <None Include="TestAttribute.cs" />
     <None Include="TestClassStruct.cs" />

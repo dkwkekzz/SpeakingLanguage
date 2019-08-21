@@ -40,7 +40,7 @@ namespace SpeakingLanguage.Library
 
         private readonly umnChunk* _chk;
         private readonly int _szElement;
-
+        
         public int Capacity { get; }
         public int Length { get; private set; }
 
@@ -48,6 +48,9 @@ namespace SpeakingLanguage.Library
         {
             get
             {
+                if (Length <= index)
+                    return null;
+
                 var ofs = index * _szElement;
                 return (T*)(_chk->Ptr + ofs);
             }
@@ -59,11 +62,11 @@ namespace SpeakingLanguage.Library
             }
         }
         
-        public static umnArray<T> AllocateNew<TAllocator>(TAllocator* allocator, int maxLength)
+        public static umnArray<T> CreateNew<TAllocator>(ref TAllocator allocator, int maxLength)
             where TAllocator : unmanaged, IumnAllocator
         {
             var sz = sizeof(T);
-            var chk = allocator->Calloc(maxLength * sz);
+            var chk = allocator.Calloc(maxLength * sz);
             return new umnArray<T>(chk);
         }
 
@@ -75,7 +78,19 @@ namespace SpeakingLanguage.Library
 
             Capacity = chk->Length;
         }
-        
+
+        public void Clear()
+        {
+            Length = 0;
+        }
+
+        public void CClear()
+        {
+            var ptr = umnChunk.GetPtr(_chk).ToPointer();
+            UnmanagedHelper.Memset(ptr, 0, _chk->Length);
+            Length = 0;
+        }
+
         public Enumerator GetEnumerator()
         {
             return new Enumerator(_chk, Length);

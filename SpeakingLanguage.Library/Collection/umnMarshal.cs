@@ -6,16 +6,25 @@ namespace SpeakingLanguage.Library
 {
     public unsafe struct umnMarshal : IumnAllocator, IDisposable
     {
-        private IntPtr _root;
-
+        private umnChunk* _headChk;
+        
         public umnChunk* Alloc(int size)
         {
-            _root = Marshal.AllocHGlobal(size + umnSize.umnChunk * 2);
-
-            var chk = (umnChunk*)_root;
-            chk->next = (umnChunk*)(_root + umnSize.umnChunk + size);
-
-            return chk;
+            umnChunk* chk = null;
+            if (null == _headChk)
+            {
+                var ptr = Marshal.AllocHGlobal(size + umnSize.umnChunk * 2);
+                chk = (umnChunk*)ptr;
+                chk->next = (umnChunk*)(ptr + umnSize.umnChunk + size);
+            }
+            else
+            {
+                var ptr = Marshal.AllocHGlobal(size + umnSize.umnChunk);
+                chk = (umnChunk*)ptr;
+                chk->next = _headChk;
+            }
+            
+            return _headChk = chk;
         }
 
         public umnChunk* Calloc(int size)
@@ -30,7 +39,14 @@ namespace SpeakingLanguage.Library
 
         public void Dispose()
         {
-            Marshal.FreeHGlobal(_root);
+            var chk = _headChk;
+            while (null != chk)
+            {
+                var ptr = (IntPtr)chk;
+                Marshal.FreeHGlobal(ptr);
+
+                chk = chk->next;
+            }
         }
     }
 }
