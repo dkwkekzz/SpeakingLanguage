@@ -5,8 +5,8 @@ namespace SpeakingLanguage.Logic
 {
     public struct ActionContext
     {
-        public ObjectCollection2.StateManager subject;
-        public ObjectCollection2.StateManager target;
+        public StateManager subject;
+        public StateManager target;
         public int delta;
     }
 }

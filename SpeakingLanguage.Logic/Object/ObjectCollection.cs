@@ -75,13 +75,7 @@ namespace SpeakingLanguage.Logic
         {
             return new Enumerator(_frontStack.Root);
         }
-
-        public StateManager GetStateManager(slObject2* obj, Library.umnChunk** stateLookup)
-        {
-            fixed (Library.umnStack* pSt = & _backStack)
-                return new StateManager(pSt, obj, stateLookup);
-        }
-
+        
         public void Dispose()
         {
             _umnAllocator.Dispose();
@@ -100,7 +94,13 @@ namespace SpeakingLanguage.Logic
             return _lookup[handle];
         }
 
-        public slObject2* InsertBack()
+        public void InsertBack(ref StateManager state)
+        {
+            _backStack.Push(state.ObjectPtr.ToPointer(), state.ObjectLength);
+            _backStack.Push(state.StackPtr.ToPointer(), state.StackOffset);
+        }
+
+        public slObject2* Create()
         {
             var pObj = slObject2.CreateNew(ref _backStack, GenerateHandle);
             _lookup.Add(&pObj->handle, pObj);
@@ -115,10 +115,6 @@ namespace SpeakingLanguage.Logic
             _stPool.Remove(obj->handle);
         }
 
-        public void Compact()
-        {
-            throw new NotImplementedException();
-        }
     }
 
     internal unsafe struct ObjectCollection

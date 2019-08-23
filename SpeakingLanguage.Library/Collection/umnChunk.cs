@@ -7,8 +7,10 @@ namespace SpeakingLanguage.Library
     {
         public umnChunk* next;
         public int typeHandle;
+        public int length;
 
         public static umnChunk* GetChunk(void* ptr) => (umnChunk*)((IntPtr)ptr - umnSize.umnChunk);
+        public static umnChunk* GetNext(umnChunk* chk) => (umnChunk*)((IntPtr)chk + umnSize.umnChunk + chk->length);
         public static IntPtr GetPtr(umnChunk* chk) => (IntPtr)chk + umnSize.umnChunk;
         public static T* GetPtr<T>(umnChunk* chk) where T : unmanaged => (T*)((IntPtr)chk + umnSize.umnChunk);
         public static int GetLength(umnChunk* chk) => (int)((long)chk->next - (long)chk->next) - umnSize.umnChunk;

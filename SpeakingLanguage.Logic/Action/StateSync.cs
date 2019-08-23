@@ -76,6 +76,14 @@ namespace SpeakingLanguage.Logic
             }
         }
 
+        public void Clear()
+        {
+            sync01 = 0;
+            sync02 = 0;
+            sync03 = 0;
+            sync04 = 0;
+        }
+
         public static StateSync Create<TEnumerator>(TEnumerator iter)
             where TEnumerator : IEnumerator<int>
         {

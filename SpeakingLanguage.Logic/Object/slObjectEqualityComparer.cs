@@ -7,12 +7,12 @@ namespace SpeakingLanguage.Logic
     {
         public bool Equals(slObjectHandle* x, slObjectHandle* y)
         {
-            return x->handle == y->handle;
+            return x->value == y->value;
         }
 
         public int GetHashCode(slObjectHandle* obj)
         {
-            return obj->handle;
+            return obj->value;
         }
     }
 }

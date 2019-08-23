@@ -5,17 +5,24 @@ namespace SpeakingLanguage.Logic
 {
     public unsafe struct StateManager : IDisposable
     {
-        private Library.umnStack* allocator;
-        private slObject2* owner;
-        private Library.umnChunk** stateLookup;
+        private readonly slObject2* owner;
+        private readonly Library.umnChunk** stateLookup;
+        private readonly IntPtr tempStackPtr;
+        private int tempOffset;
+
+        public IntPtr ObjectPtr => (IntPtr)owner;
+        public int ObjectLength => owner->capacity;
+        public IntPtr StackPtr => tempStackPtr;
+        public int StackOffset => tempOffset; 
 
         public slObjectHandle Handle => owner->handle;
 
-        public StateManager(Library.umnStack* alloc, slObject2* obj, Library.umnChunk** chks)
+        public StateManager(slObject2* obj, Library.umnChunk** chks, byte* stackPtr)
         {
-            allocator = alloc;
             owner = obj;
             stateLookup = chks;
+            tempStackPtr = (IntPtr)stackPtr;
+            tempOffset = 0;
         }
 
         public TState* Get<TState>() where TState : unmanaged
@@ -37,22 +44,23 @@ namespace SpeakingLanguage.Logic
             var ptr = Library.umnChunk.GetPtr<TState>(chk);
             *ptr = st;
         }
-
-        public TState* Add<TState>() where TState : unmanaged
-        {
-            var szObj = sizeof(TState);
-            var objChk = allocator->Calloc(szObj);
-            var objPtr = Library.umnChunk.GetPtr<TState>(objChk);
-            return objPtr;
-        }
-
+        
         public TState* Add<TState>(TState st) where TState : unmanaged
         {
             var szObj = sizeof(TState);
-            var objChk = allocator->Calloc(szObj);
-            var objPtr = Library.umnChunk.GetPtr<TState>(objChk);
-            *objPtr = st;
-            return objPtr;
+            var handle = StateCollection.GetStateHandle(typeof(TState)).key;
+            var objChk = new Library.umnChunk();
+            objChk.typeHandle = handle;
+            objChk.length = szObj;
+
+            *((Library.umnChunk*)(tempStackPtr + tempOffset)) = objChk;
+            tempOffset += sizeof(Library.umnChunk);
+
+            var stPtr = (TState*)(tempStackPtr + tempOffset);
+            *stPtr = st;
+            tempOffset += szObj;
+            
+            return stPtr;
         }
 
         public bool Remove<TState>() where TState : unmanaged
@@ -73,8 +81,7 @@ namespace SpeakingLanguage.Logic
                 var chk = iter.Current;
                 if (chk->Disposed) continue;
 
-                var backChk = allocator->Alloc(Library.umnChunk.GetLength(chk));
-                backChk->typeHandle = chk->typeHandle;
+
             }
         }
     }

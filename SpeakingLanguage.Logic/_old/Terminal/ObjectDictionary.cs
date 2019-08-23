@@ -15,7 +15,7 @@ namespace SpeakingLanguage.Logic
         {
             public int Compare(slObjectHandle* x, slObjectHandle* y)
             {
-                return x->handle.CompareTo(y->handle);
+                return x->value.CompareTo(y->value);
             }
         }
 

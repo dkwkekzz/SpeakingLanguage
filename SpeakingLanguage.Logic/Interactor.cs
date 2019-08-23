@@ -7,8 +7,6 @@ namespace SpeakingLanguage.Logic
     {
         public static unsafe void Execute(ref Service service)
         {
-            ref readonly var colAct = ref service.colAct;
-            ref readonly var colObj = ref service.colObj;
             var objIter = colObj.GetEnumerator();
             while (objIter.MoveNext())
             {
@@ -38,28 +36,28 @@ namespace SpeakingLanguage.Logic
                 colAct.InvokeSelf(ref actionCtx, ref selfStateSync);
             }
 
+            // line
+
+            ref readonly var colAct = ref service.colAct;
+            ref readonly var colObj = ref service.colObj;
+            var currentFrame = service.frameManager.FrameCount;
+
             var requester = service.GetRequester<Interaction>();
-            while (requester.TryPop(out Interaction stInter))
+            
+            var exist = requester.TryPop(out Interaction stInter);
+            while (exist)
             {
-                var pSubject = colObj.Find(stInter.lhs);
+                var selectedSubjectHandle = stInter.lhs;
+                var pSubject = colObj.Find(selectedSubjectHandle);
                 if (null == pSubject)
                 {
-                    Library.Tracer.Error($"no found subject with handle at streaming: {stInter.lhs.ToString()}");
-                    continue;
-                }
-
-                var pTarget = colObj.Find(stInter.rhs);
-                if (null == pTarget)
-                {
-                    Library.Tracer.Error($"no found target with handle at streaming: {stInter.rhs.ToString()}");
+                    Library.Tracer.Error($"no found subject with handle at streaming: {selectedSubjectHandle.ToString()}");
                     continue;
                 }
 
                 var dupStateSync = new DupStateSync();
 
-                Library.umnChunk** subjectStateChks = stackalloc Library.umnChunk*[128];
-                Library.umnChunk** targetStateChks = stackalloc Library.umnChunk*[128];
-                
+                var subjectStateLookup = stackalloc Library.umnChunk*[128];
                 var subjectIter = pSubject->GetEnumerator();
                 var subjectStateTypeHandle = -1;
                 while (subjectIter.MoveNext())
@@ -69,39 +67,59 @@ namespace SpeakingLanguage.Logic
                         continue;
 
                     subjectStateTypeHandle = chk->typeHandle;
-                    subjectStateChks[subjectStateTypeHandle] = chk;
+                    subjectStateLookup[subjectStateTypeHandle] = chk;
 
                     dupStateSync.subject.Insert(subjectStateTypeHandle);
                 }
 
-                var targetStateIter = pTarget->GetEnumerator();
-                var targetStateTypeHandle = -1;
-                while (targetStateIter.MoveNext())
-                {
-                    var chk = targetStateIter.Current;
-                    if (targetStateTypeHandle == chk->typeHandle)
-                        continue;
-
-                    targetStateTypeHandle = chk->typeHandle;
-                    targetStateChks[targetStateTypeHandle] = chk;
-
-                    dupStateSync.target.Insert(subjectStateTypeHandle);
-                }
-
-                using (var subject = colObj.GetStateManager(pSubject, subjectStateChks),
-                        var target = colObj.GetStateManager(pTarget, targetStateChks))
+                byte* subjectStateStack = stackalloc byte[1024];
                 var actionCtx = new ActionContext
                 {
+                    subject = new StateManager(pSubject, subjectStateLookup, subjectStateStack),
                     delta = service.frameManager.Delta,
                 };
 
-                // 각자는 아직 self를 진행하지 않았다면 진행해야 한다.
                 colAct.InvokeSelf(ref actionCtx, ref dupStateSync.subject);
-                //colAct.InvokeSelf(ref actionCtx, ref dupStateSync.target);
 
-                colAct.InvokeComplex(ref actionCtx, ref dupStateSync);
+                do
+                {
+                    var selectedTargetHandle = stInter.rhs;
+                    var pTarget = colObj.Find(selectedTargetHandle);
+                    if (null == pTarget)
+                    {
+                        Library.Tracer.Error($"no found target with handle at streaming: {selectedTargetHandle.ToString()}");
+                        continue;
+                    }
+
+                    dupStateSync.target.Clear();
+
+                    var targetStateLookup = stackalloc Library.umnChunk*[128];
+                    var targetStateIter = pTarget->GetEnumerator();
+                    var targetStateTypeHandle = -1;
+                    while (targetStateIter.MoveNext())
+                    {
+                        var chk = targetStateIter.Current;
+                        if (targetStateTypeHandle == chk->typeHandle)
+                            continue;
+
+                        targetStateTypeHandle = chk->typeHandle;
+                        targetStateLookup[targetStateTypeHandle] = chk;
+
+                        dupStateSync.target.Insert(subjectStateTypeHandle);
+                    }
+
+                    byte* targetStateStack = stackalloc byte[1024];
+                    actionCtx.target = new StateManager(pTarget, targetStateLookup, targetStateStack);
+                    
+                    colAct.InvokeComplex(ref actionCtx, ref dupStateSync);
+
+                    exist = requester.TryPop(out stInter);
+                }
+                while (selectedSubjectHandle.Equals(stInter.lhs));
+
+                colObj.InsertBack(ref actionCtx.subject);
             }
-
+            
             requester.Dispose();
         }
     }

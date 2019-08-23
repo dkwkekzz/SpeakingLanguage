@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Logic
 {
-    public unsafe struct slObject2 : IDisposable
+    public unsafe struct slObject2
     {
         public struct Enumerator : IEnumerator<int>
         {
@@ -16,10 +16,13 @@ namespace SpeakingLanguage.Logic
             int IEnumerator<int>.Current => cur->typeHandle;
             object IEnumerator.Current => cur->typeHandle;
 
-            public Enumerator(Library.umnChunk* chk)
+            public Enumerator(ref slObject2 obj)
             {
-                root = chk;
-                cur = null;
+                fixed (slObject2* pObj = &obj)
+                {
+                    root = (Library.umnChunk*)((IntPtr)pObj + sizeof(slObject2));
+                    cur = null;
+                }
             }
 
             public void Dispose()
@@ -40,11 +43,9 @@ namespace SpeakingLanguage.Logic
                 cur = null;
             }
         }
-
-        private Library.umnChunk* _root;
-        private Library.umnChunk* _head;
-
+        
         public slObjectHandle handle;
+        public int capacity;
         
         public static slObject2* CreateNew<TAllocator>(ref TAllocator allocator, int handle)
             where TAllocator : unmanaged, Library.IumnAllocator
@@ -52,9 +53,8 @@ namespace SpeakingLanguage.Logic
             var szObj = sizeof(slObject2);
             var objChk = allocator.Alloc(szObj);
             var objPtr = Library.umnChunk.GetPtr<slObject2>(objChk);
-            objPtr->_root = objChk;
-            objPtr->_head = objChk;
             objPtr->handle = handle;
+            objPtr->capacity = 0;
 
             return objPtr;
         }
@@ -62,6 +62,7 @@ namespace SpeakingLanguage.Logic
         public void Reset(int handle)
         {
             this.handle = handle;
+            capacity = 0;
         }
 
         public void Release()
@@ -71,118 +72,12 @@ namespace SpeakingLanguage.Logic
 
         public Enumerator GetEnumerator()
         {
-            return new Enumerator(_head);
+            return new Enumerator(ref this);
         }
         
-        public void Link(Library.umnChunk* chk)
+        public void Append(Library.umnChunk* chk)
         {
-            _head->next = chk;
-            _head = chk;
-        }
-
-        public TState* AddState<TState>() where TState : unmanaged
-        {
-            int sz = sizeof(TState);
-            var type = typeof(TState);
-            var ptr = _addImpl(sz, type);
-            return (TState*)ptr;
-        }
-
-        public TState* AddState<TState>(TState e) where TState : unmanaged
-        {
-            int sz = sizeof(TState);
-            var type = typeof(TState);
-            var ptr = _addImpl(sz, type);
-            Buffer.MemoryCopy(&e, ptr.ToPointer(), sz, sz);
-            return (TState*)ptr;
-        }
-
-        private IntPtr _addImpl(int sz, Type type)
-        {
-            var chk = _block.Calloc(sz);
-            if (null == chk)
-                Library.ThrowHelper.ThrowOutOfMemory($"in object inner heap\ncapacity:{_block.Capacity.ToString()}");
-
-            var typeHandle = StateCollection.GetStateHandle(type).key;
-            chk->typeHandle = typeHandle;
-
-            if (_root == null)
-            {
-                _root = chk;
-                return Library.umnChunk.GetPtr(chk);
-            }
-
-            Library.umnChunk* prev = null;
-            Library.umnChunk* cur = _root;
-            while (null != cur)
-            {
-                if (cur->typeHandle > typeHandle)
-                    break;
-
-                prev = cur;
-                cur = cur->next;
-            }
-
-            if (null != prev)
-                prev->next = chk;
-            chk->next = cur;
-
-            return Library.umnChunk.GetPtr(chk);
-        }
-
-        public bool RemoveEntity<TState>()
-        {
-            var typeHandle = StateCollection.GetStateHandle(typeof(TState)).key;
-            var chk = _getStateChunk(typeHandle, _root);
-            if (chk == null)
-                return false;
-
-            chk->Disposed = true;
-            return true;
-        }
-
-        public void SetState<TState>(TState* src, TState value) where TState : unmanaged
-        {
-            var sz = sizeof(TState);
-            Buffer.MemoryCopy(&value, src, sz, sz);
-        }
-
-        public TState* GetState<TState>() where TState : unmanaged
-        {
-            var typeHandle = StateCollection.GetStateHandle(typeof(TState)).key;
-            var chk = _getStateChunk(typeHandle, _root);
-            if (chk == null)
-                return null;
-
-            return (TState*)chk->Ptr;
-        }
-
-        public TState* GetState<TState>(Library.umnChunk* startChk) where TState : unmanaged
-        {
-            var typeHandle = StateCollection.GetStateHandle(typeof(TState)).key;
-            var chk = _getStateChunk(typeHandle, startChk);
-            if (chk == null)
-                return null;
-
-            return (TState*)chk->Ptr;
-        }
-
-        private Library.umnChunk* _getStateChunk(int typeHandle, Library.umnChunk* head)
-        {
-            while (null != head)
-            {
-                if (head->typeHandle == typeHandle)
-                    return head;
-
-                head = head->next;
-            }
-
-            return null;
-        }
-
-        public void Dispose()
-        {
-            _block.Dispose();
+            capacity += sizeof(Library.umnChunk) + chk->length;
         }
     }
 
