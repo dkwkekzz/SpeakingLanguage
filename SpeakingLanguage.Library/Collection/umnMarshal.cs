@@ -15,15 +15,22 @@ namespace SpeakingLanguage.Library
             {
                 var ptr = Marshal.AllocHGlobal(size + umnSize.umnChunk * 2);
                 chk = (umnChunk*)ptr;
-                chk->next = (umnChunk*)(ptr + umnSize.umnChunk + size);
+                chk->length = size;
+
+                var endChk = umnChunk.GetNext(chk);
+                endChk->length = 0;
             }
             else
             {
-                var ptr = Marshal.AllocHGlobal(size + umnSize.umnChunk);
+                var ptr = Marshal.AllocHGlobal(size + umnSize.umnChunk * 2);
                 chk = (umnChunk*)ptr;
-                chk->next = _headChk;
+                chk->length = size;
+
+                var offsetFromHead = (long)_headChk - (long)ptr;
+                var endChk = umnChunk.GetNext(chk);
+                endChk->length = (int)offsetFromHead;
             }
-            
+
             return _headChk = chk;
         }
 
@@ -33,7 +40,8 @@ namespace SpeakingLanguage.Library
             if (null == chk)
                 return null;
 
-            UnmanagedHelper.Memset(chk->Ptr.ToPointer(), 0, size);
+            var ptr = umnChunk.GetPtr(chk);
+            UnmanagedHelper.Memset(ptr.ToPointer(), 0, size);
             return chk;
         }
 
@@ -45,7 +53,11 @@ namespace SpeakingLanguage.Library
                 var ptr = (IntPtr)chk;
                 Marshal.FreeHGlobal(ptr);
 
-                chk = chk->next;
+                var endChk = umnChunk.GetNext(chk);
+                if (endChk->length == 0)
+                    break;
+
+                chk = umnChunk.GetNext(endChk);
             }
         }
     }

@@ -23,7 +23,7 @@ namespace SpeakingLanguage.Library
                 _ofs = -_sz;
             }
 
-            public T* Current => (T*)(_chk->Ptr + _ofs);
+            public T* Current => (T*)(umnChunk.GetPtr(_chk) + _ofs);
             object IEnumerator.Current => *Current;
 
             public bool MoveNext()
@@ -51,12 +51,13 @@ namespace SpeakingLanguage.Library
             get
             {
                 var ofs = index * _szElement;
-                return (T*)(_chk->Ptr + ofs);
+                var ptr = umnChunk.GetPtr(_chk);
+                return (T*)(ptr + ofs);
             }
             set
             {
                 var ofs = index * _szElement;
-                var ptr = _chk->Ptr + ofs;
+                var ptr = umnChunk.GetPtr(_chk) + ofs;
                 Buffer.MemoryCopy(value, ptr.ToPointer(), _szElement, _szElement);
             }
         }
@@ -75,7 +76,7 @@ namespace SpeakingLanguage.Library
             _szElement = Marshal.SizeOf(typeof(T));
             Length = 0;
 
-            Capacity = chk->Length;
+            Capacity = chk->length;
         }
 
         public void Clear()
@@ -86,7 +87,7 @@ namespace SpeakingLanguage.Library
         public void CClear()
         {
             var ptr = umnChunk.GetPtr(_chk).ToPointer();
-            UnmanagedHelper.Memset(ptr, 0, _chk->Length);
+            UnmanagedHelper.Memset(ptr, 0, _chk->length);
             Length = 0;
         }
 
@@ -106,7 +107,7 @@ namespace SpeakingLanguage.Library
                 ThrowHelper.ThrowCapacityOverflow($"Capacity:{Capacity.ToString()}");
 
             var ofs = Length++ * _szElement;
-            var ptr = _chk->Ptr + ofs;
+            var ptr = umnChunk.GetPtr(_chk) + ofs;
             Buffer.MemoryCopy(e, ptr.ToPointer(), _szElement, _szElement);
             return (T*)ptr;
         }
@@ -117,7 +118,7 @@ namespace SpeakingLanguage.Library
                 ThrowHelper.ThrowCapacityOverflow($"Capacity:{Capacity.ToString()}");
 
             var ofs = Length++ * _szElement;
-            var ptr = _chk->Ptr + ofs;
+            var ptr = umnChunk.GetPtr(_chk) + ofs;
             UnmanagedHelper.MoveMemory(ptr.ToPointer(), e, _szElement);
             return (T*)ptr;
         }
@@ -128,7 +129,7 @@ namespace SpeakingLanguage.Library
                 ThrowHelper.ThrowCapacityOverflow($"Length:{Length.ToString()}");
 
             var ofs = --Length * _szElement;
-            return (T*)(_chk->Ptr + ofs);
+            return (T*)(umnChunk.GetPtr(_chk) + ofs);
         }
 
         public void Dispose()

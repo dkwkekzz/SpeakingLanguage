@@ -11,7 +11,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeakingLanguage.Logic", "S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeakingLanguage.Table", "SpeakingLanguage.Table\SpeakingLanguage.Table.csproj", "{221DB2E7-9886-4C54-997E-489169872184}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeakingLanguage.Event", "SpeakingLanguage.Event\SpeakingLanguage.Event.csproj", "{EF42DED6-1110-4328-8A1B-A9570C9E6503}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeakingLanguage.Server", "SpeakingLanguage.Server\SpeakingLanguage.Server.csproj", "{4D99E343-5566-47AC-A05E-F763EF37DDCD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LiteNetLib", "LiteNetLib\LiteNetLib.csproj", "{719A66FE-AAF9-48B5-9426-569C25FE7B3A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeakingLanguage.ClientSample", "SpeakingLanguage.ClientSample\SpeakingLanguage.ClientSample.csproj", "{D384FEFE-47B2-4580-AF23-463A8826D80B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeakingLanguage.Protocol", "SpeakingLanguage.Protocol\SpeakingLanguage.Protocol.csproj", "{6B49CF0F-BA87-476A-805B-7B0AE5B662D8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +41,22 @@ Global
 		{221DB2E7-9886-4C54-997E-489169872184}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{221DB2E7-9886-4C54-997E-489169872184}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{221DB2E7-9886-4C54-997E-489169872184}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EF42DED6-1110-4328-8A1B-A9570C9E6503}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EF42DED6-1110-4328-8A1B-A9570C9E6503}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EF42DED6-1110-4328-8A1B-A9570C9E6503}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EF42DED6-1110-4328-8A1B-A9570C9E6503}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D99E343-5566-47AC-A05E-F763EF37DDCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D99E343-5566-47AC-A05E-F763EF37DDCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D99E343-5566-47AC-A05E-F763EF37DDCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D99E343-5566-47AC-A05E-F763EF37DDCD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{719A66FE-AAF9-48B5-9426-569C25FE7B3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{719A66FE-AAF9-48B5-9426-569C25FE7B3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{719A66FE-AAF9-48B5-9426-569C25FE7B3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{719A66FE-AAF9-48B5-9426-569C25FE7B3A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D384FEFE-47B2-4580-AF23-463A8826D80B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D384FEFE-47B2-4580-AF23-463A8826D80B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D384FEFE-47B2-4580-AF23-463A8826D80B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D384FEFE-47B2-4580-AF23-463A8826D80B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B49CF0F-BA87-476A-805B-7B0AE5B662D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B49CF0F-BA87-476A-805B-7B0AE5B662D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B49CF0F-BA87-476A-805B-7B0AE5B662D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B49CF0F-BA87-476A-805B-7B0AE5B662D8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Logic
 {
-    public unsafe struct slObjectEqualityComparer : Library.IumnEqualityComparer<slObjectHandle>
+    internal unsafe struct slObjectEqualityComparer : Library.IumnEqualityComparer<slObjectHandle>
     {
         public bool Equals(slObjectHandle* x, slObjectHandle* y)
         {

@@ -50,11 +50,12 @@ namespace SpeakingLanguage.Library
             if (null == chk)
                 return null;
 
-            UnmanagedHelper.Memset(chk->Ptr.ToPointer(), 0, size);
+            var ptr = umnChunk.GetPtr(chk);
+            UnmanagedHelper.Memset(ptr.ToPointer(), 0, size);
             return chk;
         }
         
-        public void Push(void* src, int size)
+        public void* Push(void* src, int size)
         {
             var szChk = umnSize.umnChunk;
             var remained = _rootChk->length - _head;
@@ -64,6 +65,20 @@ namespace SpeakingLanguage.Library
             var dest = (_rootPtr + _head).ToPointer();
             Buffer.MemoryCopy(src, dest, size, size);
             _head += size;
+            return dest;
+        }
+
+        public void* Push(ref Reader reader, int size)
+        {
+            var szChk = umnSize.umnChunk;
+            var remained = _rootChk->length - _head;
+            if (remained < size)
+                ThrowHelper.ThrowOutOfMemory("at umnStack::PushBack");
+
+            var dest = (_rootPtr + _head).ToPointer();
+            reader.ReadMemory(dest, size);
+            _head += size;
+            return dest;
         }
 
         public void CopyTo(void* dest)

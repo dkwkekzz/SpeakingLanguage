@@ -13,3 +13,13 @@ D:\develop\MyProject\SpeakingLanguage\SpeakingLanguage.Logic\obj\Debug\SpeakingL
 D:\develop\MyProject\SpeakingLanguage\SpeakingLanguage.Logic\obj\Debug\SpeakingLanguage.Logic.csproj.CoreCompileInputs.cache
 D:\develop\MyProject\SpeakingLanguage\SpeakingLanguage.Logic\obj\Debug\SpeakingLanguage.Logic.dll
 D:\develop\MyProject\SpeakingLanguage\SpeakingLanguage.Logic\obj\Debug\SpeakingLanguage.Logic.pdb
+D:\develop\myProject2\SpeakingLanguage\SpeakingLanguage.Logic\obj\Debug\SpeakingLanguage.Logic.csprojAssemblyReference.cache
+D:\develop\myProject2\SpeakingLanguage\SpeakingLanguage.Logic\obj\Debug\SpeakingLanguage.Logic.csproj.CoreCompileInputs.cache
+D:\develop\myProject2\SpeakingLanguage\SpeakingLanguage.Logic\obj\Debug\SpeakingLanguage.Logic.dll
+D:\develop\myProject2\SpeakingLanguage\SpeakingLanguage.Logic\obj\Debug\SpeakingLanguage.Logic.pdb
+D:\develop\myProject2\SpeakingLanguage\SpeakingLanguage.Logic\bin\Debug\SpeakingLanguage.Logic.dll
+D:\develop\myProject2\SpeakingLanguage\SpeakingLanguage.Logic\bin\Debug\SpeakingLanguage.Logic.pdb
+D:\develop\myProject2\SpeakingLanguage\SpeakingLanguage.Logic\bin\Debug\SpeakingLanguage.Library.dll
+D:\develop\myProject2\SpeakingLanguage\SpeakingLanguage.Logic\bin\Debug\Newtonsoft.Json.dll
+D:\develop\myProject2\SpeakingLanguage\SpeakingLanguage.Logic\bin\Debug\SpeakingLanguage.Library.pdb
+D:\develop\myProject2\SpeakingLanguage\SpeakingLanguage.Logic\obj\Debug\SpeakingLanguage.Logic.csproj.CopyComplete

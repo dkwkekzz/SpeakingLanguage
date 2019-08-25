@@ -43,58 +43,39 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Action\ActionContext.cs" />
+    <Compile Include="Action\slActionContext.cs" />
     <Compile Include="Action\slAction.cs" />
-    <Compile Include="Attribute\TargetAttribute.cs" />
+    <Compile Include="Action\Attribute\TargetAttribute.cs" />
+    <Compile Include="Event\ChangeView.cs" />
+    <Compile Include="Event\Controller.cs" />
+    <Compile Include="Event\DataList.cs" />
+    <Compile Include="EventManager.cs" />
+    <Compile Include="Event\IEventData.cs" />
+    <Compile Include="Event\InteractionComparer.cs" />
+    <Compile Include="Event\InteractionGraph.cs" />
     <Compile Include="Object\slObjectEqualityComparer.cs" />
     <Compile Include="Object\slObjectComparer.cs" />
     <Compile Include="Object\slObjectHandle.cs" />
-    <Compile Include="Object\StateManager.cs" />
+    <Compile Include="Object\slObjectContext.cs" />
+    <Compile Include="Perform\Factory.cs" />
     <Compile Include="StateCollection.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="Interactor.cs" />
-    <Compile Include="Interaction.cs" />
+    <Compile Include="Perform\Interactor.cs" />
+    <Compile Include="Event\Interaction.cs" />
     <Compile Include="Service.cs" />
-    <Compile Include="Action\StateContext.cs" />
-    <Compile Include="Action\DupStateSync.cs" />
-    <Compile Include="Action\StateSync.cs" />
+    <Compile Include="State\DupStateSync.cs" />
+    <Compile Include="State\StateSync.cs" />
     <Compile Include="State\Spawner.cs" />
-    <Compile Include="_old\Streamer.cs" />
     <Compile Include="TestSpace.cs" />
-    <Compile Include="_old\Executor\Factory.cs" />
-    <Compile Include="_old\Executor\Interaction.cs" />
-    <Compile Include="_old\InteractContext.cs" />
-    <Compile Include="Action\ActionCollection.cs" />
-    <Compile Include="_old\Define.cs" />
+    <Compile Include="Action\slActionCollection.cs" />
     <Compile Include="State\LifeCycle.cs" />
-    <Compile Include="Object\ObjectCollection.cs" />
-    <Compile Include="_old\Event\SelfInteraction.cs" />
-    <Compile Include="_old\Event\SimpleInteraction.cs" />
-    <Compile Include="_old\Event\Transform.cs" />
-    <Compile Include="_old\Terminal\ObjectDictionary.cs" />
-    <Compile Include="_old\CellDictionary.cs" />
-    <Compile Include="FrameManager.cs" />
-    <Compile Include="_old\BinaryCommand.cs" />
-    <Compile Include="Attribute\FrameAttribute.cs" />
-    <Compile Include="Action\InteractAction.cs" />
-    <Compile Include="_old\ICommander.cs" />
-    <Compile Include="_old\IEntityManager.cs" />
-    <Compile Include="_old\Provider.cs" />
+    <Compile Include="Object\slObjectCollection.cs" />
+    <Compile Include="Action\Attribute\FrameAttribute.cs" />
     <Compile Include="Object\slObject.cs" />
-    <Compile Include="Attribute\SubjectAttribute.cs" />
-    <Compile Include="_old\IPublicContext.cs" />
+    <Compile Include="Action\Attribute\SubjectAttribute.cs" />
     <Compile Include="State\IState.cs" />
     <Compile Include="StartInfo.cs" />
-    <Compile Include="_old\StateValue.cs" />
-    <Compile Include="_old\WorldActor.cs" />
-    <Compile Include="_old\FrontStack.cs" />
-    <Compile Include="_old\Terminal\Locator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="_old\sCell.cs" />
-    <Compile Include="_old\sCellComparer.cs" />
-    <Compile Include="_old\sCellNode.cs" />
-    <Compile Include="_old\sCellNodeComparer.cs" />
-    <Compile Include="_old\Executor\World.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SpeakingLanguage.Library\SpeakingLanguage.Library.csproj">
@@ -102,9 +83,6 @@
       <Name>SpeakingLanguage.Library</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="_old\Public\" />
-    <Folder Include="_old\Structure\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

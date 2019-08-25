@@ -55,9 +55,13 @@ namespace SpeakingLanguage.Library
                 ThrowHelper.ThrowKeyNotFound();
                 return null;
             }
+        }
+
+        public TValue* this[TKey* key]
+        {
             set
             {
-                _insert(&key, value, false);
+                _insert(key, value, false);
             }
         }
 

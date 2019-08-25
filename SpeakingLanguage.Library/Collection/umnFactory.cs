@@ -71,7 +71,7 @@ namespace SpeakingLanguage.Library
             else
             {
                 var chk = _allocator->Alloc(_szNode + umnSize.umnFactoryPtr);
-                cur = (umnFactoryPtr*)chk->Ptr;
+                cur = umnChunk.GetPtr<umnFactoryPtr>(chk);
             }
             
             _putTail(ref _used, ref cur);

@@ -13,21 +13,7 @@ namespace SpeakingLanguage.Logic.TestSpace
         public int value3;
         public int value4;
     }
-
-
-    class Eventer
-    {
-        [Logic.SubjectAttribute(typeof(Controller))]
-        public static unsafe void OnClientControl(ref Logic.ActionContext ctx)
-        {
-            var ctrl = ctx.subject.Get<Controller>()
-            if (hasEvent())
-            {
-                ctrl->value1 = 5;
-            }
-        }
-    }
-
+    
     class Health
     {
 

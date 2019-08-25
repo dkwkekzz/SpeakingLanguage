@@ -8,17 +8,16 @@ namespace SpeakingLanguage.Library
         private umnChunk* _rootChk;
         private umnChunk* _headChk;
 
-        public int Capacity => (int)((long)_rootChk->next - (long)_rootChk) - umnSize.umnChunk;
-
+        public int Capacity => _rootChk->length;
         public bool IsCreated => _rootChk != null;
-        public umnChunk* Root => (umnChunk*)((IntPtr)_rootChk + umnSize.umnChunk);
+        public umnChunk* Root => _rootChk;
         public long Offset => (long)_headChk - (long)_rootChk + umnSize.umnChunk;
 
         public umnHeap(umnChunk* chk)
         {
             _rootChk = chk;
             _headChk = _rootChk + umnSize.umnChunk;
-            _headChk->next = null;
+            _headChk->length = 0;
         }
 
         public void Reset()
@@ -29,26 +28,20 @@ namespace SpeakingLanguage.Library
         public umnChunk* Alloc(int size)
         {
             var szChk = umnSize.umnChunk;
-            var head = (long)_headChk;
-            var tail = (long)_rootChk->next;
+            var totalSize = size + szChk;
+            var remained = Offset;
+            if (remained < totalSize)
+                return null;
 
-            var remained = tail - head;
-            if (remained < size + szChk)
-            {
-                remained = _compactClean();
-                if (remained < size)
-                    return null;
-            }
-            
-            var endChk = (umnChunk*)(head + size);
-            endChk->next = null;
-            
-            var chk = _headChk;
-            chk->next = endChk;
-            
+            var headPtr = (IntPtr)_headChk;
+            var endChk = (umnChunk*)(headPtr + totalSize);
+            endChk->length = 0;
+
+            _headChk->length = size;
+
+            var curChk = _headChk;
             _headChk = endChk;
-
-            return chk;
+            return curChk;
         }
 
         public umnChunk* Calloc(int size)
@@ -57,7 +50,8 @@ namespace SpeakingLanguage.Library
             if (null == chk)
                 return null;
 
-            UnmanagedHelper.Memset(chk->Ptr.ToPointer(), 0, size);
+            var ptr = umnChunk.GetPtr(chk);
+            UnmanagedHelper.Memset(ptr.ToPointer(), 0, size);
             return chk;
         }
 

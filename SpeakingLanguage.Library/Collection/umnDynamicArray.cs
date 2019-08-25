@@ -30,7 +30,7 @@ namespace SpeakingLanguage.Library
             _root = umnChunk.GetPtr(chk);
             _head = _root;
             _EP = (long)_head;
-            Capacity = umnChunk.GetLength(chk);
+            Capacity = chk->length;
         }
 
         public void Clear()

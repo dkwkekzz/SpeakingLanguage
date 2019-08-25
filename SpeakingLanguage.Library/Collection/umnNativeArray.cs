@@ -22,7 +22,7 @@ namespace SpeakingLanguage.Library
         {
             _root = umnChunk.GetPtr(chk);
             _head = _root;
-            Capacity = umnChunk.GetLength( chk );
+            Capacity = chk->length;
         }
 
         public void Reset()

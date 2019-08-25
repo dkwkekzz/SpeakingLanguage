@@ -3,102 +3,77 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Logic
 {
-    public unsafe struct Service : IDisposable
+    public struct Service : IDisposable
     {
-        public struct Poster<TEvent>
-            where TEvent : unmanaged
-        {
-            private readonly Library.umnDynamicArray* pStreamer;
+        internal readonly slActionCollection colAct;
+        internal readonly slObjectCollection colObj;
 
-            public Poster(Library.umnDynamicArray* stream)
-            {
-                pStreamer = stream;
-                pStreamer->Entry<TEvent>();
-            }
-            
-            public void Push(TEvent st)
-            {
-                pStreamer->PushBack(&st);
-            }
+        // tick = ms / 10000
+        internal long CurrentTick => Library.Ticker.GlobalTicks;
+        internal long BeginTick { get; private set; }
+        internal int Delta { get; private set; }
+        internal int FrameRate { get; set; }
 
-            public void Push(TEvent* st)
-            {
-                pStreamer->PushBack(st);
-            }
-
-            public void Push(void* ptr, int len)
-            {
-                pStreamer->PushBack(ptr, len);
-            }
-        }
-
-        internal struct Requester<TEvent> : IDisposable 
-            where TEvent : unmanaged
-        {
-            private readonly Library.umnDynamicArray* pStreamer;
-
-            public Requester(Library.umnDynamicArray* stream)
-            {
-                pStreamer = stream;
-            }
-
-            public void Dispose()
-            {
-                pStreamer->Exit();
-            }
-
-            public bool TryPop(out TEvent stInter)
-            {
-                var pInter = pStreamer->PopBack<TEvent>();
-                if (null == pInter)
-                {
-                    stInter = default;
-                    return false;
-                }
-
-                stInter = *pInter;
-                return true;
-            }
-        }
-        
-        private readonly Library.umnMarshal umnAllocator;
-        private readonly Library.umnDynamicArray stEventStream;
-
-        internal readonly ActionCollection colAct;
-        internal readonly ObjectCollection2 colObj;
-        internal readonly FrameManager frameManager;
-        
         public Service(StartInfo info) : this(ref info)
         {
         }
 
         public Service(ref StartInfo info)
         {
-            umnAllocator = new Library.umnMarshal();
-            stEventStream = new Library.umnDynamicArray(umnAllocator.Calloc(info.max_byte_streamer));
+            colAct = new slActionCollection();
+            colObj = new slObjectCollection(info.default_objectcount);
 
-            colAct = new ActionCollection();
-            colObj = new ObjectCollection2(info.default_objectcount);
-            frameManager = new FrameManager(info.startFrame);
+            BeginTick = Library.Ticker.GlobalTicks;
+            Delta = 0;
+            FrameRate = info.default_frameRate;
         }
 
         public void Dispose()
         {
-            umnAllocator.Dispose();
+            colObj.Dispose();
         }
 
-        public Poster<TEvent> GetPoster<TEvent>()
-            where TEvent : unmanaged
+        public unsafe void SyncObject(ref Library.Reader reader)
         {
-            fixed (Library.umnDynamicArray* pStrm = &stEventStream)
-                return new Poster<TEvent>(pStrm);
+            var ret = reader.ReadInt(out int size);
+            if (!ret)
+            {
+                Library.Tracer.Error("fail to read.");
+                return;
+            }
+
+            colObj.InsertFront(ref reader, size);
         }
 
-        internal Requester<TEvent> GetRequester<TEvent>()
-            where TEvent : unmanaged
+        public unsafe void SyncObject(slObjectHandle handle, ref Library.Writer writer)
         {
-            fixed (Library.umnDynamicArray* pStrm = &stEventStream)
-                return new Requester<TEvent>(pStrm);
+            var obj = colObj.Find(handle);
+            if (obj == null)
+            {
+                Library.Tracer.Error($"no has object: {handle.ToString()}");
+                return;
+            }
+
+            var size = obj->capacity + sizeof(slObject);
+            writer.WriteInt(size);
+            writer.WriteMemory(obj, size);
+        }
+
+        internal void Begin()
+        {
+            Delta = (int)(CurrentTick - BeginTick);
+            BeginTick = CurrentTick;
+        }
+
+        internal void End()
+        {
+            colObj.SwapBuffer();
+
+            var frameTick = 1000 * 10000 / FrameRate;
+            var elapsed = (int)(CurrentTick - BeginTick);
+            var leg = elapsed - frameTick;
+
+            Library.Tracer.Write($"[Service Report] elapsed: {elapsed.ToString()}");
         }
     }
 }

@@ -5,15 +5,12 @@ namespace SpeakingLanguage.Logic
 {
     public struct StartInfo
     {
-        public long startTick;
-        public int startFrame;
-
+        public int port;
+        public int default_agentcount;
+        public int default_scenecount;
+        public int default_frameRate;
         public int default_objectcount;
-
-        public int max_byte_objectcollection;
-        public int max_byte_streamer;
-
-
+        
         // unused
         public int max_byte_world_service;
         public int max_byte_interact_service;
