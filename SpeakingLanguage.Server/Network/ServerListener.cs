@@ -39,8 +39,7 @@ namespace SpeakingLanguage.Server
         {
             Console.WriteLine($"[Server] Peer reveived: {peer.EndPoint}, count: {reader.AvailableBytes.ToString()}");
 
-            var code = reader.GetInt();
-            Receiver.OnReceive(code, peer, reader);
+            Receiver.OnReceive(peer, reader);
 
             //fragment log
             if (reader.AvailableBytes == 13218)

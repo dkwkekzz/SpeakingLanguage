@@ -42,7 +42,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Code.cs" />
+    <Compile Include="Packet\InteractionData.cs" />
+    <Compile Include="Packet\KeyboardData.cs" />
+    <Compile Include="Packet\SceneData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LiteNetLib\LiteNetLib.csproj">
+      <Project>{719a66fe-aaf9-48b5-9426-569c25fe7b3a}</Project>
+      <Name>LiteNetLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

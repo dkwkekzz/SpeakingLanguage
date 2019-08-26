@@ -24,7 +24,7 @@ namespace SpeakingLanguage.Server
             }
             _serverListener.Server = server;
 
-            var receiver = new PacketReceiver(new WorldManager(ref info));
+            var receiver = new PacketReceiver(ref info);
             _serverListener.Receiver = receiver;
 
             while (!Console.KeyAvailable)

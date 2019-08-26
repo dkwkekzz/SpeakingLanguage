@@ -14,30 +14,14 @@ namespace SpeakingLanguage.Server
 
                 public int Capacity { get; }
                 public int Count => _dicAgent.Count;
-
-                public IScene Left => throw new NotImplementedException();
-
-                public IScene Top => throw new NotImplementedException();
-
-                public IScene Right => throw new NotImplementedException();
-
-                public IScene Bottom => throw new NotImplementedException();
-
-                public IScene LeftTop => throw new NotImplementedException();
-
-                public IScene TopRight => throw new NotImplementedException();
-
-                public IScene RightBottom => throw new NotImplementedException();
-
-                public IScene BottomLeft => throw new NotImplementedException();
-
+                
                 public Scene(int capacity)
                 {
                     _dicAgent = new Dictionary<int, Agent>(capacity);
                     Capacity = capacity;
                 }
 
-                public bool TryInsert(Agent agent)
+                public bool TryInsert(ref Agent agent)
                 {
                     if (Capacity > 0 && _dicAgent.Count >= Capacity)
                         return false;
@@ -46,9 +30,9 @@ namespace SpeakingLanguage.Server
                     return true;
                 }
 
-                public bool Remove(int clientId)
+                public bool Remove(int id)
                 {
-                    return _dicAgent.Remove(clientId);
+                    return _dicAgent.Remove(id);
                 }
 
                 public void Dispose()
@@ -59,6 +43,16 @@ namespace SpeakingLanguage.Server
                 public override string ToString()
                 {
                     return $"capacity: {Capacity.ToString()}, count: {Count.ToString()}";
+                }
+
+                public void MoveTo(IScene dest)
+                {
+                    var iter = _dicAgent.Values.GetEnumerator();
+                    while (iter.MoveNext())
+                    {
+                        var agent = iter.Current;
+                        dest.TryInsert(ref agent);
+                    }
                 }
 
                 public Dictionary<int, Agent>.ValueCollection.Enumerator GetEnumerator()
@@ -137,17 +131,17 @@ namespace SpeakingLanguage.Server
         {
             public bool Equals(SceneHandle x, SceneHandle y)
             {
-                throw new NotImplementedException();
+                return x.Equals(y);
             }
 
             public int GetHashCode(SceneHandle obj)
             {
-                throw new NotImplementedException();
+                return obj.sceneX ^ (obj.sceneY << 16);
             }
         }
         
         private Dictionary<SceneHandle, IScene> _dicScene;
-        private Dictionary<int, IScene> _dicAgent2Scene;
+        private Dictionary<int, IScene> _dicAgent2Scene;    
         private SceneFactory _factory;
 
         public WorldManager(ref Logic.StartInfo info)
@@ -157,52 +151,69 @@ namespace SpeakingLanguage.Server
             _factory = new SceneFactory();
         }
         
-        public IScene FindScene(int clientId)
+        public IScene FindScene(int agentId)
         {
-            if (_dicAgent2Scene == null)
-                Library.ThrowHelper.ThrowWrongState("Please call install first.");
-
-            if (!_dicAgent2Scene.TryGetValue(clientId, out IScene scene))
+            if (!_dicAgent2Scene.TryGetValue(agentId, out IScene scene))
                 return null;
             return scene;
         }
 
-        public void EnterScene(SceneHandle sceneHandle, Agent agent)
+        public IScene GetScene(SceneHandle sceneHandle)
         {
-            if (_dicScene == null)
-                Library.ThrowHelper.ThrowWrongState("Please call install first.");
-
             if (!_dicScene.TryGetValue(sceneHandle, out IScene scene))
             {
                 scene = _factory.GetScene();
                 _dicScene.Add(sceneHandle, scene);
-
-                scene.TryInsert(agent);
             }
-            else
+
+            return scene;
+        }
+
+        public IScene SubscribeScene(ref Agent agent, SceneHandle sceneHandle)
+        {
+            if (!_dicScene.TryGetValue(sceneHandle, out IScene scene))
             {
-                if (!scene.TryInsert(agent))
-                {
-                    _factory.PutScene(scene);
-
-                    var newScene = _factory.GetScene(scene.Capacity + 2);
-                    newScene.TryInsert(agent);
-                    _dicScene[sceneHandle] = newScene;
-                }
+                scene = _factory.GetScene();
+                _dicScene.Add(sceneHandle, scene);
             }
 
+            if (!scene.TryInsert(ref agent))
+            {
+                var newScene = _factory.GetScene(scene.Capacity + 2);
+                scene.MoveTo(newScene);
+                _factory.PutScene(scene);
+
+                newScene.TryInsert(ref agent);
+                _dicScene[sceneHandle] = newScene;
+
+                return newScene;
+            }
+
+            return scene;
+        }
+
+        public IScene UnsubscribeScene(int agentId, SceneHandle sceneHandle)
+        {
+            if (!_dicScene.TryGetValue(sceneHandle, out IScene scene))
+                return null;
+
+            var exist = scene.Remove(agentId);
+            if (!exist)
+                return null;
+
+            return scene;
+        }
+
+        public void EnterScene(ref Agent agent, IScene scene)
+        {
             _dicAgent2Scene[agent.Id] = scene;
         }
 
         public bool LeaveScene(int agentId)
         {
-            if (_dicAgent2Scene == null)
-                Library.ThrowHelper.ThrowWrongState("Please call install first.");
-
             if (!_dicAgent2Scene.TryGetValue(agentId, out IScene scene))
                 return false;
 
-            scene.Remove(agentId);
             return _dicAgent2Scene.Remove(agentId);
         }
     }

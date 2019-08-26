@@ -76,8 +76,9 @@ namespace SpeakingLanguage.ClientSample
                 var writer = new NetDataWriter();
                 while (running)
                 {
+                    writer.Reset();
+
                     var input = Console.ReadKey();
-                    var code = 0;
                     var key = input.Key;
                     switch (input.Key)
                     {
@@ -85,17 +86,38 @@ namespace SpeakingLanguage.ClientSample
                         case ConsoleKey.RightArrow:
                         case ConsoleKey.UpArrow:
                         case ConsoleKey.DownArrow:
-                            code = 1;
+                            writer.Put((int)Protocol.Code.Packet.Keyboard);
+                            writer.Put(new Protocol.Packet.KeyboardData { press = true, key = (int)key });
+                            break;
+                        case ConsoleKey.A:
+                        case ConsoleKey.D:
+                        case ConsoleKey.W:
+                        case ConsoleKey.S:
+                            writer.Put((int)Protocol.Code.Packet.SelectScene);
+                            writer.Put(new Protocol.Packet.SceneData { worldIndex = (int)key });
+                            break;
+                        case ConsoleKey.D1:
+                            writer.Put((int)Protocol.Code.Packet.SubscribeScene);
+                            writer.Put(new Protocol.Packet.SceneData { worldIndex = (int)key });
+                            break;
+                        case ConsoleKey.D2:
+                            writer.Put((int)Protocol.Code.Packet.UnsubscribeScene);
+                            writer.Put(new Protocol.Packet.SceneData { worldIndex = (int)key });
+                            break;
+                        case ConsoleKey.Q:
+                            writer.Put((int)Protocol.Code.Packet.Interaction);
+                            writer.Put(new Protocol.Packet.InteractionData
+                            {
+                                lhs = new Protocol.Packet.InteractionData.ObjectHandle { value = 0 },
+                                rhs = new Protocol.Packet.InteractionData.ObjectHandle { value = 1 }
+                            });
                             break;
                         case ConsoleKey.Z:
-                            code = 2;
+                            writer.Put((int)Protocol.Code.Packet.Terminate);
                             running = false;
                             break;
                     }
-
-                    writer.Reset();
-                    writer.Put(code);
-                    writer.Put((int)key);
+                    
                     peer.Send(writer, DeliveryMethod.ReliableOrdered);
                 }
             });   

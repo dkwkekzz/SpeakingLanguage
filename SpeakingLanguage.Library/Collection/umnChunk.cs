@@ -23,6 +23,8 @@ namespace SpeakingLanguage.Library
             {
                 if (value)
                     typeHandle = -1;
+                else if (typeHandle < 0)
+                    typeHandle = 0;
             }
         }
     }

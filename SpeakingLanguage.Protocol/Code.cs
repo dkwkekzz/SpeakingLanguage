@@ -8,9 +8,13 @@ namespace SpeakingLanguage.Protocol
         public enum Packet
         {
             None = 0,
+            Authentication,
+            Terminate,
             Keyboard,
             Touch,
             SelectScene,
+            SubscribeScene,
+            UnsubscribeScene,
             Interaction,
             __MAX__
         }

@@ -24,7 +24,7 @@ namespace SpeakingLanguage.Server
             var startInfo = new Logic.StartInfo()
             {
                 port = int.Parse(ConfigurationManager.AppSettings["port"]),
-                default_agentcount = int.Parse(ConfigurationManager.AppSettings["default_clientcount"]),
+                default_agentcount = int.Parse(ConfigurationManager.AppSettings["default_agentcount"]),
                 default_scenecount = int.Parse(ConfigurationManager.AppSettings["default_scenecount"]),
             };
             

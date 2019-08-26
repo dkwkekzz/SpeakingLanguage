@@ -53,7 +53,15 @@ namespace SpeakingLanguage.ClientSample
 
         public void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
         {
-            Console.WriteLine("[Client] disconnected: " + disconnectInfo.Reason);
+            var code = Protocol.Code.Packet.None;
+            var error = Protocol.Code.Error.None;
+            if (disconnectInfo.AdditionalData.AvailableBytes > 0)
+            {
+                code = (Protocol.Code.Packet)disconnectInfo.AdditionalData.GetInt();
+                error = (Protocol.Code.Error)disconnectInfo.AdditionalData.GetInt();
+            }
+
+            Console.WriteLine($"[Client] disconnected: {disconnectInfo.Reason}, code: {code}, error: {error}");
         }
 
         public void OnNetworkError(IPEndPoint endPoint, SocketError socketErrorCode)
@@ -72,10 +80,10 @@ namespace SpeakingLanguage.ClientSample
             }
             else
             {
-                int type = reader.GetInt();
-                int num = reader.GetInt();
+                var press = reader.GetBool();
+                var key = reader.GetInt();
                 _messagesReceivedCount++;
-                Console.WriteLine("[{0}] CNT: {1}, TYPE: {2}, NUM: {3}, MTD: {4}", peer.NetManager.LocalPort, _messagesReceivedCount, type, num, deliveryMethod);
+                Console.WriteLine("[{0}] CNT: {1}, PRESS: {2}, KEY: {3}, MTD: {4}", peer.NetManager.LocalPort, _messagesReceivedCount, press, key, deliveryMethod);
             }
         }
 
