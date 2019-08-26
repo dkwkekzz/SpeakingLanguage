@@ -12,12 +12,12 @@ namespace SpeakingLanguage.Server
         public int sceneY;
         public int sceneZ;
 
-        public SceneHandle(Protocol.Packet.SceneData packet)
+        public SceneHandle(Protocol.Packet.SceneData data)
         {
-            worldIndex = packet.worldIndex;
-            sceneX = packet.sceneX;
-            sceneY = packet.sceneY;
-            sceneZ = packet.sceneZ;
+            worldIndex = data.worldIndex;
+            sceneX = data.sceneX;
+            sceneY = data.sceneY;
+            sceneZ = data.sceneZ;
         }
 
         public bool Equals(SceneHandle other)

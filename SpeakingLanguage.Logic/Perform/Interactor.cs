@@ -28,7 +28,7 @@ namespace SpeakingLanguage.Logic
                 pSubject->frame = eventManager.CurrentFrame;
 
                 // invoke subject
-                var dupStateSync = new DupStateSync();
+                var stateSyncPair = new StateSyncPair();
 
                 var subjectStateLookup = stackalloc Library.umnChunk*[128];
                 var subjectIter = pSubject->GetEnumerator();
@@ -42,7 +42,7 @@ namespace SpeakingLanguage.Logic
                     subjectStateTypeHandle = chk->typeHandle;
                     subjectStateLookup[subjectStateTypeHandle] = chk;
 
-                    dupStateSync.subject.Insert(subjectStateTypeHandle);
+                    stateSyncPair.subject.Insert(subjectStateTypeHandle);
                 }
 
                 byte* subjectStateStack = stackalloc byte[1024];
@@ -54,7 +54,7 @@ namespace SpeakingLanguage.Logic
                     currentTick = service.CurrentTick,
                 };
 
-                colAct.InvokeSelf(ref actionCtx, ref dupStateSync.subject);
+                colAct.InvokeSelf(ref actionCtx, ref stateSyncPair.subject);
 
                 do
                 {
@@ -67,7 +67,7 @@ namespace SpeakingLanguage.Logic
                     }
 
                     // invoke subject and target
-                    dupStateSync.target.Clear();
+                    stateSyncPair.target.Clear();
 
                     var targetStateLookup = stackalloc Library.umnChunk*[128];
                     var targetStateIter = pTarget->GetEnumerator();
@@ -81,13 +81,13 @@ namespace SpeakingLanguage.Logic
                         targetStateTypeHandle = chk->typeHandle;
                         targetStateLookup[targetStateTypeHandle] = chk;
 
-                        dupStateSync.target.Insert(subjectStateTypeHandle);
+                        stateSyncPair.target.Insert(subjectStateTypeHandle);
                     }
 
                     byte* targetStateStack = stackalloc byte[1024];
                     actionCtx.target = new slObjectContext(pTarget, targetStateLookup, targetStateStack);
                     
-                    colAct.InvokeComplex(ref actionCtx, ref dupStateSync);
+                    colAct.InvokeComplex(ref actionCtx, ref stateSyncPair);
 
                     exist = graph.MoveNext();
                 }

@@ -27,7 +27,7 @@ namespace SpeakingLanguage.Logic
 
         public TState* Get<TState>() where TState : unmanaged
         {
-            var handle = StateCollection.GetStateHandle(typeof(TState)).key;
+            var handle = TypeManager.GetStateHandle(typeof(TState)).key;
             var chk = stateLookup[handle];
             if (null == chk) return null;
 
@@ -37,7 +37,7 @@ namespace SpeakingLanguage.Logic
 
         public void Set<TState>(TState st) where TState : unmanaged
         {
-            var handle = StateCollection.GetStateHandle(typeof(TState)).key;
+            var handle = TypeManager.GetStateHandle(typeof(TState)).key;
             var chk = stateLookup[handle];
             if (null == chk) Library.ThrowHelper.ThrowWrongArgument($"no has this state: {typeof(TState).Name}");
 
@@ -48,7 +48,7 @@ namespace SpeakingLanguage.Logic
         public TState* Add<TState>(TState st) where TState : unmanaged
         {
             var szObj = sizeof(TState);
-            var handle = StateCollection.GetStateHandle(typeof(TState)).key;
+            var handle = TypeManager.GetStateHandle(typeof(TState)).key;
             var objChk = new Library.umnChunk();
             objChk.typeHandle = handle;
             objChk.length = szObj;
@@ -65,7 +65,7 @@ namespace SpeakingLanguage.Logic
 
         public bool Remove<TState>() where TState : unmanaged
         {
-            var handle = StateCollection.GetStateHandle(typeof(TState)).key;
+            var handle = TypeManager.GetStateHandle(typeof(TState)).key;
             var chk = stateLookup[handle];
             if (null == chk) return false;
 

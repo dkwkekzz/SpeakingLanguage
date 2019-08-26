@@ -12,6 +12,7 @@ namespace SpeakingLanguage.Server
         public void Run(ref Logic.StartInfo info)
         {
             Console.WriteLine("=== SpeakingLanguage Server ===");
+
             //Server
             _serverListener = new ServerListener();
 
@@ -24,7 +25,7 @@ namespace SpeakingLanguage.Server
             }
             _serverListener.Server = server;
 
-            var receiver = new PacketReceiver(ref info);
+            var receiver = new PacketReceiver();
             _serverListener.Receiver = receiver;
 
             while (!Console.KeyAvailable)

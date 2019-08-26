@@ -22,9 +22,9 @@ namespace SpeakingLanguage.Server
         private readonly NetDataWriter _writer;
         private readonly Func<NetPeer, NetPacketReader, Result>[] _packetActions;
 
-        public PacketReceiver(ref Logic.StartInfo info)
+        public PacketReceiver()
         {
-            _world = new WorldManager(ref info);
+            _world = WorldManager.Locator;
             _writer = new NetDataWriter();
             _packetActions = new Func<NetPeer, NetPacketReader, Result>[(int)Protocol.Code.Packet.__MAX__];
             _packetActions[(int)Protocol.Code.Packet.Keyboard] = _onKeyboard;
@@ -104,12 +104,15 @@ namespace SpeakingLanguage.Server
             if (!exist)
                 return new Result(Protocol.Code.Error.NullReferenceScene);
 
-            var selectData = reader.Get<Protocol.Packet.SceneData>();
-            var scene = _world.GetScene(new SceneHandle(selectData));
+            var data = reader.Get<Protocol.Packet.SceneData>();
+            var scene = _world.GetScene(new SceneHandle(data));
             if (null == scene)
                 return new Result(Protocol.Code.Error.NullReferenceScene);
 
             var agent = new Agent(peer);
+
+            // validate: 내가 선택한 subjectHandle의 position이 scene에 적합해야 한다.
+
             _world.EnterScene(ref agent, scene);
 
             return new Result();
@@ -117,11 +120,22 @@ namespace SpeakingLanguage.Server
 
         private Result _onSubscribeScene(NetPeer peer, NetPacketReader reader)
         {
-            var selectData = reader.Get<Protocol.Packet.SceneData>();
+            var data = reader.Get<Protocol.Packet.SceneData>();
             var agent = new Agent(peer);
-            var scene = _world.SubscribeScene(ref agent, new SceneHandle(selectData));
+            var scene = _world.SubscribeScene(ref agent, new SceneHandle(data));
             if (null == scene)
                 return new Result(Protocol.Code.Error.NullReferenceScene);
+
+            var writer = new Library.Writer();
+
+            var sceneIter = scene.GetEnumerator();
+            while (sceneIter.MoveNext())
+            {
+                var subjectHandle = sceneIter.Current.SubjectHandle;
+                WorldManager.Locator.Service.SyncObject(subjectHandle, ref writer);
+            }
+
+            peer.Send(writer.GetBuffer(), DeliveryMethod.ReliableOrdered);
 
             return new Result();
         }
@@ -129,8 +143,8 @@ namespace SpeakingLanguage.Server
         private Result _onUnsubscribeScene(NetPeer peer, NetPacketReader reader)
         {
             var id = peer.Id;
-            var selectData = reader.Get<Protocol.Packet.SceneData>();
-            var scene = _world.UnsubscribeScene(id, new SceneHandle(selectData));
+            var data = reader.Get<Protocol.Packet.SceneData>();
+            var scene = _world.UnsubscribeScene(id, new SceneHandle(data));
             if (null == scene)
                 return new Result(Protocol.Code.Error.NullReferenceScene);
 
@@ -139,9 +153,11 @@ namespace SpeakingLanguage.Server
 
         private Result _onInteraction(NetPeer peer, NetPacketReader reader)
         {
-            var interactionData = reader.Get<Protocol.Packet.InteractionData>();
+            var data = reader.Get<Protocol.Packet.InteractionData>();
 
             // interaction 검증
+            var eventManager = Logic.EventManager.Locator;
+            eventManager.Insert(eventManager.CurrentFrame, new Logic.Interaction { lhs = data.lhsValue, rhs = data.rhsValue });
 
             return new Result();
         }

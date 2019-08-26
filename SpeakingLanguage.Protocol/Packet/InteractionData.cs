@@ -6,24 +6,19 @@ namespace SpeakingLanguage.Protocol.Packet
 {
     public struct InteractionData : INetSerializable
     {
-        public struct ObjectHandle
-        {
-            public int value;
-        }
-
-        public ObjectHandle lhs;
-        public ObjectHandle rhs;
+        public int lhsValue;
+        public int rhsValue;
 
         public void Serialize(NetDataWriter writer)
         {
-            writer.Put(lhs.value);
-            writer.Put(rhs.value);
+            writer.Put(lhsValue);
+            writer.Put(rhsValue);
         }
 
         public void Deserialize(NetDataReader reader)
         {
-            lhs.value = reader.GetInt();
-            rhs.value = reader.GetInt();
+            lhsValue = reader.GetInt();
+            rhsValue = reader.GetInt();
         }
     }
 }

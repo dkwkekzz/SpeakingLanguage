@@ -27,7 +27,10 @@ namespace SpeakingLanguage.Server
                 default_agentcount = int.Parse(ConfigurationManager.AppSettings["default_agentcount"]),
                 default_scenecount = int.Parse(ConfigurationManager.AppSettings["default_scenecount"]),
             };
-            
+
+            WorldManager.Locator.Install(ref startInfo);
+            WorldManager.Locator.Run();
+
             var processor = new PacketProcessor();
             processor.Run(ref startInfo);
         }

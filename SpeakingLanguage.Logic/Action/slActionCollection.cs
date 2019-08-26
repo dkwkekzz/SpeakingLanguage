@@ -6,12 +6,12 @@ namespace SpeakingLanguage.Logic
     internal class slActionCollection
     {
         private readonly List<slAction<StateSync>> _lstSelfAction;
-        private readonly List<slAction<DupStateSync>> _lstComplexAction;
+        private readonly List<slAction<StateSyncPair>> _lstComplexAction;
 
         public slActionCollection()
         {
             _lstSelfAction = new List<slAction<StateSync>>();
-            _lstComplexAction = new List<slAction<DupStateSync>>();
+            _lstComplexAction = new List<slAction<StateSyncPair>>();
 
             var TSubjectAttribute = typeof(SubjectAttribute);
             var TTargetAttribute = typeof(TargetAttribute);
@@ -42,8 +42,8 @@ namespace SpeakingLanguage.Logic
                         }
                         else
                         {
-                            _lstComplexAction.Add(new slAction<DupStateSync>(mth, 
-                                DupStateSync.Create(subTypes.GetEnumerator(), targetTypes.GetEnumerator())));
+                            _lstComplexAction.Add(new slAction<StateSyncPair>(mth, 
+                                StateSyncPair.Create(subTypes.GetEnumerator(), targetTypes.GetEnumerator())));
                         }
                     }
                 }
@@ -68,7 +68,7 @@ namespace SpeakingLanguage.Logic
             }
         }
 
-        public unsafe void InvokeComplex(ref slActionContext actionCtx, ref DupStateSync sync)
+        public unsafe void InvokeComplex(ref slActionContext actionCtx, ref StateSyncPair sync)
         {
             var iter = _lstComplexAction.GetEnumerator();
             while (iter.MoveNext())

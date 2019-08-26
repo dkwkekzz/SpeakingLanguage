@@ -18,7 +18,7 @@ namespace SpeakingLanguage.Logic
             var list = new List<int>(arr.Length);
             for (int i = 0; i != arr.Length; i++)
             {
-                var typeKey = StateCollection.GetStateHandle(arr[i]).key;
+                var typeKey = TypeManager.GetStateHandle(arr[i]).key;
                 list.Add(typeKey);
             }
 

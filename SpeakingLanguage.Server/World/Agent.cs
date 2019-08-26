@@ -15,11 +15,13 @@ namespace SpeakingLanguage.Server
         public ESort Sort => Peer != null ? ESort.PC : ESort.NPC;
         public NetPeer Peer { get; private set; }
         public int Id { get; }
+        public Logic.slObjectHandle SubjectHandle { get; private set; }
 
         public Agent(NetPeer peer)
         {
             Peer = peer;
             Id = Peer.Id;
+            SubjectHandle = 0;
         }
     }
 }

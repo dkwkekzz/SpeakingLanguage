@@ -6,6 +6,11 @@ namespace SpeakingLanguage.Server
 {
     internal class WorldManager
     {
+        private static readonly Lazy<WorldManager> lazy = new Lazy<WorldManager>(() => new WorldManager());
+
+        public static WorldManager Locator => lazy.Value;
+        public static bool IsCreated => lazy.IsValueCreated;
+
         private class SceneFactory
         {
             private class Scene : IScene
@@ -14,7 +19,7 @@ namespace SpeakingLanguage.Server
 
                 public int Capacity { get; }
                 public int Count => _dicAgent.Count;
-                
+
                 public Scene(int capacity)
                 {
                     _dicAgent = new Dictionary<int, Agent>(capacity);
@@ -139,18 +144,33 @@ namespace SpeakingLanguage.Server
                 return obj.sceneX ^ (obj.sceneY << 16);
             }
         }
-        
-        private Dictionary<SceneHandle, IScene> _dicScene;
-        private Dictionary<int, IScene> _dicAgent2Scene;    
-        private SceneFactory _factory;
 
-        public WorldManager(ref Logic.StartInfo info)
+        private Dictionary<SceneHandle, IScene> _dicScene;
+        private Dictionary<int, IScene> _dicAgent2Scene;
+        private SceneFactory _factory;
+        private Executor _executor;
+        private Logic.Service _service;
+
+        public ref Logic.Service Service => ref _service;
+
+        private WorldManager()
+        {
+        }
+        
+        public void Install(ref Logic.StartInfo info)
         {
             _dicScene = new Dictionary<SceneHandle, IScene>(info.default_scenecount, new SceneComparer());
             _dicAgent2Scene = new Dictionary<int, IScene>(info.default_agentcount);
             _factory = new SceneFactory();
+            _service = new Logic.Service(ref info);
         }
-        
+
+        public void Run()
+        {
+            _executor = new Executor();
+            _executor.Run(ref _service);
+        }
+
         public IScene FindScene(int agentId)
         {
             if (!_dicAgent2Scene.TryGetValue(agentId, out IScene scene))
