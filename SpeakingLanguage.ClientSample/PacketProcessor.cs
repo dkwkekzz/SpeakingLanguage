@@ -108,8 +108,8 @@ namespace SpeakingLanguage.ClientSample
                             writer.Put((int)Protocol.Code.Packet.Interaction);
                             writer.Put(new Protocol.Packet.InteractionData
                             {
-                                lhsValue = new Protocol.Packet.InteractionData.ObjectHandle { value = 0 },
-                                rhsValue = new Protocol.Packet.InteractionData.ObjectHandle { value = 1 }
+                                lhsValue = 0,
+                                rhsValue = 1
                             });
                             break;
                         case ConsoleKey.Z:

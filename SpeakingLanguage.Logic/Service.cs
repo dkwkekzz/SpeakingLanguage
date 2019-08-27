@@ -33,7 +33,7 @@ namespace SpeakingLanguage.Logic
             colObj.Dispose();
         }
 
-        public unsafe void SyncObject(ref Library.Reader reader)
+        public unsafe void DeserializeObject(ref Library.Reader reader)
         {
             var ret = reader.ReadInt(out int size);
             if (!ret)
@@ -45,7 +45,7 @@ namespace SpeakingLanguage.Logic
             colObj.InsertFront(ref reader, size);
         }
 
-        public unsafe void SyncObject(slObjectHandle handle, ref Library.Writer writer)
+        public unsafe void SerializeObject(slObjectHandle handle, ref Library.Writer writer)
         {
             var obj = colObj.Find(handle);
             if (obj == null)

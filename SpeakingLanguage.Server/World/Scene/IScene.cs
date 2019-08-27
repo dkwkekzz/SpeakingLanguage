@@ -8,9 +8,9 @@ namespace SpeakingLanguage.Server
     {
         int Capacity { get; }
         int Count { get; }
-        bool TryInsert(ref Agent agent);
+        bool TryInsert(ISubscriber subscriber);
         bool Remove(int id);
         void MoveTo(IScene dest);
-        Dictionary<int, Agent>.ValueCollection.Enumerator GetEnumerator();
+        Dictionary<int, ISubscriber>.ValueCollection.Enumerator GetEnumerator();
     }
 }

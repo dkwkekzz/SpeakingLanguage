@@ -23,6 +23,8 @@ namespace SpeakingLanguage.Protocol
         {
             None = 0,
             NullReferenceScene,
+            NullReferenceAgent,
+            AlreadyExistAgent,
             __MAX__
         }
     }

@@ -52,8 +52,10 @@
     <Compile Include="Network\ServerListener.cs" />
     <Compile Include="World\Agent.cs" />
     <Compile Include="Interaction.cs" />
-    <Compile Include="World\Executor.cs" />
+    <Compile Include="World\LogicExecutor.cs" />
+    <Compile Include="World\Scene\Scene.cs" />
     <Compile Include="World\Scene\IScene.cs" />
+    <Compile Include="World\Scene\SceneComparer.cs" />
     <Compile Include="World\Scene\SceneHandle.cs" />
     <Compile Include="World\WorldManager.cs" />
   </ItemGroup>

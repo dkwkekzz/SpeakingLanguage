@@ -19,7 +19,5 @@ namespace SpeakingLanguage.Logic
             _umnAllocator = new Library.umnMarshal();
             _lookup = Library.umnHashMap<slSceneEqualityComparer, slSceneHandle, slScene>.CreateNew(ref _umnAllocator, defaultSceneCount);
         }
-
-        public 
     }
 }

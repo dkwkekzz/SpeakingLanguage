@@ -9,7 +9,10 @@ namespace SpeakingLanguage.Library
     {
         private byte[] _buffer;
         private int _offset;
-        
+
+        public byte[] Buffer => _buffer;
+        public int Offset => _offset;
+
         public Writer(int capacity)
         {
             _buffer = Library.Locator.BufferPool.GetBuffer(capacity);

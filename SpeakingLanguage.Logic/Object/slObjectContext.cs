@@ -15,7 +15,7 @@ namespace SpeakingLanguage.Logic
         internal IntPtr StackPtr => tempStackPtr;
         internal int StackOffset => tempOffset; 
 
-        internal slObjectHandle Handle => owner->handle;
+        public slObjectHandle Handle => owner->handle;
 
         internal slObjectContext(slObject* obj, Library.umnChunk** chks, byte* stackPtr)
         {

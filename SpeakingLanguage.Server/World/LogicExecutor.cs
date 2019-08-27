@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Server
 {
-    internal class Executor
+    internal class LogicExecutor
     {
         public void Run(ref Logic.Service service)
         {

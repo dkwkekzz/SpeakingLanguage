@@ -8,13 +8,13 @@ namespace SpeakingLanguage.Logic
     {
         private static readonly Lazy<EventManager> lazy = new Lazy<EventManager>(() => new EventManager());
         
-        private readonly DataList<ChangeView> _changeViews = new DataList<ChangeView>(32);
+        private readonly DataList<SelectScene> _selectScenes = new DataList<SelectScene>(32);
         private readonly DataList<Controller> _controllers = new DataList<Controller>(32);
         private readonly DataList<Interaction> _interactions = new DataList<Interaction>(32, new InteractionComparer());
 
-        private readonly List<int> _tempList;
-        private readonly Dictionary<int, int> _tempDic;
-        private readonly Queue<int> _tempQueue;
+        private readonly List<int> _tempList = new List<int>();
+        private readonly Dictionary<int, int> _tempDic = new Dictionary<int, int>();
+        private readonly Queue<int> _tempQueue = new Queue<int>();
 
         private int _currentFrame;
         private int _lastFrame;
@@ -24,6 +24,30 @@ namespace SpeakingLanguage.Logic
         public static bool IsCreated => lazy.IsValueCreated;
 
         public int CurrentFrame => _currentFrame;
+
+        public void Insert(int frame, SelectScene stEvent)
+        {
+            Library.Tracer.Assert(_lastFrame <= frame);
+            _lastFrame = frame;
+
+            var lhsValue = stEvent.lhs.value;
+            var rhsValue = stEvent.rhs.value;
+            if (lhsValue == rhsValue)
+            {
+                Library.Tracer.Error($"could not self interact: {lhsValue.ToString()} to {rhsValue.ToString()}");
+                return;
+            }
+
+            _selectScenes.Add(new DataPair<SelectScene>
+            {
+                frame = frame,
+                data = new SelectScene
+                {
+                    lhs = lhsValue < rhsValue ? stEvent.lhs : stEvent.rhs,
+                    rhs = lhsValue < rhsValue ? stEvent.rhs : stEvent.lhs,
+                }
+            });
+        }
 
         public void Insert(int frame, Interaction stEvent)
         {
@@ -64,7 +88,7 @@ namespace SpeakingLanguage.Logic
         internal void Commit()
         {
             _currentFrame++;
-            _changeViews.Swap();
+            _selectScenes.Swap();
             _controllers.Swap();
             _interactions.Swap();
         }

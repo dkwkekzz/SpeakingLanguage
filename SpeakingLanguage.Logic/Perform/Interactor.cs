@@ -105,6 +105,8 @@ namespace SpeakingLanguage.Logic
                 if (pSelf->frame == eventManager.CurrentFrame)
                     continue;
 
+                pSelf->frame = eventManager.CurrentFrame;
+
                 var selfStateSync = new StateSync();
 
                 var subjectStateLookup = stackalloc Library.umnChunk*[128];

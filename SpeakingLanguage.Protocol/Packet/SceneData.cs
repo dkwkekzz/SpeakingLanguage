@@ -6,6 +6,7 @@ namespace SpeakingLanguage.Protocol.Packet
 {
     public struct SceneData : INetSerializable
     {
+        public int objectHandleValue;
         public int worldIndex;
         public int sceneX;
         public int sceneY;
@@ -13,6 +14,7 @@ namespace SpeakingLanguage.Protocol.Packet
 
         public void Deserialize(NetDataReader reader)
         {
+            objectHandleValue = reader.GetInt();
             worldIndex = reader.GetInt();
             sceneX = reader.GetInt();
             sceneY = reader.GetInt();
@@ -21,6 +23,7 @@ namespace SpeakingLanguage.Protocol.Packet
 
         public void Serialize(NetDataWriter writer)
         {
+            writer.Put(objectHandleValue);
             writer.Put(worldIndex);
             writer.Put(sceneX);
             writer.Put(sceneY);
