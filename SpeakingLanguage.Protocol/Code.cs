@@ -25,6 +25,7 @@ namespace SpeakingLanguage.Protocol
             NullReferenceScene,
             NullReferenceAgent,
             AlreadyExistAgent,
+            OverflowSubscribe,
             __MAX__
         }
     }

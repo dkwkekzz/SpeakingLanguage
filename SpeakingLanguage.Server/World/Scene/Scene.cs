@@ -1,65 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace SpeakingLanguage.Server
 {
-    internal class SceneCollection
-    {
-        private Dictionary<SceneHandle, IScene> _dicScene;
-        private Scene.Factory _factory;
-
-        public SceneCollection() : this(0)
-        {
-        }
-
-        public SceneCollection(int capacity)
-        {
-            _dicScene = new Dictionary<SceneHandle, IScene>(capacity, new SceneComparer());
-            _factory = new Scene.Factory();
-        }
-        
-        public IScene Get(SceneHandle sceneHandle)
-        {
-            if (!_dicScene.TryGetValue(sceneHandle, out IScene scene))
-            {
-                scene = _factory.GetScene();
-                _dicScene.Add(sceneHandle, scene);
-            }
-        
-            return scene;
-        }
-        
-        public IScene SubscribeScene(ISubscriber subscriber, SceneHandle sceneHandle)
-        {
-            var scene = Get(sceneHandle);
-            if (!scene.TryInsert(subscriber))
-            {
-                var newScene = _factory.GetScene(scene.Capacity + 2);
-                scene.MoveTo(newScene);
-                _factory.PutScene(scene);
-        
-                newScene.TryInsert(subscriber);
-                _dicScene[sceneHandle] = newScene;
-        
-                return newScene;
-            }
-        
-            return scene;
-        }
-        
-        public IScene UnsubscribeScene(int id, SceneHandle sceneHandle)
-        {
-            if (!_dicScene.TryGetValue(sceneHandle, out IScene scene))
-                return null;
-        
-            var exist = scene.Remove(id);
-            if (!exist)
-                return null;
-        
-            return scene;
-        }
-    }
-
     internal class Scene : IScene
     {
         public class Factory
@@ -141,7 +85,7 @@ namespace SpeakingLanguage.Server
             Capacity = capacity;
         }
 
-        public bool TryInsert(ISubscriber subscriber)
+        public bool TryAddSubscribe(ISubscriber subscriber)
         {
             if (Capacity > 0 && _dicSubs.Count >= Capacity)
                 return false;
@@ -150,7 +94,7 @@ namespace SpeakingLanguage.Server
             return true;
         }
 
-        public bool Remove(int id)
+        public bool CancelSubscribe(int id)
         {
             return _dicSubs.Remove(id);
         }
@@ -171,13 +115,23 @@ namespace SpeakingLanguage.Server
             while (iter.MoveNext())
             {
                 var subscriber = iter.Current;
-                dest.TryInsert(subscriber);
+                dest.TryAddSubscribe(subscriber);
             }
         }
-
+        
         public Dictionary<int, ISubscriber>.ValueCollection.Enumerator GetEnumerator()
         {
             return _dicSubs.Values.GetEnumerator();
+        }
+
+        IEnumerator<ISubscriber> IEnumerable<ISubscriber>.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

@@ -38,21 +38,27 @@ namespace SpeakingLanguage.Server
         public void OnEnter(NetPeer peer)
         {
             var id = peer.Id;
-            var agent = _world.Agents.Insert(id);
+            var agent = _world.Agents.CreateEmpty(id);
             if (null == agent)
+            {
+                // cast failure
                 return; //new Result(Protocol.Code.Error.AlreadyExistAgent);
-            
-            // build user agent
+            }
 
-            var scene = _world.Scenes.Get(SceneHandle.Lobby);
-            agent.CurrentScene = scene;
+            agent.ConstructUser(peer);
+            agent.CaptureScene(_world.Scenes.Get(SceneHandle.Lobby));
         }
 
         public void OnLeave(NetPeer peer)
         {
-            _world.Agents.Remove(peer.Id);
+            var id = peer.Id;
+            var agent = _world.Agents.Get(id);
+            if (agent == null)
+                return; //new Result(Protocol.Code.Error.NullReferenceAgent);
 
-            // clear agent: database and subsriber list
+            agent.ClearSubscribe();
+
+            _world.Agents.Remove(agent);
         }
 
         public void OnReceive(NetPeer peer, NetPacketReader reader)
@@ -93,7 +99,7 @@ namespace SpeakingLanguage.Server
             while (sceneIter.MoveNext())
             {
                 var subscriber = sceneIter.Current;
-                subscriber.Read(_writer);
+                subscriber.Push(_writer);
             }
 
             return new Result();
@@ -110,19 +116,13 @@ namespace SpeakingLanguage.Server
             var agent = _world.Agents.Get(id);
             if (agent == null)
                 return new Result(Protocol.Code.Error.NullReferenceAgent);
-
-            var scene = agent.CurrentScene;
-            if (null == scene)
-                return new Result(Protocol.Code.Error.NullReferenceScene);
-
-            scene.Remove(id);
             
             var data = reader.Get<Protocol.Packet.SceneData>();
             var newScene = _world.Scenes.Get(new SceneHandle(data));
-            agent.CurrentScene = newScene;
-            
+            var lastScene = agent.CaptureScene(newScene);
+
             // validate: 내가 선택한 subjectHandle의 position이 scene에 적합해야 한다.
-            
+
             return new Result();
         }
 
@@ -133,9 +133,19 @@ namespace SpeakingLanguage.Server
             if (agent == null)
                 return new Result(Protocol.Code.Error.NullReferenceAgent);
 
+            // scenedata 여러개 한번에 처리하도록...
             var data = reader.Get<Protocol.Packet.SceneData>();
-            var scene = _world.Scenes.SubscribeScene(agent, new SceneHandle(data));
-            
+            var scene = _world.Scenes.Get(new SceneHandle(data));
+            if (!scene.TryAddSubscribe(agent))
+            {
+                scene = _world.Scenes.ExpandScene(scene);
+                scene.TryAddSubscribe(agent);
+            }
+
+            scene = agent.SubscribeScene(scene);
+            if (null == scene)
+                return new Result(Protocol.Code.Error.OverflowSubscribe);
+
             _writer.Reset();
             _writer.Put((int)Protocol.Code.Packet.SubscribeScene);
 
@@ -156,22 +166,28 @@ namespace SpeakingLanguage.Server
         private Result _onUnsubscribeScene(NetPeer peer, NetPacketReader reader)
         {
             var id = peer.Id;
+            var agent = _world.Agents.Get(id);
+            if (agent == null)
+                return new Result(Protocol.Code.Error.NullReferenceAgent);
+
             var data = reader.Get<Protocol.Packet.SceneData>();
-            var scene = _world.Scenes.UnsubscribeScene(id, new SceneHandle(data));
-            if (null == scene)
+            var scene = _world.Scenes.Get(new SceneHandle(data));
+            scene.CancelSubscribe(id);
+
+            if (!agent.UnsubscribeScene(scene))
                 return new Result(Protocol.Code.Error.NullReferenceScene);
 
-            _writer.Reset();
-            _writer.Put((int)Protocol.Code.Packet.UnsubscribeScene);
-            
-            var sceneIter = scene.GetEnumerator();
-            while (sceneIter.MoveNext())
-            {
-                var subjectHandle = sceneIter.Current.SubjectHandle;
-                _writer.Put(subjectHandle.value);
-            }
-
-            peer.Send(_writer, DeliveryMethod.ReliableOrdered);
+            //_writer.Reset();
+            //_writer.Put((int)Protocol.Code.Packet.UnsubscribeScene);
+            //
+            //var sceneIter = scene.GetEnumerator();
+            //while (sceneIter.MoveNext())
+            //{
+            //    var subjectHandle = sceneIter.Current.SubjectHandle;
+            //    _writer.Put(subjectHandle.value);
+            //}
+            //
+            //peer.Send(_writer, DeliveryMethod.ReliableOrdered);
 
             return new Result();
         }

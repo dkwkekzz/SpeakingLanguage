@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Server
 {
-    public class SceneComparer : IEqualityComparer<SceneHandle>
+    internal class SceneComparer : IEqualityComparer<SceneHandle>
     {
         public bool Equals(SceneHandle x, SceneHandle y)
         {

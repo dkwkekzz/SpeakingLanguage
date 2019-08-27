@@ -5,62 +5,6 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Server
 {
-    internal interface IAgent
-    {
-
-    }
-
-    internal interface ISubscriber
-    {
-        int Id { get; }
-        void Read(NetDataWriter writer);
-        Logic.slObjectHandle SubjectHandle { get; }
-    }
-
-    internal class AgentCollection
-    {
-        private Dictionary<int, Agent> _dicAgent;
-        private Agent.Factory _factory;
-        
-        public AgentCollection() : this(0)
-        {
-        }
-
-        public AgentCollection(int capacity)
-        {
-            _dicAgent = new Dictionary<int, Agent>(capacity);
-            _factory = new Agent.Factory();
-        }
-
-        public bool Contains(int id)
-        {
-            return _dicAgent.ContainsKey(id);
-        }
-
-        public Agent Get(int id)
-        {
-            if (!_dicAgent.TryGetValue(id, out Agent agent))
-                return null;
-
-            return agent;
-        }
-
-        public Agent Insert(int id)
-        {
-            if (_dicAgent.ContainsKey(id))
-                return null;
-
-            var agent = _factory.GetAgent(id);
-            _dicAgent.Add(id, agent);
-            return agent;
-        }
-
-        public bool Remove(int id)
-        {
-            return _dicAgent.Remove(id);
-        }
-    }
-
     internal class Agent : ISubscriber
     {
         public class Factory
@@ -74,13 +18,13 @@ namespace SpeakingLanguage.Server
             public Factory(int capacity)
             {
                 for (int i = 0; i != capacity; i++)
-                    _pool.Enqueue(new Agent(i));
+                    _pool.Enqueue(new Agent());
             }
 
-            public Agent GetAgent(int id)
+            public Agent GetAgent()
             {
                 if (_pool.Count == 0)
-                    return new Agent(id);
+                    return new Agent();
 
                 return _pool.Dequeue();
             }
@@ -96,28 +40,92 @@ namespace SpeakingLanguage.Server
             NPC = 0,
             PC,
         }
-        
-        public ESort Sort => Peer != null ? ESort.PC : ESort.NPC;
 
-        public int Id { get; }
-        public IScene CurrentScene { get; set; }
-        public Logic.slObjectHandle SubjectHandle { get; set; }
+        private readonly List<IScene> _subscribeScenes = new List<IScene>(4);
 
+        // ISubscriber
+        public int Id { get; private set; }
+        public Logic.slObjectHandle SubjectHandle { get; private set; }
+
+        public IScene CurrentScene { get; private set; }
         public NetPeer Peer { get; private set; }
 
-        public Agent(int id)
+        public ESort Sort => Peer != null ? ESort.PC : ESort.NPC;
+
+        private Agent()
         {
-            Id = id;
         }
 
-        private Agent(NetPeer peer, int objectHandleValue)
+        public void ConstructUser(NetPeer peer)
         {
+            _subscribeScenes.Clear();
+            CurrentScene = null;
+            SubjectHandle = 0;
+            Id = peer.Id;
             Peer = peer;
-            Id = Peer.Id;
-            SubjectHandle = objectHandleValue;
         }
 
-        public void Read(NetDataWriter writer)
+        public void Dispose()
+        {
+        }
+
+        public Logic.slObjectHandle CaptureSubject(int subjectValue)
+        {
+            var lastSubject = SubjectHandle;
+            SubjectHandle = new Logic.slObjectHandle { value = subjectValue };
+            return lastSubject;
+        }
+
+        public IScene CaptureScene(IScene scene)
+        {
+            var lastScene = CurrentScene;
+            CurrentScene = scene;
+            return lastScene;
+        }
+
+        public IScene SubscribeScene(IScene scene)
+        {
+            if (_subscribeScenes.Count < 4)
+            {
+                _subscribeScenes.Add(scene);
+                return scene;
+            }
+
+            for (int i = 0; i != _subscribeScenes.Count; i++)
+            {
+                if (null == _subscribeScenes[i])
+                {
+                    _subscribeScenes[i] = scene;
+                    return scene;
+                }
+            }
+            return null;
+        }
+
+        public bool UnsubscribeScene(IScene scene)
+        {
+            for (int i = 0; i != _subscribeScenes.Count; i++)
+            {
+                if (scene == _subscribeScenes[i])
+                {
+                    _subscribeScenes[i] = null;
+                    scene.CancelSubscribe(Id);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void ClearSubscribe()
+        {
+            for (int i = 0; i != _subscribeScenes.Count; i++)
+            {
+                _subscribeScenes[i].CancelSubscribe(Id);
+            }
+            _subscribeScenes.Clear();
+        }
+
+        public void Push(NetDataWriter writer)
         {
             if (Peer != null)
             {
