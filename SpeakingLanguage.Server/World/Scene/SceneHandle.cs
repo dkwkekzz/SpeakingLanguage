@@ -12,9 +12,9 @@ namespace SpeakingLanguage.Server
         public int yValue;
         public int zValue;
 
-        public SceneHandle(Protocol.Packet.SceneData data)
+        public SceneHandle(int world, Protocol.Packet.SceneData data)
         {
-            worldIndex = data.worldIndex;
+            worldIndex = world;
             xValue = data.sceneX;
             yValue = data.sceneY;
             zValue = data.sceneZ;

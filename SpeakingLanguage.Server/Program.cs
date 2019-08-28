@@ -32,7 +32,7 @@ namespace SpeakingLanguage.Server
             worldManager.Install(ref startInfo);
             worldManager.Executor.Run(ref worldManager.Service);
 
-            var processor = new PacketProcessor();
+            var processor = new Network.PacketProcessor();
             processor.Run(ref startInfo);
         }
     }

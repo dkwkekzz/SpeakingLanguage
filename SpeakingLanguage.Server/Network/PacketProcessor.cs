@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace SpeakingLanguage.Server
+namespace SpeakingLanguage.Server.Network
 {
     internal class PacketProcessor
     {

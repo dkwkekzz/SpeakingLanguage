@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Server
 {
-    internal class Agent : ISubscriber
+    internal class Agent : ISubscriber, IDisposable
     {
         public class Factory
         {
@@ -31,6 +31,7 @@ namespace SpeakingLanguage.Server
 
             public void PutAgent(Agent agent)
             {
+                agent.Dispose();
                 _pool.Enqueue(agent);
             }
         }
@@ -46,10 +47,8 @@ namespace SpeakingLanguage.Server
         // ISubscriber
         public int Id { get; private set; }
         public Logic.slObjectHandle SubjectHandle { get; private set; }
-
-        public IScene CurrentScene { get; private set; }
+        
         public NetPeer Peer { get; private set; }
-
         public ESort Sort => Peer != null ? ESort.PC : ESort.NPC;
 
         private Agent()
@@ -59,7 +58,6 @@ namespace SpeakingLanguage.Server
         public void ConstructUser(NetPeer peer)
         {
             _subscribeScenes.Clear();
-            CurrentScene = null;
             SubjectHandle = 0;
             Id = peer.Id;
             Peer = peer;
@@ -77,11 +75,9 @@ namespace SpeakingLanguage.Server
             return lastSubject;
         }
         
-        public IScene CaptureScene(IScene scene)
+        public List<IScene>.Enumerator GetSceneEnumerator()
         {
-            var lastScene = CurrentScene;
-            CurrentScene = scene;
-            return lastScene;
+            return _subscribeScenes.GetEnumerator();
         }
 
         public IScene SubscribeScene(IScene scene)
@@ -110,7 +106,6 @@ namespace SpeakingLanguage.Server
                 if (scene == _subscribeScenes[i])
                 {
                     _subscribeScenes[i] = null;
-                    scene.CancelNotification(Id);
                     return true;
                 }
             }
@@ -119,10 +114,6 @@ namespace SpeakingLanguage.Server
 
         public void ClearSubscribe()
         {
-            for (int i = 0; i != _subscribeScenes.Count; i++)
-            {
-                _subscribeScenes[i].CancelNotification(Id);
-            }
             _subscribeScenes.Clear();
         }
 

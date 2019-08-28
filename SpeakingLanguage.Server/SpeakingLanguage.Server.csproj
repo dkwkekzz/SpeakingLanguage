@@ -45,8 +45,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="World\Agent\ColliderCollection.cs" />
-    <Compile Include="World\Agent\ColliderHandle.cs" />
+    <Compile Include="Network\ReceiverHelper.cs" />
+    <Compile Include="World\Collider\Collider.cs" />
+    <Compile Include="World\Collider\ColliderCollection.cs" />
+    <Compile Include="World\Collider\ColliderHandle.cs" />
     <Compile Include="World\Scene\SceneCollection.cs" />
     <Compile Include="World\Agent\AgentCollection.cs" />
     <Compile Include="Network\PacketProcessor.cs" />

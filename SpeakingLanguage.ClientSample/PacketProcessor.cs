@@ -93,7 +93,7 @@ namespace SpeakingLanguage.ClientSample
                         case ConsoleKey.D:
                         case ConsoleKey.W:
                         case ConsoleKey.S:
-                            writer.Put((int)Protocol.Code.Packet.SelectScene);
+                            writer.Put((int)Protocol.Code.Packet.SelectSubject);
                             writer.Put(new Protocol.Packet.SceneData { worldIndex = (int)key });
                             break;
                         case ConsoleKey.D1:

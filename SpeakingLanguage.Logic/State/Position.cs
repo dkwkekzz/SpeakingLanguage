@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Logic
 {
-    public struct Position : IState
+    public struct Position
     {
         public int world;
         public int x;

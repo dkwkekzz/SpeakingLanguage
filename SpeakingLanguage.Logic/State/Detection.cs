@@ -3,9 +3,8 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Logic
 {
-    public struct Spawner
+    public struct Detection
     {
-        public int value;
-        public long tick;
+        public int radius;
     }
 }

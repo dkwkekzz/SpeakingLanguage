@@ -14,9 +14,8 @@ namespace SpeakingLanguage.Logic
             while (objIter.MoveNext())
             {
                 var objPtr = objIter.Current;
+                var logicState = slObject.GetDefaultState(objPtr);
 
-                var position = slObject.GetPosition(objPtr);
-                
             }
         }
     }

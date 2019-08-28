@@ -66,45 +66,22 @@ namespace SpeakingLanguage.Logic
             var objPtr = Library.umnChunk.GetPtr<slObject>(objChk);
             objPtr->handle = handle;
             
-            var szLifeCycle = TypeManager.SHLifeCycle.size;
-            var chkLifeCycle = allocator.Alloc(szLifeCycle);
-            chkLifeCycle->typeHandle = TypeManager.SHLifeCycle.key;
-            chkLifeCycle->length = szLifeCycle;
-
-            var szSpawner = TypeManager.SHSpawner.size;
-            var chkSpawner = allocator.Alloc(szSpawner);
-            chkSpawner->typeHandle = TypeManager.SHSpawner.key;
-            chkSpawner->length = szSpawner;
-
-            var szPosition = TypeManager.SHPosition.size;
-            var chkPosition = allocator.Alloc(szPosition);
-            chkPosition->typeHandle = TypeManager.SHPosition.key;
-            chkPosition->length = szPosition;
-
-            objPtr->capacity = sizeof(Library.umnChunk) * 3 + szLifeCycle + szSpawner + szPosition;
+            var szLogicState = TypeManager.SHDefaultState.size;
+            var chkLogicState = allocator.Alloc(szLogicState);
+            chkLogicState->typeHandle = TypeManager.SHDefaultState.key;
+            chkLogicState->length = szLogicState;
+            
+            objPtr->capacity = sizeof(Library.umnChunk) + szLogicState;
 
             return objPtr;
         }
 
-        public static LifeCycle* GetLifeCycle(slObject* obj)
+        public static DefaultState* GetDefaultState(slObject* obj)
         {
             var ptr = (IntPtr)obj + sizeof(slObject) + sizeof(Library.umnChunk);
-            return (LifeCycle*)ptr.ToPointer();
+            return (DefaultState*)ptr.ToPointer();
         }
-
-        public static Spawner* GetSpawner(slObject* obj)
-        {
-            var ptr = (IntPtr)obj + sizeof(slObject) + sizeof(Library.umnChunk) * 2 + TypeManager.SHLifeCycle.size;
-            return (Spawner*)ptr.ToPointer();
-        }
-
-        public static Position* GetPosition(slObject* obj)
-        {
-            var ptr = (IntPtr)obj + sizeof(slObject) + sizeof(Library.umnChunk) * 3 
-                + TypeManager.SHLifeCycle.size + TypeManager.SHSpawner.size;
-            return (Position*)ptr.ToPointer();
-        }
-
+        
         public Enumerator GetEnumerator()
         {
             return new Enumerator(ref this);

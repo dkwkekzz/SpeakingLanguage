@@ -3,7 +3,7 @@ using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;
 
-namespace SpeakingLanguage.Server
+namespace SpeakingLanguage.Server.Network
 {
     internal class PacketReceiver
     {
@@ -29,7 +29,7 @@ namespace SpeakingLanguage.Server
             _packetActions = new Func<NetPeer, NetPacketReader, Result>[(int)Protocol.Code.Packet.__MAX__];
             _packetActions[(int)Protocol.Code.Packet.Keyboard] = _onKeyboard;
             _packetActions[(int)Protocol.Code.Packet.Touch] = _onTouch;
-            _packetActions[(int)Protocol.Code.Packet.SelectScene] = _onSelectScene;
+            _packetActions[(int)Protocol.Code.Packet.SelectSubject] = _onSelectSubject;
             _packetActions[(int)Protocol.Code.Packet.SubscribeScene] = _onSubscribeScene;
             _packetActions[(int)Protocol.Code.Packet.UnsubscribeScene] = _onUnsubscribeScene;
             _packetActions[(int)Protocol.Code.Packet.Interaction] = _onInteraction;
@@ -40,13 +40,9 @@ namespace SpeakingLanguage.Server
             var id = peer.Id;
             var agent = _world.Agents.CreateEmpty(id);
             if (null == agent)
-            {
-                // cast failure
-                return; //new Result(Protocol.Code.Error.AlreadyExistAgent);
-            }
+                Library.ThrowHelper.ThrowWrongArgument("Duplicate agent id on enter.");
 
             agent.ConstructUser(peer);
-            agent.CaptureScene(_world.Scenes.Get(SceneHandle.Lobby));
         }
 
         public void OnLeave(NetPeer peer)
@@ -54,9 +50,13 @@ namespace SpeakingLanguage.Server
             var id = peer.Id;
             var agent = _world.Agents.Get(id);
             if (agent == null)
-                return; //new Result(Protocol.Code.Error.NullReferenceAgent);
+                Library.ThrowHelper.ThrowKeyNotFound("Not found agent id on leave.");
 
-            agent.ClearSubscribe();
+            var iter = agent.GetSceneEnumerator();
+            while (iter.MoveNext())
+            {
+                iter.Current.CancelNotification(id);
+            }
 
             _world.Agents.Remove(agent);
         }
@@ -86,8 +86,9 @@ namespace SpeakingLanguage.Server
             if (agent == null)
                 return new Result(Protocol.Code.Error.NullReferenceAgent);
 
-            var scene = agent.CurrentScene;
-            Library.Tracer.Assert(null != scene);
+            var scene = ReceiverHelper.GetCurrentScene(_world, agent);
+            if (null == scene)
+                return new Result(Protocol.Code.Error.NullReferenceCollider);
 
             var keyData = reader.Get<Protocol.Packet.KeyboardData>();
 
@@ -102,6 +103,10 @@ namespace SpeakingLanguage.Server
                 subscriber.Push(_writer);
             }
 
+            // controller를 등록시키자.
+            var eventManager = Logic.EventManager.Locator;
+            eventManager.Insert(eventManager.CurrentFrame, new Logic.Interaction { lhs = 0, rhs = 0 });
+
             return new Result();
         }
 
@@ -110,19 +115,23 @@ namespace SpeakingLanguage.Server
             return new Result();
         }
 
-        private Result _onSelectScene(NetPeer peer, NetPacketReader reader)
+        private Result _onSelectSubject(NetPeer peer, NetPacketReader reader)
         {
             var id = peer.Id;
             var agent = _world.Agents.Get(id);
             if (agent == null)
                 return new Result(Protocol.Code.Error.NullReferenceAgent);
             
-            var data = reader.Get<Protocol.Packet.SceneData>();
-            var newScene = _world.Scenes.Get(new SceneHandle(data));
-            var lastScene = agent.CaptureScene(newScene);
+            var subjectData = reader.Get<Protocol.Packet.ObjectData>();
 
-            // validate: 내가 선택한 subjectHandle의 position이 scene에 적합해야 한다.
+            // 해당 계정이 이 핸들을 취할 수 있는지에 대한 검증이 필요하다.
 
+            agent.CaptureSubject(subjectData.handleValue);
+
+            var subjectHandle = agent.SubjectHandle;
+            if (!_world.Colliders.TryGetCollider(subjectHandle, out Collider collider))
+                return new Result(Protocol.Code.Error.NullReferenceCollider);
+            
             return new Result();
         }
 
@@ -133,29 +142,37 @@ namespace SpeakingLanguage.Server
             if (agent == null)
                 return new Result(Protocol.Code.Error.NullReferenceAgent);
 
-            // scenedata 여러개 한번에 처리하도록...
-            var data = reader.Get<Protocol.Packet.SceneData>();
-            var scene = _world.Scenes.Get(new SceneHandle(data));
-            if (!scene.TryAddNotification(agent))
-            {
-                scene = _world.Scenes.ExpandScene(scene);
-                scene.TryAddNotification(agent);
-            }
-
-            scene = agent.SubscribeScene(scene);
-            if (null == scene)
-                return new Result(Protocol.Code.Error.OverflowSubscribe);
-
             _writer.Reset();
             _writer.Put((int)Protocol.Code.Packet.SubscribeScene);
 
             var writer = new Library.Writer(1 << 10);
-            var sceneIter = scene.GetEnumerator();
-            while (sceneIter.MoveNext())
+            var subjectCount = 0;
+            var subData = reader.Get<Protocol.Packet.SubscribeData>();
+            for (int i = 0; i != subData.count; i++)
             {
-                var subjectHandle = sceneIter.Current.SubjectHandle;
-                WorldManager.Locator.Service.SerializeObject(subjectHandle, ref writer);
+                var data = reader.Get<Protocol.Packet.SceneData>();
+                var scene = _world.Scenes.Get(new SceneHandle(subData.worldIndex, data));
+                if (!scene.TryAddNotification(agent))
+                {
+                    scene = _world.Scenes.ExpandScene(scene);
+                    scene.TryAddNotification(agent);
+                }
+
+                scene = agent.SubscribeScene(scene);
+                if (null == scene)
+                    return new Result(Protocol.Code.Error.OverflowSubscribe);
+
+                var sceneIter = scene.GetEnumerator();
+                while (sceneIter.MoveNext())
+                {
+                    var subjectHandle = sceneIter.Current.SubjectHandle;
+                    WorldManager.Locator.Service.SerializeObject(subjectHandle, ref writer);
+
+                    subjectCount++;
+                }
             }
+
+            _writer.Put(subjectCount);
             _writer.Put(writer.Buffer, 0, writer.Offset);
 
             peer.Send(_writer, DeliveryMethod.ReliableOrdered);
@@ -170,31 +187,37 @@ namespace SpeakingLanguage.Server
             if (agent == null)
                 return new Result(Protocol.Code.Error.NullReferenceAgent);
 
-            var data = reader.Get<Protocol.Packet.SceneData>();
-            var scene = _world.Scenes.Get(new SceneHandle(data));
-            if (!agent.UnsubscribeScene(scene))
-                return new Result(Protocol.Code.Error.NullReferenceScene);
-            
             _writer.Reset();
             _writer.Put((int)Protocol.Code.Packet.UnsubscribeScene);
 
-            var subCount = scene.Count;
-            _writer.Put(subCount);
-
-            if (subCount != 0)
+            var subData = reader.Get<Protocol.Packet.SubscribeData>();
+            for (int i = 0; i != subData.count; i++)
             {
-                var sceneIter = scene.GetEnumerator();
-                while (sceneIter.MoveNext())
+                var data = reader.Get<Protocol.Packet.SceneData>();
+                var scene = _world.Scenes.Get(new SceneHandle(subData.worldIndex, data));
+                if (!agent.UnsubscribeScene(scene))
+                    return new Result(Protocol.Code.Error.NullReferenceScene);
+
+                if (!scene.CancelNotification(id))
+                    return new Result(Protocol.Code.Error.SubsrciberIdNotFound);
+
+                var subCount = scene.Count;
+                if (subCount != 0)
                 {
-                    var subjectHandle = sceneIter.Current.SubjectHandle;
-                    _writer.Put(subjectHandle.value);
+                    var sceneIter = scene.GetEnumerator();
+                    while (sceneIter.MoveNext())
+                    {
+                        var subjectHandle = sceneIter.Current.SubjectHandle;
+                        _writer.Put(subjectHandle.value);
+                    }
+                }
+                else
+                {
+                    _world.Scenes.Remove(new SceneHandle(subData.worldIndex, data));
                 }
             }
-            else
-            {
-                _world.Scenes.Remove(new SceneHandle(data));
-            }
 
+            _writer.Put(-1);    // end
             peer.Send(_writer, DeliveryMethod.ReliableOrdered);
 
             return new Result();
@@ -203,8 +226,15 @@ namespace SpeakingLanguage.Server
         private Result _onInteraction(NetPeer peer, NetPacketReader reader)
         {
             var data = reader.Get<Protocol.Packet.InteractionData>();
+            
+            if (!_world.Colliders.TryGetCollider(new Logic.slObjectHandle(data.lhsValue), out Collider lcollider))
+                return new Result(Protocol.Code.Error.NullReferenceCollider);
 
-            // interaction 검증
+            if (!_world.Colliders.TryGetCollider(new Logic.slObjectHandle(data.rhsValue), out Collider rcollider))
+                return new Result(Protocol.Code.Error.NullReferenceCollider);
+
+            if (!ReceiverHelper.ValidateInteract(ref lcollider, ref rcollider))
+                return new Result(Protocol.Code.Error.IllegalityDataForInteraction);
 
             var eventManager = Logic.EventManager.Locator;
             eventManager.Insert(eventManager.CurrentFrame, new Logic.Interaction { lhs = data.lhsValue, rhs = data.rhsValue });

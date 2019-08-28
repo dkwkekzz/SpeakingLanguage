@@ -12,17 +12,18 @@ namespace SpeakingLanguage.Logic
             while (objIter.MoveNext())
             {
                 var objPtr = objIter.Current;
+                var logicState = slObject.GetDefaultState(objPtr);
 
-                var lcPtr = slObject.GetLifeCycle(objPtr);
-                if (lcPtr->value == 0)
+                var life = logicState->lifeCycle;
+                if (life.value == 0)
                 {
                     colObj.Destroy(objPtr);
                 }
 
-                var spPtr = slObject.GetSpawner(objPtr);
-                if (spPtr->value > 0)
+                var spawner = logicState->spawner;
+                if (spawner.value > 0)
                 {
-                    colObj.Create(spPtr->value);
+                    colObj.Create(spawner.value);
                 }
             }
         }

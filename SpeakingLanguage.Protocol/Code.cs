@@ -12,7 +12,7 @@ namespace SpeakingLanguage.Protocol
             Terminate,
             Keyboard,
             Touch,
-            SelectScene,
+            SelectSubject,
             SubscribeScene,
             UnsubscribeScene,
             Interaction,
@@ -24,8 +24,13 @@ namespace SpeakingLanguage.Protocol
             None = 0,
             NullReferenceScene,
             NullReferenceAgent,
+            NullReferenceCollider,
+            ObjectHandleNotFound,
             AlreadyExistAgent,
             OverflowSubscribe,
+            SubsrciberIdNotFound,
+            IllegalityDataForSelectSubject,
+            IllegalityDataForInteraction,
             __MAX__
         }
     }

@@ -9,6 +9,11 @@ namespace SpeakingLanguage.Logic
 
         public override string ToString() => value.ToString();
 
+        public slObjectHandle(int v)
+        {
+            value = v;
+        }
+
         public bool Equals(slObjectHandle other)
         {
             return value == other.value;

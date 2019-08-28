@@ -3,11 +3,6 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Server
 {
-    internal struct Collider
-    {
-        public Logic.Position position;
-    }
-
     internal class ColliderCollection
     {
         private class _colliderEqualityComparer : IEqualityComparer<ColliderHandle>
@@ -34,12 +29,16 @@ namespace SpeakingLanguage.Server
             _dicColliders = new Dictionary<ColliderHandle, Collider>(capacity, new _colliderEqualityComparer());
         }
 
-        public void Update(Logic.slObjectHandle objHandle, Logic.Position pos)
+        public bool TryGetCollider(Logic.slObjectHandle objHandle, out Collider collider)
         {
-            _dicColliders[new ColliderHandle(objHandle)] = new Collider
-            {
-                position = pos,
-            };
+            var handle = new ColliderHandle(objHandle);
+            return _dicColliders.TryGetValue(handle, out collider);
+        }
+
+        public void Update(Logic.slObjectHandle objHandle, ref Logic.Position pos, ref Logic.Detection det)
+        {
+            var handle = new ColliderHandle(objHandle);
+            _dicColliders[handle] = new Collider { position = pos, detection = det };
         }
     }
 }
