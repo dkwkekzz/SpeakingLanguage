@@ -4,12 +4,12 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Server
 {
-    internal interface IScene : IDisposable, IEnumerable<ISubscriber>
+    internal interface IScene : IDisposable
     {
         int Capacity { get; }
         int Count { get; }
-        bool TryAddSubscribe(ISubscriber subscriber);
-        bool CancelSubscribe(int id);
+        bool TryAddNotification(ISubscriber subscriber);
+        bool CancelNotification(int id);
         void MoveTo(IScene dest);
         Dictionary<int, ISubscriber>.ValueCollection.Enumerator GetEnumerator();
     }

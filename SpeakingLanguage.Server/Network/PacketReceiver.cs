@@ -136,10 +136,10 @@ namespace SpeakingLanguage.Server
             // scenedata 여러개 한번에 처리하도록...
             var data = reader.Get<Protocol.Packet.SceneData>();
             var scene = _world.Scenes.Get(new SceneHandle(data));
-            if (!scene.TryAddSubscribe(agent))
+            if (!scene.TryAddNotification(agent))
             {
                 scene = _world.Scenes.ExpandScene(scene);
-                scene.TryAddSubscribe(agent);
+                scene.TryAddNotification(agent);
             }
 
             scene = agent.SubscribeScene(scene);
@@ -172,22 +172,30 @@ namespace SpeakingLanguage.Server
 
             var data = reader.Get<Protocol.Packet.SceneData>();
             var scene = _world.Scenes.Get(new SceneHandle(data));
-            scene.CancelSubscribe(id);
-
             if (!agent.UnsubscribeScene(scene))
                 return new Result(Protocol.Code.Error.NullReferenceScene);
+            
+            _writer.Reset();
+            _writer.Put((int)Protocol.Code.Packet.UnsubscribeScene);
 
-            //_writer.Reset();
-            //_writer.Put((int)Protocol.Code.Packet.UnsubscribeScene);
-            //
-            //var sceneIter = scene.GetEnumerator();
-            //while (sceneIter.MoveNext())
-            //{
-            //    var subjectHandle = sceneIter.Current.SubjectHandle;
-            //    _writer.Put(subjectHandle.value);
-            //}
-            //
-            //peer.Send(_writer, DeliveryMethod.ReliableOrdered);
+            var subCount = scene.Count;
+            _writer.Put(subCount);
+
+            if (subCount != 0)
+            {
+                var sceneIter = scene.GetEnumerator();
+                while (sceneIter.MoveNext())
+                {
+                    var subjectHandle = sceneIter.Current.SubjectHandle;
+                    _writer.Put(subjectHandle.value);
+                }
+            }
+            else
+            {
+                _world.Scenes.Remove(new SceneHandle(data));
+            }
+
+            peer.Send(_writer, DeliveryMethod.ReliableOrdered);
 
             return new Result();
         }

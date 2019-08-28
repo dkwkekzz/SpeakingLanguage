@@ -67,6 +67,7 @@ namespace SpeakingLanguage.Server
 
         public void Dispose()
         {
+            ClearSubscribe();
         }
 
         public Logic.slObjectHandle CaptureSubject(int subjectValue)
@@ -75,7 +76,7 @@ namespace SpeakingLanguage.Server
             SubjectHandle = new Logic.slObjectHandle { value = subjectValue };
             return lastSubject;
         }
-
+        
         public IScene CaptureScene(IScene scene)
         {
             var lastScene = CurrentScene;
@@ -109,7 +110,7 @@ namespace SpeakingLanguage.Server
                 if (scene == _subscribeScenes[i])
                 {
                     _subscribeScenes[i] = null;
-                    scene.CancelSubscribe(Id);
+                    scene.CancelNotification(Id);
                     return true;
                 }
             }
@@ -120,7 +121,7 @@ namespace SpeakingLanguage.Server
         {
             for (int i = 0; i != _subscribeScenes.Count; i++)
             {
-                _subscribeScenes[i].CancelSubscribe(Id);
+                _subscribeScenes[i].CancelNotification(Id);
             }
             _subscribeScenes.Clear();
         }

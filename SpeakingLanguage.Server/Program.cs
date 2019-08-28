@@ -28,8 +28,9 @@ namespace SpeakingLanguage.Server
                 default_scenecount = int.Parse(ConfigurationManager.AppSettings["default_scenecount"]),
             };
 
-            WorldManager.Locator.Install(ref startInfo);
-            WorldManager.Locator.Run();
+            var worldManager = WorldManager.Locator;
+            worldManager.Install(ref startInfo);
+            worldManager.Executor.Run(ref worldManager.Service);
 
             var processor = new PacketProcessor();
             processor.Run(ref startInfo);

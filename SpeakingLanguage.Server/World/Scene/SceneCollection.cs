@@ -5,6 +5,19 @@ namespace SpeakingLanguage.Server
 {
     internal class SceneCollection
     {
+        private class _sceneComparer : IEqualityComparer<SceneHandle>
+        {
+            public bool Equals(SceneHandle x, SceneHandle y)
+            {
+                return x.Equals(y);
+            }
+
+            public int GetHashCode(SceneHandle obj)
+            {
+                return obj.xValue ^ (obj.yValue << 16);
+            }
+        }
+
         private Dictionary<SceneHandle, IScene> _dicScene;
         private Scene.Factory _factory;
 
@@ -14,7 +27,7 @@ namespace SpeakingLanguage.Server
 
         public SceneCollection(int capacity)
         {
-            _dicScene = new Dictionary<SceneHandle, IScene>(capacity, new SceneComparer());
+            _dicScene = new Dictionary<SceneHandle, IScene>(capacity, new _sceneComparer());
             _factory = new Scene.Factory();
         }
 
@@ -41,35 +54,5 @@ namespace SpeakingLanguage.Server
             _factory.PutScene(scene);
             return newScene;
         }
-
-        //public IScene SubscribeScene(ISubscriber subscriber, SceneHandle sceneHandle)
-        //{
-        //    var scene = Get(sceneHandle);
-        //    if (!scene.TryInsert(subscriber))
-        //    {
-        //        var newScene = _factory.GetScene(scene.Capacity + 2);
-        //        scene.MoveTo(newScene);
-        //        _factory.PutScene(scene);
-        //
-        //        newScene.TryInsert(subscriber);
-        //        _dicScene[sceneHandle] = newScene;
-        //
-        //        return newScene;
-        //    }
-        //
-        //    return scene;
-        //}
-        //
-        //public IScene Delete(SceneHandle sceneHandle)
-        //{
-        //    if (!_dicScene.TryGetValue(sceneHandle, out IScene scene))
-        //        return null;
-        //
-        //    var exist = scene.Remove(id);
-        //    if (!exist)
-        //        return null;
-        //
-        //    return scene;
-        //}
     }
 }

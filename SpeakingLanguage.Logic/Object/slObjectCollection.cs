@@ -87,6 +87,14 @@ namespace SpeakingLanguage.Logic
         
         public void SwapBuffer()
         {
+            // lookup reset at last step for multithreading
+            var iter = new Enumerator(_backStack.Root);
+            while (iter.MoveNext())
+            {
+                var objPtr = iter.Current;
+                _lookup[&objPtr->handle] = objPtr;
+            }
+
             Library.umnStack.Swap(ref _frontStack, ref _backStack);
         }
 
@@ -111,9 +119,8 @@ namespace SpeakingLanguage.Logic
 
             _backStack.Push(objPtr, ctx.ObjectLength);
             _backStack.Push(ctx.StackPtr.ToPointer(), ctx.StackOffset);
-            _lookup[&objPtr->handle] = objPtr;
         }
-
+        
         public slObject* Create(int dataIndex)
         {
             var pObj = slObject.CreateNew(ref _backStack, GenerateHandle);

@@ -53,6 +53,7 @@ namespace SpeakingLanguage.Server
 
         public bool Remove(Agent agent)
         {
+            var id = agent.Id;
             _factory.PutAgent(agent);
             return _dicAgent.Remove(id);
         }

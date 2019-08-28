@@ -6,16 +6,12 @@ namespace SpeakingLanguage.Server
     internal static class Interaction
     {
         [Logic.Subject(typeof(Logic.Position))]
-        static unsafe void ValidateScene(ref Logic.slActionContext ctx)
+        static unsafe void UpdateCollider(ref Logic.slActionContext ctx)
         {
             var subjectHandle = ctx.subject.Handle;
-
-
             var pos = ctx.subject.Get<Logic.Position>();
 
-            // calculate scene handle
-
-            // insert subject handle
+            WorldManager.Locator.Colliders.Update(subjectHandle, *pos);
         }
     }
 }

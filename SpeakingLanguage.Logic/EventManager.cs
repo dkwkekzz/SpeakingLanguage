@@ -30,8 +30,8 @@ namespace SpeakingLanguage.Logic
             Library.Tracer.Assert(_lastFrame <= frame);
             _lastFrame = frame;
 
-            var lhsValue = stEvent.lhs.value;
-            var rhsValue = stEvent.rhs.value;
+            var lhsValue = 0;
+            var rhsValue = 1;
             if (lhsValue == rhsValue)
             {
                 Library.Tracer.Error($"could not self interact: {lhsValue.ToString()} to {rhsValue.ToString()}");
@@ -43,8 +43,6 @@ namespace SpeakingLanguage.Logic
                 frame = frame,
                 data = new SelectScene
                 {
-                    lhs = lhsValue < rhsValue ? stEvent.lhs : stEvent.rhs,
-                    rhs = lhsValue < rhsValue ? stEvent.rhs : stEvent.lhs,
                 }
             });
         }

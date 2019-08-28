@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Server
 {
-    internal class Scene : IScene
+    internal class Scene : IScene, IEnumerable<ISubscriber>
     {
         public class Factory
         {
@@ -85,7 +85,7 @@ namespace SpeakingLanguage.Server
             Capacity = capacity;
         }
 
-        public bool TryAddSubscribe(ISubscriber subscriber)
+        public bool TryAddNotification(ISubscriber subscriber)
         {
             if (Capacity > 0 && _dicSubs.Count >= Capacity)
                 return false;
@@ -94,7 +94,7 @@ namespace SpeakingLanguage.Server
             return true;
         }
 
-        public bool CancelSubscribe(int id)
+        public bool CancelNotification(int id)
         {
             return _dicSubs.Remove(id);
         }
@@ -115,7 +115,7 @@ namespace SpeakingLanguage.Server
             while (iter.MoveNext())
             {
                 var subscriber = iter.Current;
-                dest.TryAddSubscribe(subscriber);
+                dest.TryAddNotification(subscriber);
             }
         }
         
