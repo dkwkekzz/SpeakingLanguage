@@ -5,13 +5,13 @@ namespace SpeakingLanguage.Server
 {
     internal static class Interaction
     {
-        [Logic.Subject(typeof(Logic.DefaultState))]
-        static unsafe void UpdateCollider(ref Logic.slActionContext ctx)
+        [Logic.SubjectAttribute(typeof(Logic.Default))]
+        static void UpdateCollider(ref Logic.slActionContext ctx)
         {
             var subjectHandle = ctx.subject.Handle;
-            var logicState = ctx.subject.Get<Logic.DefaultState>();
+            var logicState = ctx.subject.Get<Logic.Default>();
 
-            WorldManager.Locator.Colliders.Update(subjectHandle, ref logicState->position, ref logicState->detection);
+            WorldManager.Locator.Colliders.Update(subjectHandle.value, ref logicState.position, ref logicState.detection);
         }
     }
 }

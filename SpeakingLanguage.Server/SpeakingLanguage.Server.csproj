@@ -48,7 +48,6 @@
     <Compile Include="Network\ReceiverHelper.cs" />
     <Compile Include="World\Collider\Collider.cs" />
     <Compile Include="World\Collider\ColliderCollection.cs" />
-    <Compile Include="World\Collider\ColliderHandle.cs" />
     <Compile Include="World\Scene\SceneCollection.cs" />
     <Compile Include="World\Agent\AgentCollection.cs" />
     <Compile Include="Network\PacketProcessor.cs" />
@@ -60,7 +59,7 @@
     <Compile Include="Interaction.cs" />
     <Compile Include="World\Database.cs" />
     <Compile Include="World\Agent\ISubscriber.cs" />
-    <Compile Include="World\LogicExecutor.cs" />
+    <Compile Include="World\LogicProcessor.cs" />
     <Compile Include="World\Scene\Scene.cs" />
     <Compile Include="World\Scene\IScene.cs" />
     <Compile Include="World\Scene\SceneHandle.cs" />

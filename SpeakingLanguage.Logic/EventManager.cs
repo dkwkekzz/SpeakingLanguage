@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace SpeakingLanguage.Logic
 {
@@ -8,7 +9,6 @@ namespace SpeakingLanguage.Logic
     {
         private static readonly Lazy<EventManager> lazy = new Lazy<EventManager>(() => new EventManager());
         
-        private readonly DataList<SelectScene> _selectScenes = new DataList<SelectScene>(32);
         private readonly DataList<Controller> _controllers = new DataList<Controller>(32);
         private readonly DataList<Interaction> _interactions = new DataList<Interaction>(32, new InteractionComparer());
 
@@ -19,36 +19,27 @@ namespace SpeakingLanguage.Logic
         private int _currentFrame;
         private int _lastFrame;
 
-        #region PUBLIC
         public static EventManager Locator => lazy.Value;
         public static bool IsCreated => lazy.IsValueCreated;
 
         public int CurrentFrame => _currentFrame;
 
-        public void Insert(int frame, SelectScene stEvent)
+        public void Insert(int frame, Controller stEvent)
         {
+            Library.Tracer.Assert(_currentFrame <= frame);
             Library.Tracer.Assert(_lastFrame <= frame);
             _lastFrame = frame;
-
-            var lhsValue = 0;
-            var rhsValue = 1;
-            if (lhsValue == rhsValue)
-            {
-                Library.Tracer.Error($"could not self interact: {lhsValue.ToString()} to {rhsValue.ToString()}");
-                return;
-            }
-
-            _selectScenes.Add(new DataPair<SelectScene>
+            
+            _controllers.Add(new DataPair<Controller>
             {
                 frame = frame,
-                data = new SelectScene
-                {
-                }
+                data = stEvent,
             });
         }
 
         public void Insert(int frame, Interaction stEvent)
         {
+            Library.Tracer.Assert(_currentFrame <= frame);
             Library.Tracer.Assert(_lastFrame <= frame);
             _lastFrame = frame;
 
@@ -73,22 +64,19 @@ namespace SpeakingLanguage.Logic
 
         public void ExecuteFrame(ref Service service)
         {
-            service.Begin();
+            Interlocked.Increment(ref _currentFrame);
 
-            Interactor.Execute(this, ref service);
-            Factory.Execute(this, ref service);
-            Commit();
+            Process.Director.Execute(this, ref service);
+            Process.Interactor.Execute(this, ref service);
+            Process.Factory.Execute(this, ref service);
 
-            service.End();
+            _commit();
         }
-        #endregion
 
-        internal void Commit()
+        #region INTERNAL
+        internal DataList<Controller>.Enumerator GetControllerEnumerator()
         {
-            _currentFrame++;
-            _selectScenes.Swap();
-            _controllers.Swap();
-            _interactions.Swap();
+            return _controllers.GetEnumerator();
         }
 
         internal InteractionGraph GetInteractionGraph()
@@ -119,5 +107,12 @@ namespace SpeakingLanguage.Logic
 
             return new InteractionGraph(_tempList, _tempDic, _tempQueue);
         }
+
+        private void _commit()
+        {
+            _controllers.Swap();
+            _interactions.Swap();
+        }
+        #endregion
     }
 }

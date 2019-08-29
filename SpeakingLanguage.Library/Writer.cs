@@ -60,7 +60,7 @@ namespace SpeakingLanguage.Library
             fixed (void* vp = &v[0])
             fixed (void* bp = &_buffer[_offset])
             {
-                Buffer.MemoryCopy(vp, bp, v.Length, v.Length);
+                System.Buffer.MemoryCopy(vp, bp, v.Length, v.Length);
                 _offset += v.Length;
             }
         }
@@ -69,7 +69,7 @@ namespace SpeakingLanguage.Library
         {
             fixed (void* bp = &_buffer[_offset])
             {
-                Buffer.MemoryCopy(p, bp, sz, sz);
+                System.Buffer.MemoryCopy(p, bp, sz, sz);
                 _offset += sz;
             }
         }
@@ -94,7 +94,7 @@ namespace SpeakingLanguage.Library
         public byte[] GetBuffer()
         {
             var nBuf = new byte[_offset];
-            Buffer.BlockCopy(_buffer, 0, nBuf, 0, _offset);
+            System.Buffer.BlockCopy(_buffer, 0, nBuf, 0, _offset);
             return nBuf;
         }
 

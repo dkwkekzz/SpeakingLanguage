@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SpeakingLanguage.Logic
+namespace SpeakingLanguage.Logic.Process
 {
     internal static class Factory
     {
@@ -12,7 +12,7 @@ namespace SpeakingLanguage.Logic
             while (objIter.MoveNext())
             {
                 var objPtr = objIter.Current;
-                var logicState = slObject.GetDefaultState(objPtr);
+                var logicState = slObjectHelper.GetDefaultState(objPtr);
 
                 var life = logicState->lifeCycle;
                 if (life.value == 0)

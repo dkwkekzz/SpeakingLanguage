@@ -30,7 +30,7 @@ namespace SpeakingLanguage.ClientSample
                 Console.WriteLine("Client1 start failed");
                 return;
             }
-            client1.Connect("127.0.0.1", info.port, "gamekey");
+            client1.Connect("127.0.0.1", info.port, Protocol.Define.GAME_KEY);
 
             //client2
             NetManager client2 = new NetManager(_clientListener)
@@ -40,7 +40,7 @@ namespace SpeakingLanguage.ClientSample
             };
 
             client2.Start();
-            client2.Connect("::1", info.port, "gamekey");
+            client2.Connect("::1", info.port, Protocol.Define.GAME_KEY);
 
             running = true;
             TestInput(client1.FirstPeer);
@@ -86,23 +86,26 @@ namespace SpeakingLanguage.ClientSample
                         case ConsoleKey.RightArrow:
                         case ConsoleKey.UpArrow:
                         case ConsoleKey.DownArrow:
-                            writer.Put((int)Protocol.Code.Packet.Keyboard);
-                            writer.Put(new Protocol.Packet.KeyboardData { press = true, key = (int)key });
-                            break;
                         case ConsoleKey.A:
                         case ConsoleKey.D:
                         case ConsoleKey.W:
                         case ConsoleKey.S:
-                            writer.Put((int)Protocol.Code.Packet.SelectSubject);
-                            writer.Put(new Protocol.Packet.SceneData { worldIndex = (int)key });
+                            writer.Put((int)Protocol.Code.Packet.Keyboard);
+                            writer.Put(new Protocol.Packet.KeyboardData { press = true, key = (int)key });
                             break;
                         case ConsoleKey.D1:
-                            writer.Put((int)Protocol.Code.Packet.SubscribeScene);
-                            writer.Put(new Protocol.Packet.SceneData { worldIndex = (int)key });
+                            writer.Put((int)Protocol.Code.Packet.SelectSubject);
+                            writer.Put(new Protocol.Packet.ObjectData { handleValue = (int)key });
                             break;
                         case ConsoleKey.D2:
+                            writer.Put((int)Protocol.Code.Packet.SubscribeScene);
+                            writer.Put(new Protocol.Packet.SubscribeData { worldIndex = (int)key, count = 1 });
+                            writer.Put(new Protocol.Packet.SceneData { sceneX = 0, sceneY = 0, sceneZ = 0 });
+                            break;
+                        case ConsoleKey.D3:
                             writer.Put((int)Protocol.Code.Packet.UnsubscribeScene);
-                            writer.Put(new Protocol.Packet.SceneData { worldIndex = (int)key });
+                            writer.Put(new Protocol.Packet.SubscribeData { worldIndex = (int)key, count = 1, });
+                            writer.Put(new Protocol.Packet.SceneData { sceneX = 0, sceneY = 0, sceneZ = 0 });
                             break;
                         case ConsoleKey.Q:
                             writer.Put((int)Protocol.Code.Packet.Interaction);

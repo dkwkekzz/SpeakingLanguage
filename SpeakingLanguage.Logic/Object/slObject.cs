@@ -48,16 +48,6 @@ namespace SpeakingLanguage.Logic
         public int capacity;
         public int frame;
         
-        public static slObject* GetNext(slObject* curObj)
-        {
-            var nextChkPtr = (IntPtr)curObj + sizeof(slObject) + curObj->capacity;
-            if (((Library.umnChunk*)nextChkPtr)->length == 0)
-                return null;
-
-            var nextObjPtr = nextChkPtr + sizeof(Library.umnChunk);
-            return (slObject*)nextObjPtr;
-        }
-
         public static slObject* CreateNew<TAllocator>(ref TAllocator allocator, int handle)
             where TAllocator : unmanaged, Library.IumnAllocator
         {
@@ -66,22 +56,16 @@ namespace SpeakingLanguage.Logic
             var objPtr = Library.umnChunk.GetPtr<slObject>(objChk);
             objPtr->handle = handle;
             
-            var szLogicState = TypeManager.SHDefaultState.size;
-            var chkLogicState = allocator.Alloc(szLogicState);
-            chkLogicState->typeHandle = TypeManager.SHDefaultState.key;
-            chkLogicState->length = szLogicState;
+            var szDefaultState = TypeManager.SHDefaultState.size;
+            var chkDefaultState = allocator.Alloc(szDefaultState);
+            chkDefaultState->typeHandle = TypeManager.SHDefaultState.key;
+            chkDefaultState->length = szDefaultState;
             
-            objPtr->capacity = sizeof(Library.umnChunk) + szLogicState;
+            objPtr->capacity = sizeof(Library.umnChunk) + szDefaultState;
 
             return objPtr;
         }
 
-        public static DefaultState* GetDefaultState(slObject* obj)
-        {
-            var ptr = (IntPtr)obj + sizeof(slObject) + sizeof(Library.umnChunk);
-            return (DefaultState*)ptr.ToPointer();
-        }
-        
         public Enumerator GetEnumerator()
         {
             return new Enumerator(ref this);

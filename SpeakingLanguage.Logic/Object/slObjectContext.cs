@@ -25,16 +25,32 @@ namespace SpeakingLanguage.Logic
             tempOffset = 0;
         }
 
-        public TState* Get<TState>() where TState : unmanaged
+        public TState Get<TState>() where TState : unmanaged
         {
             var handle = TypeManager.GetStateHandle(typeof(TState)).key;
             var chk = stateLookup[handle];
-            if (null == chk) return null;
+            if (null == chk)
+                Library.ThrowHelper.ThrowKeyNotFound($"this state not found: {typeof(TState).Name}");
 
             var ptr = Library.umnChunk.GetPtr<TState>(chk);
-            return ptr;
+            return *ptr;
         }
 
+        public bool TryGet<TState>(out TState state) where TState : unmanaged
+        {
+            var handle = TypeManager.GetStateHandle(typeof(TState)).key;
+            var chk = stateLookup[handle];
+            if (null == chk)
+            {
+                state = default;
+                return false;
+            }
+
+            var ptr = Library.umnChunk.GetPtr<TState>(chk);
+            state = *ptr;
+            return true;
+        }
+        
         public void Set<TState>(TState st) where TState : unmanaged
         {
             var handle = TypeManager.GetStateHandle(typeof(TState)).key;

@@ -59,21 +59,24 @@ namespace SpeakingLanguage.Logic
             writer.WriteMemory(obj, size);
         }
 
-        internal void Begin()
+        public void Begin()
         {
             Delta = (int)(CurrentTick - BeginTick);
             BeginTick = CurrentTick;
         }
 
-        internal void End()
+        public FrameResult End()
         {
             colObj.SwapBuffer();
 
             var frameTick = 1000 * 10000 / FrameRate;
             var elapsed = (int)(CurrentTick - BeginTick);
-            var leg = elapsed - frameTick;
-
             Library.Tracer.Write($"[Service Report] elapsed: {elapsed.ToString()}");
+
+            return new FrameResult
+            {
+                leg = elapsed - frameTick,
+            };
         }
     }
 }

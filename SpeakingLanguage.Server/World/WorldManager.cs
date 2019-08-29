@@ -14,7 +14,6 @@ namespace SpeakingLanguage.Server
         public SceneCollection Scenes { get; private set; }
         public AgentCollection Agents { get; private set; }
         public ColliderCollection Colliders { get; private set; }
-        public LogicExecutor Executor { get; private set; }
 
         private Logic.Service _logicService;
         public ref Logic.Service Service => ref _logicService;
@@ -30,7 +29,6 @@ namespace SpeakingLanguage.Server
             Scenes = new SceneCollection(info.default_scenecount);
             Agents = new AgentCollection(info.default_agentcount);
             Colliders = new ColliderCollection(info.default_agentcount);
-            Executor = new LogicExecutor();
         }
     }
 }

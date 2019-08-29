@@ -3,19 +3,26 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Logic
 {
+    public enum ControlType
+    {
+        None = 0,
+        Keyboard,
+        Touch,
+    }
+
     public struct Controller : IEventData<Controller>
     {
-        public int left;
-        public int right;
-        public int top;
-        public int bottom;
+        public ControlType type;
+        public int objectHandleValue;
+        public int key;
+        public int value;
 
         public bool Equals(Controller other)
         {
-            return left == other.left
-                && right == other.right
-                && top == other.top
-                && bottom == other.bottom;
+            return type == other.type
+                && objectHandleValue == other.objectHandleValue
+                && key == other.key
+                && value == other.value;
         }
     }
 }

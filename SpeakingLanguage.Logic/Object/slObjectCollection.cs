@@ -34,7 +34,7 @@ namespace SpeakingLanguage.Logic
                 }
                 else
                 {
-                    cur = slObject.GetNext(cur);
+                    cur = slObjectHelper.GetNext(cur);
                 }
                 
                 return null != cur;

@@ -8,7 +8,7 @@ namespace SpeakingLanguage.Server.Network
         public static IScene GetCurrentScene(WorldManager world, Agent agent)
         {
             var subjectHandle = agent.SubjectHandle;
-            if (!world.Colliders.TryGetCollider(subjectHandle, out Collider collider))
+            if (!world.Colliders.TryGetCollider(subjectHandle.value, out Collider collider))
                 return null;
 
             var pos = collider.position;

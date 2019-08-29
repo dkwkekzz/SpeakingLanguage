@@ -62,7 +62,7 @@ namespace SpeakingLanguage.Server.Network
 
         public void OnConnectionRequest(ConnectionRequest request)
         {
-            var acceptedPeer = request.AcceptIfKey("gamekey");
+            var acceptedPeer = request.AcceptIfKey(Protocol.Define.GAME_KEY);
             Console.WriteLine("[Server] ConnectionRequest. Ep: {0}, Accepted: {1}",
                 request.RemoteEndPoint,
                 acceptedPeer != null);

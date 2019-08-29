@@ -5,15 +5,24 @@ using System.Threading;
 
 namespace SpeakingLanguage.Server.Network
 {
-    internal class PacketProcessor
+    internal class PacketProcessor : IDisposable
     {
         private ServerListener _serverListener;
 
-        public void Run(ref Logic.StartInfo info)
+        public void Dispose()
         {
-            Console.WriteLine("=== SpeakingLanguage Server ===");
+            var server = _serverListener.Server;
+            server.Stop();
 
-            //Server
+            Console.WriteLine("ServStats:\n BytesReceived: {0}\n PacketsReceived: {1}\n BytesSent: {2}\n PacketsSent: {3}",
+                server.Statistics.BytesReceived,
+                server.Statistics.PacketsReceived,
+                server.Statistics.BytesSent,
+                server.Statistics.PacketsSent);
+        }
+
+        public PacketProcessor(ref Logic.StartInfo info)
+        {
             _serverListener = new ServerListener();
 
             var server = new NetManager(_serverListener);
@@ -27,22 +36,11 @@ namespace SpeakingLanguage.Server.Network
 
             var receiver = new PacketReceiver();
             _serverListener.Receiver = receiver;
+        }
 
-            while (!Console.KeyAvailable)
-            {
-                server.PollEvents();
-                Thread.Sleep(15);
-            }
-
-            server.Stop();
-            Console.ReadKey();
-            Console.WriteLine("ServStats:\n BytesReceived: {0}\n PacketsReceived: {1}\n BytesSent: {2}\n PacketsSent: {3}",
-                server.Statistics.BytesReceived,
-                server.Statistics.PacketsReceived,
-                server.Statistics.BytesSent,
-                server.Statistics.PacketsSent);
-            Console.WriteLine("Press any key to exit");
-            Console.ReadKey();
+        public void Update()
+        {
+            _serverListener.Server.PollEvents();
         }
     }
 }

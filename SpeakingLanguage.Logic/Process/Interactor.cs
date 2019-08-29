@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SpeakingLanguage.Logic
+namespace SpeakingLanguage.Logic.Process
 {
     internal static class Interactor
     {

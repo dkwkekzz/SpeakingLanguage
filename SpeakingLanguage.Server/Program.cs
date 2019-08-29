@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Threading;
 
 namespace SpeakingLanguage.Server
 {
@@ -21,6 +22,8 @@ namespace SpeakingLanguage.Server
             });
             ntpRequest.Send();
 
+            // install
+
             var startInfo = new Logic.StartInfo()
             {
                 port = int.Parse(ConfigurationManager.AppSettings["port"]),
@@ -30,10 +33,36 @@ namespace SpeakingLanguage.Server
 
             var worldManager = WorldManager.Locator;
             worldManager.Install(ref startInfo);
-            worldManager.Executor.Run(ref worldManager.Service);
 
-            var processor = new Network.PacketProcessor();
-            processor.Run(ref startInfo);
+            // process
+
+            Console.WriteLine("=== SpeakingLanguage Server ===");
+
+            var packet = new Network.PacketProcessor(ref startInfo);
+            var logic = new LogicProcessor();
+
+            ref var service = ref worldManager.Service;
+            while (!Console.KeyAvailable)
+            {
+                service.Begin();
+
+                packet.Update();
+                logic.Update(ref service);
+
+                var ret = service.End();
+                if (ret.leg > 0)
+                    continue;
+
+                Thread.Sleep(ret.leg);
+            }
+
+            // uninstall
+
+            packet.Dispose();
+            logic.Dispose();
+
+            Console.WriteLine("Press any key to exit");
+            Console.ReadKey();
         }
     }
 }

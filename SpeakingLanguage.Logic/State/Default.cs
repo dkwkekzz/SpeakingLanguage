@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Logic
 {
-    public struct DefaultState : IState
+    public struct Default : IState
     {
         public LifeCycle lifeCycle;
         public Spawner spawner;

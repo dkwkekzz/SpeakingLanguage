@@ -102,10 +102,10 @@ namespace SpeakingLanguage.Server.Network
                 var subscriber = sceneIter.Current;
                 subscriber.Push(_writer);
             }
-
-            // controller를 등록시키자.
+            
             var eventManager = Logic.EventManager.Locator;
-            eventManager.Insert(eventManager.CurrentFrame, new Logic.Interaction { lhs = 0, rhs = 0 });
+            eventManager.Insert(eventManager.CurrentFrame, 
+                new Logic.Controller { type = Logic.ControlType.Keyboard, key = keyData.key, value = keyData.press ? 1 : 0 });
 
             return new Result();
         }
@@ -129,7 +129,7 @@ namespace SpeakingLanguage.Server.Network
             agent.CaptureSubject(subjectData.handleValue);
 
             var subjectHandle = agent.SubjectHandle;
-            if (!_world.Colliders.TryGetCollider(subjectHandle, out Collider collider))
+            if (!_world.Colliders.TryGetCollider(subjectData.handleValue, out Collider collider))
                 return new Result(Protocol.Code.Error.NullReferenceCollider);
             
             return new Result();
@@ -227,10 +227,10 @@ namespace SpeakingLanguage.Server.Network
         {
             var data = reader.Get<Protocol.Packet.InteractionData>();
             
-            if (!_world.Colliders.TryGetCollider(new Logic.slObjectHandle(data.lhsValue), out Collider lcollider))
+            if (!_world.Colliders.TryGetCollider(data.lhsValue, out Collider lcollider))
                 return new Result(Protocol.Code.Error.NullReferenceCollider);
 
-            if (!_world.Colliders.TryGetCollider(new Logic.slObjectHandle(data.rhsValue), out Collider rcollider))
+            if (!_world.Colliders.TryGetCollider(data.rhsValue, out Collider rcollider))
                 return new Result(Protocol.Code.Error.NullReferenceCollider);
 
             if (!ReceiverHelper.ValidateInteract(ref lcollider, ref rcollider))
