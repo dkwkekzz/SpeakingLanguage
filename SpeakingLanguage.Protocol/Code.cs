@@ -25,10 +25,10 @@ namespace SpeakingLanguage.Protocol
             NullReferenceScene,
             NullReferenceAgent,
             NullReferenceCollider,
-            ObjectHandleNotFound,
-            AlreadyExistAgent,
+            NullReferenceSubsrciber,
+            DuplicateAgent,
             OverflowSubscribe,
-            SubsrciberIdNotFound,
+            FailToAuthentication,
             IllegalityDataForSelectSubject,
             IllegalityDataForInteraction,
             __MAX__

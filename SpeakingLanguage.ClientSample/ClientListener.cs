@@ -60,8 +60,8 @@ namespace SpeakingLanguage.ClientSample
                 code = (Protocol.Code.Packet)disconnectInfo.AdditionalData.GetInt();
                 error = (Protocol.Code.Error)disconnectInfo.AdditionalData.GetInt();
             }
-
-            Console.WriteLine($"[Client] disconnected: {disconnectInfo.Reason}, code: {code}, error: {error}");
+            
+            Console.WriteLine($"[Client] disconnected: {peer.EndPoint}, code: {code}, error: {error}, reason: {disconnectInfo.Reason}");
         }
 
         public void OnNetworkError(IPEndPoint endPoint, SocketError socketErrorCode)
@@ -80,10 +80,12 @@ namespace SpeakingLanguage.ClientSample
             }
             else
             {
-                var press = reader.GetBool();
-                var key = reader.GetInt();
+                if (reader.AvailableBytes <= 0)
+                    return;
+
+                var code = reader.GetInt();
                 _messagesReceivedCount++;
-                Console.WriteLine("[{0}] CNT: {1}, PRESS: {2}, KEY: {3}, MTD: {4}", peer.NetManager.LocalPort, _messagesReceivedCount, press, key, deliveryMethod);
+                Console.WriteLine("[{0}] CNT: {1}, CODE: {2}, MTD: {3}", peer.NetManager.LocalPort, _messagesReceivedCount, code.ToString(), deliveryMethod);
             }
         }
 

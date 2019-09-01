@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace SpeakingLanguage.Server
@@ -21,9 +22,14 @@ namespace SpeakingLanguage.Server
             return _dicColliders.TryGetValue(objHandleValue, out collider);
         }
 
+        public void Update(int objHandleValue)
+        {
+            _dicColliders[objHandleValue] = new Collider { isCreated = false };
+        }
+
         public void Update(int objHandleValue, ref Logic.Position pos, ref Logic.Detection det)
         {
-            _dicColliders[objHandleValue] = new Collider { position = pos, detection = det };
+            _dicColliders[objHandleValue] = new Collider { isCreated = true, position = pos, detection = det };
         }
     }
 }

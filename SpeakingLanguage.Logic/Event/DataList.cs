@@ -4,12 +4,6 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Logic
 {
-    internal struct DataPair<TData>
-    {
-        public int frame;
-        public TData data;
-    }
-
     internal struct DataList<TData> : IEnumerable<TData>
         where TData : IEventData<TData>
     {
@@ -57,12 +51,9 @@ namespace SpeakingLanguage.Logic
         }
 
         private readonly IComparer<TData> _comparer;
-        private List<TData> _lstData;
-        private Queue<DataPair<TData>> _lstBackData;
-
-        public int CurrentFrame { get; private set; }
-        public int Count => _lstData.Count;
-
+        private List<TData> _lstReadData;
+        private List<TData> _lstWriteData;
+        
         public DataList(int capacity) : this(capacity, null)
         {
         }
@@ -70,37 +61,24 @@ namespace SpeakingLanguage.Logic
         public DataList(int capacity, IComparer<TData> comparer)
         {
             _comparer = comparer;
-            _lstData = new List<TData>(capacity);
-            _lstBackData = new Queue<DataPair<TData>>(capacity >> 1);
-
-            CurrentFrame = 0;
+            _lstReadData = new List<TData>(capacity);
+            _lstWriteData = new List<TData>(capacity);
         }
 
-        public void Add(DataPair<TData> pair)
+        public void Add(TData data)
         {
-            var dataCount = _lstData.Count;
-            if (dataCount == 0)
-            {
-                CurrentFrame = pair.frame;
-                _lstData.Add(pair.data);
-                return;
-            }
-
-            if (CurrentFrame == pair.frame)
-                _lstData.Add(pair.data);
-            else
-                _lstBackData.Enqueue(pair);
+            _lstWriteData.Add(data);
         }
 
         public Enumerator GetSortedEnumerator()
         {
-            _lstData.Sort(_comparer);
-            return new Enumerator(_lstData);
+            _lstReadData.Sort(_comparer);
+            return new Enumerator(_lstReadData);
         }
 
         public Enumerator GetEnumerator()
         {
-            return new Enumerator(_lstData);
+            return new Enumerator(_lstReadData);
         }
 
         IEnumerator<TData> IEnumerable<TData>.GetEnumerator()
@@ -115,20 +93,10 @@ namespace SpeakingLanguage.Logic
 
         public void Swap()
         {
-            _lstData.Clear();
-
-            var backDataCount = _lstBackData.Count;
-            if (backDataCount == 0) return;
-
-            CurrentFrame = _lstBackData.Peek().frame;
-            for (int i = 0; i < backDataCount; i++)
-            {
-                var pair = _lstBackData.Dequeue();
-                if (pair.frame != CurrentFrame)
-                    break;
-
-                _lstData.Add(pair.data);
-            }
+            var temp = _lstReadData;
+            _lstReadData = _lstWriteData;
+            _lstWriteData = temp;
+            _lstWriteData.Clear();
         }
     }
 }

@@ -10,6 +10,8 @@ namespace SpeakingLanguage.Logic
         {
             private Library.umnChunk* begin;
             private Library.umnChunk* cur;
+            private int capacity;
+            private int offset;
 
             public Library.umnChunk* Current => cur;
 
@@ -22,6 +24,8 @@ namespace SpeakingLanguage.Logic
                 {
                     begin = (Library.umnChunk*)((IntPtr)pObj + sizeof(slObject));
                     cur = null;
+                    capacity = pObj->capacity;
+                    offset = 0;
                 }
             }
 
@@ -34,8 +38,16 @@ namespace SpeakingLanguage.Logic
                 if (null == cur)
                     cur = begin;
                 else
+                {
+                    int interval = Library.umnSize.umnChunk + cur->length;
+                    offset += interval;
+                    if (offset >= capacity)
+                        return false;
+
                     cur = Library.umnChunk.GetNext(cur);
-                return cur != null;
+                }
+                
+                return cur != null && cur->length > 0;
             }
 
             public void Reset()
@@ -57,7 +69,7 @@ namespace SpeakingLanguage.Logic
             objPtr->handle = handle;
             
             var szDefaultState = TypeManager.SHDefaultState.size;
-            var chkDefaultState = allocator.Alloc(szDefaultState);
+            var chkDefaultState = allocator.Calloc(szDefaultState);
             chkDefaultState->typeHandle = TypeManager.SHDefaultState.key;
             chkDefaultState->length = szDefaultState;
             
@@ -69,6 +81,11 @@ namespace SpeakingLanguage.Logic
         public Enumerator GetEnumerator()
         {
             return new Enumerator(ref this);
+        }
+
+        public void Dispose()
+        {
+            handle = -1;
         }
         
         public void Append(Library.umnChunk* chk)

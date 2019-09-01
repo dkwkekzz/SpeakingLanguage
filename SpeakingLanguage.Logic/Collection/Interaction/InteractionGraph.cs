@@ -3,9 +3,62 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SpeakingLanguage.Logic
+namespace SpeakingLanguage.Logic.Collection
 {
-    internal struct InteractionGraph : IEnumerator<Interaction>
+    // umn버전으로 바꿔야함... service안의 객체들은 umn으로 접근해야함
+    internal struct InteractionGraph
+    {
+        private readonly Dictionary<slObjectHandle, List<slObjectHandle>> _dicGraph;
+        private readonly int _defaultInteractCount;
+        
+        public InteractionGraph(int defaultObjectCount, int defaultInteractCount)
+        {
+            _dicGraph = new Dictionary<slObjectHandle, List<slObjectHandle>>(defaultObjectCount);
+            _defaultInteractCount = defaultInteractCount;
+        }
+        
+        public void Insert(slObjectHandle subject, slObjectHandle target)
+        {
+            //slObjectHandle subject, target;
+            //if (interaction.lhs.value > interaction.rhs.value)
+            //{
+            //    subject = interaction.rhs;
+            //    target = interaction.lhs;
+            //}
+            //else
+            //{
+            //    subject = interaction.lhs;
+            //    target = interaction.rhs;
+            //}
+            
+            if (!_dicGraph.TryGetValue(subject, out List<slObjectHandle> list))
+            {
+                    list = new List<slObjectHandle>(_defaultInteractCount);
+                _dicGraph.Add(subject, list);
+            }
+            
+            if (list.Contains(target))
+                return;
+
+            list.Add(target);
+        }
+
+        public bool Remove(slObjectHandle subject)
+        {
+            return _dicGraph.Remove(subject);
+        }
+
+        public void Reset()
+        {
+            var iter = _dicGraph.Values.GetEnumerator();
+            while (iter.MoveNext())
+            {
+                iter.Current.Clear();
+            }
+        }
+    }
+
+    internal struct InteractionGraph2 : IEnumerator<Interaction>
     {
         private List<int> _graph;
         private Dictionary<int, int> _indexMap;
@@ -18,7 +71,7 @@ namespace SpeakingLanguage.Logic
         public Interaction Current => new Interaction { lhs = _selectedKey, rhs = _graph[_here] };
         object IEnumerator.Current => Current;
 
-        public InteractionGraph(List<int> list, Dictionary<int, int> map, Queue<int> queue)
+        public InteractionGraph2(List<int> list, Dictionary<int, int> map, Queue<int> queue)
         {
             _graph = list;
             _indexMap = map;

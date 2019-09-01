@@ -5,22 +5,28 @@ namespace SpeakingLanguage.Server.Network
 {
     internal static class ReceiverHelper
     {
-        public static IScene GetCurrentScene(WorldManager world, Agent agent)
+        public static IScene GetCurrentScene(WorldManager world, User agent)
         {
             var subjectHandle = agent.SubjectHandle;
+
+            SceneHandle selectedSceneHandle;
             if (!world.Colliders.TryGetCollider(subjectHandle.value, out Collider collider))
-                return null;
-
-            var pos = collider.position;
-            var SelectSubjectHandle = new SceneHandle
             {
-                worldIndex = pos.world,
-                xValue = pos.x > 0 ? pos.x / Protocol.Define.SCENE_WIDTH : 0,
-                yValue = pos.y > 0 ? pos.y / Protocol.Define.SCENE_HEIGHT : 0,
-                zValue = pos.z,
-            };
-
-            return world.Scenes.Get(SelectSubjectHandle);
+                selectedSceneHandle = SceneHandle.Lobby;
+            }
+            else
+            {
+                var pos = collider.position;
+                selectedSceneHandle = new SceneHandle
+                {
+                    worldIndex = pos.world,
+                    xValue = pos.x > 0 ? pos.x / Protocol.Define.SCENE_WIDTH : 0,
+                    yValue = pos.y > 0 ? pos.y / Protocol.Define.SCENE_HEIGHT : 0,
+                    zValue = pos.z,
+                };
+            }
+            
+            return world.Scenes.Get(selectedSceneHandle);
         }
 
         public static bool ValidateScene(ref Protocol.Packet.SceneData sceneData, ref Collider collider)
@@ -43,6 +49,16 @@ namespace SpeakingLanguage.Server.Network
             var diffY = Math.Abs(lcollider.position.y - rcollider.position.y);
             var distance = lcollider.detection.radius + rcollider.detection.radius;
             return diffX * diffX + diffY * diffY >= distance * distance;
+        }
+
+        public static bool ValidateAuthenticate(ref Protocol.Packet.AuthenticationData data)
+        {
+            return true;
+        }
+
+        public static bool CanCaptureSubject(User agent, ref Protocol.Packet.ObjectData data)
+        {
+            return true;
         }
     }
 }

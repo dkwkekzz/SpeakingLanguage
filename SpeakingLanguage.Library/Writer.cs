@@ -19,6 +19,12 @@ namespace SpeakingLanguage.Library
             _offset = 0;
         }
 
+        public Writer(byte[] buffer, int startIndex)
+        {
+            _buffer = buffer;
+            _offset = startIndex;
+        }
+
         public void WriteSuccess()
         {
             WriteBoolean(true);

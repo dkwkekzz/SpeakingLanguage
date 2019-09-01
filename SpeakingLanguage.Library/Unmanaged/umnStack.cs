@@ -12,11 +12,14 @@ namespace SpeakingLanguage.Library
         public umnChunk* Root => (umnChunk*)_rootPtr;
         public int Capacity => _rootChk->length;
         public bool IsCreated => _rootChk != null;
+        public int Current => _current;
 
         public umnStack(umnChunk* chk)
         {
             _rootChk = chk;
             _rootPtr = umnChunk.GetPtr(chk);
+            ((umnChunk*)_rootPtr)->typeHandle = 0;
+            ((umnChunk*)_rootPtr)->length = 0;
             _current = 0;
         }
 
@@ -37,6 +40,7 @@ namespace SpeakingLanguage.Library
             endChk->length = 0;
             
             var chk = (umnChunk*)(_rootPtr + _current);
+            chk->typeHandle = 0;
             chk->length = size;
 
             _current += totalSize;
@@ -68,8 +72,15 @@ namespace SpeakingLanguage.Library
             return dest;
         }
 
-        public void* Push(ref Reader reader, int size)
+        public void* Push(ref Reader reader)
         {
+            var ret = reader.ReadInt(out int size);
+            if (!ret)
+                return null;
+
+            if (size == 0)
+                return null;
+            
             var szChk = umnSize.umnChunk;
             var remained = _rootChk->length - _current;
             if (remained < size)

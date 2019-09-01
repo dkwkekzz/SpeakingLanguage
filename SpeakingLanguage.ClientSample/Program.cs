@@ -21,7 +21,7 @@ namespace SpeakingLanguage.ClientSample
                     Console.WriteLine("[MAIN] NTP time error");
             });
             ntpRequest.Send();
-
+            
             var startInfo = new Logic.StartInfo()
             {
                 port = int.Parse(ConfigurationManager.AppSettings["port"]),

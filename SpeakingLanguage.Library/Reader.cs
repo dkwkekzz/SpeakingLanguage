@@ -13,6 +13,7 @@ namespace SpeakingLanguage.Library
         public bool EOB => _buffer.Length <= _offset + 1;
         public int Position => _offset;
         public int LengthToRead => _length - _offset;
+        public byte[] Buffer => _buffer;
 
         public Reader(byte[] buf)
         {
@@ -109,7 +110,7 @@ namespace SpeakingLanguage.Library
 
             fixed (void* bp = &_buffer[_offset])
             {
-                Buffer.MemoryCopy(bp, destPtr, sz, sz);
+                System.Buffer.MemoryCopy(bp, destPtr, sz, sz);
                 _offset += sz;
             }
 

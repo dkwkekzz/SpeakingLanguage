@@ -4,10 +4,8 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Server
 {
-    internal interface ISubscriber
+    internal interface ISubscriber : IAgent
     {
-        int Id { get; }
-        Logic.slObjectHandle SubjectHandle { get; }
-        void Push(NetDataWriter writer);
+        NetDataWriter DataWriter { get; }
     }
 }

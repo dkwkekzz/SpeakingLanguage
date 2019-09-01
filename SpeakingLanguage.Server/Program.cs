@@ -27,39 +27,27 @@ namespace SpeakingLanguage.Server
             var startInfo = new Logic.StartInfo()
             {
                 port = int.Parse(ConfigurationManager.AppSettings["port"]),
-                default_agentcount = int.Parse(ConfigurationManager.AppSettings["default_agentcount"]),
+                default_usercount = int.Parse(ConfigurationManager.AppSettings["default_usercount"]),
+                default_dummycount = int.Parse(ConfigurationManager.AppSettings["default_dummycount"]),
                 default_scenecount = int.Parse(ConfigurationManager.AppSettings["default_scenecount"]),
+                default_objectcount = int.Parse(ConfigurationManager.AppSettings["default_objectcount"]),
+                default_frameRate = int.Parse(ConfigurationManager.AppSettings["default_frameRate"]),
             };
 
-            var worldManager = WorldManager.Locator;
+            var worldManager = WorldManager.Instance;
             worldManager.Install(ref startInfo);
+
+            var eventManager = Logic.EventManager.Instance;
+            eventManager.Install(ref startInfo);
 
             // process
 
-            Console.WriteLine("=== SpeakingLanguage Server ===");
-
-            var packet = new Network.PacketProcessor(ref startInfo);
-            var logic = new LogicProcessor();
-
-            ref var service = ref worldManager.Service;
-            while (!Console.KeyAvailable)
-            {
-                service.Begin();
-
-                packet.Update();
-                logic.Update(ref service);
-
-                var ret = service.End();
-                if (ret.leg > 0)
-                    continue;
-
-                Thread.Sleep(ret.leg);
-            }
+            var packet = new Network.PacketProcessor();
+            packet.Run(startInfo.port);
 
             // uninstall
-
+            
             packet.Dispose();
-            logic.Dispose();
 
             Console.WriteLine("Press any key to exit");
             Console.ReadKey();

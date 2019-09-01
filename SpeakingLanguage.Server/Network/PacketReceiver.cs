@@ -24,9 +24,11 @@ namespace SpeakingLanguage.Server.Network
 
         public PacketReceiver()
         {
-            _world = WorldManager.Locator;
-            _writer = new NetDataWriter();
+            _world = WorldManager.Instance;
+            _writer = new NetDataWriter(true, 256);
             _packetActions = new Func<NetPeer, NetPacketReader, Result>[(int)Protocol.Code.Packet.__MAX__];
+            _packetActions[(int)Protocol.Code.Packet.Authentication] = _onAuthentication;
+            _packetActions[(int)Protocol.Code.Packet.Terminate] = _onTerminate;
             _packetActions[(int)Protocol.Code.Packet.Keyboard] = _onKeyboard;
             _packetActions[(int)Protocol.Code.Packet.Touch] = _onTouch;
             _packetActions[(int)Protocol.Code.Packet.SelectSubject] = _onSelectSubject;
@@ -38,17 +40,18 @@ namespace SpeakingLanguage.Server.Network
         public void OnEnter(NetPeer peer)
         {
             var id = peer.Id;
-            var agent = _world.Agents.CreateEmpty(id);
+            var agent = _world.UserFactory.Create(id);
             if (null == agent)
                 Library.ThrowHelper.ThrowWrongArgument("Duplicate agent id on enter.");
 
-            agent.ConstructUser(peer);
+            agent.CapturePeer(peer);
+            _world.Agents.Insert(agent);
         }
 
         public void OnLeave(NetPeer peer)
         {
             var id = peer.Id;
-            var agent = _world.Agents.Get(id);
+            var agent = _world.Agents.GetUser(id);
             if (agent == null)
                 Library.ThrowHelper.ThrowKeyNotFound("Not found agent id on leave.");
 
@@ -59,6 +62,7 @@ namespace SpeakingLanguage.Server.Network
             }
 
             _world.Agents.Remove(agent);
+            _world.UserFactory.Destroy(agent);
         }
 
         public void OnReceive(NetPeer peer, NetPacketReader reader)
@@ -78,11 +82,32 @@ namespace SpeakingLanguage.Server.Network
 
             Library.Tracer.Write($"[CastSuccess] id: {peer.Id.ToString()}, code: {((Protocol.Code.Packet)code).ToString()}");
         }
-        
+
+        private Result _onAuthentication(NetPeer peer, NetPacketReader reader)
+        {
+            var id = peer.Id;
+            var agent = _world.Agents.GetUser(id);
+            if (agent == null)
+                return new Result(Protocol.Code.Error.NullReferenceAgent);
+
+            var data = reader.Get<Protocol.Packet.AuthenticationData>();
+            if (!ReceiverHelper.ValidateAuthenticate(ref data))
+                return new Result(Protocol.Code.Error.FailToAuthentication);
+
+            _world.Database.ConstructUser(agent, data.id, data.pswd);
+
+            return new Result();
+        }
+
+        private Result _onTerminate(NetPeer peer, NetPacketReader reader)
+        {
+            return new Result();
+        }
+
         private Result _onKeyboard(NetPeer peer, NetPacketReader reader)
         {
             var id = peer.Id;
-            var agent = _world.Agents.Get(id);
+            var agent = _world.Agents.GetUser(id);
             if (agent == null)
                 return new Result(Protocol.Code.Error.NullReferenceAgent);
 
@@ -90,23 +115,19 @@ namespace SpeakingLanguage.Server.Network
             if (null == scene)
                 return new Result(Protocol.Code.Error.NullReferenceCollider);
 
-            var keyData = reader.Get<Protocol.Packet.KeyboardData>();
+            var data = reader.Get<Protocol.Packet.KeyboardData>();
 
-            _writer.Reset();
-            _writer.Put(keyData.press);
-            _writer.Put(keyData.key);
+            var eventManager = Logic.EventManager.Instance;
+            eventManager.Insert(new Logic.Controller { type = Logic.ControlType.Keyboard, key = data.key, value = data.press ? 1 : 0 });
 
             var sceneIter = scene.GetEnumerator();
             while (sceneIter.MoveNext())
             {
                 var subscriber = sceneIter.Current;
-                subscriber.Push(_writer);
+                subscriber.DataWriter.Put((int)Protocol.Code.Packet.Keyboard);
+                subscriber.DataWriter.Put(data);
             }
             
-            var eventManager = Logic.EventManager.Locator;
-            eventManager.Insert(eventManager.CurrentFrame, 
-                new Logic.Controller { type = Logic.ControlType.Keyboard, key = keyData.key, value = keyData.press ? 1 : 0 });
-
             return new Result();
         }
 
@@ -118,34 +139,44 @@ namespace SpeakingLanguage.Server.Network
         private Result _onSelectSubject(NetPeer peer, NetPacketReader reader)
         {
             var id = peer.Id;
-            var agent = _world.Agents.Get(id);
+            var agent = _world.Agents.GetUser(id);
             if (agent == null)
                 return new Result(Protocol.Code.Error.NullReferenceAgent);
             
             var subjectData = reader.Get<Protocol.Packet.ObjectData>();
+            if (!ReceiverHelper.CanCaptureSubject(agent, ref subjectData))
+                return new Result(Protocol.Code.Error.IllegalityDataForSelectSubject);
 
-            // 해당 계정이 이 핸들을 취할 수 있는지에 대한 검증이 필요하다.
+            if (!_world.Colliders.TryGetCollider(subjectData.handleValue, out Collider collider))
+            {
+                Library.Reader objReader;
+                _world.Database.ConstructObject(subjectData.handleValue, out objReader);
+
+                var eventManager = Logic.EventManager.Instance;
+                eventManager.Service.DeserializeObject(ref objReader);
+            }
 
             agent.CaptureSubject(subjectData.handleValue);
 
-            var subjectHandle = agent.SubjectHandle;
-            if (!_world.Colliders.TryGetCollider(subjectData.handleValue, out Collider collider))
-                return new Result(Protocol.Code.Error.NullReferenceCollider);
-            
             return new Result();
         }
 
         private Result _onSubscribeScene(NetPeer peer, NetPacketReader reader)
         {
             var id = peer.Id;
-            var agent = _world.Agents.Get(id);
+            var agent = _world.Agents.GetUser(id);
             if (agent == null)
                 return new Result(Protocol.Code.Error.NullReferenceAgent);
 
             _writer.Reset();
             _writer.Put((int)Protocol.Code.Packet.SubscribeScene);
 
-            var writer = new Library.Writer(1 << 10);
+            var lenPos = _writer.Length;
+            _writer.Put(0);
+
+            var eventManager = Logic.EventManager.Instance;
+
+            var writer = new Library.Writer(_writer.Data, _writer.Length);
             var subjectCount = 0;
             var subData = reader.Get<Protocol.Packet.SubscribeData>();
             for (int i = 0; i != subData.count; i++)
@@ -166,15 +197,14 @@ namespace SpeakingLanguage.Server.Network
                 while (sceneIter.MoveNext())
                 {
                     var subjectHandle = sceneIter.Current.SubjectHandle;
-                    WorldManager.Locator.Service.SerializeObject(subjectHandle, ref writer);
+                    eventManager.Service.SerializeObject(subjectHandle, ref writer);
 
                     subjectCount++;
                 }
             }
 
-            _writer.Put(subjectCount);
-            _writer.Put(writer.Buffer, 0, writer.Offset);
-
+            _writer.Length = writer.Offset;
+            _writer.PutAt(lenPos, subjectCount);
             peer.Send(_writer, DeliveryMethod.ReliableOrdered);
 
             return new Result();
@@ -183,14 +213,18 @@ namespace SpeakingLanguage.Server.Network
         private Result _onUnsubscribeScene(NetPeer peer, NetPacketReader reader)
         {
             var id = peer.Id;
-            var agent = _world.Agents.Get(id);
+            var agent = _world.Agents.GetUser(id);
             if (agent == null)
                 return new Result(Protocol.Code.Error.NullReferenceAgent);
 
             _writer.Reset();
             _writer.Put((int)Protocol.Code.Packet.UnsubscribeScene);
 
+            var lenPos = _writer.Length;
+            _writer.Put(0);
+
             var subData = reader.Get<Protocol.Packet.SubscribeData>();
+            var subjectCount = 0;
             for (int i = 0; i != subData.count; i++)
             {
                 var data = reader.Get<Protocol.Packet.SceneData>();
@@ -199,7 +233,7 @@ namespace SpeakingLanguage.Server.Network
                     return new Result(Protocol.Code.Error.NullReferenceScene);
 
                 if (!scene.CancelNotification(id))
-                    return new Result(Protocol.Code.Error.SubsrciberIdNotFound);
+                    return new Result(Protocol.Code.Error.NullReferenceSubsrciber);
 
                 var subCount = scene.Count;
                 if (subCount != 0)
@@ -209,6 +243,8 @@ namespace SpeakingLanguage.Server.Network
                     {
                         var subjectHandle = sceneIter.Current.SubjectHandle;
                         _writer.Put(subjectHandle.value);
+
+                        subjectCount++;
                     }
                 }
                 else
@@ -217,7 +253,7 @@ namespace SpeakingLanguage.Server.Network
                 }
             }
 
-            _writer.Put(-1);    // end
+            _writer.PutAt(lenPos, subjectCount);  
             peer.Send(_writer, DeliveryMethod.ReliableOrdered);
 
             return new Result();
@@ -225,20 +261,28 @@ namespace SpeakingLanguage.Server.Network
 
         private Result _onInteraction(NetPeer peer, NetPacketReader reader)
         {
+            var id = peer.Id;
+            var agent = _world.Agents.GetUser(id);
+            if (agent == null)
+                return new Result(Protocol.Code.Error.NullReferenceAgent);
+
+            var scene = ReceiverHelper.GetCurrentScene(_world, agent);
+            if (null == scene)
+                return new Result(Protocol.Code.Error.NullReferenceCollider);
+
             var data = reader.Get<Protocol.Packet.InteractionData>();
             
-            if (!_world.Colliders.TryGetCollider(data.lhsValue, out Collider lcollider))
-                return new Result(Protocol.Code.Error.NullReferenceCollider);
+            var eventManager = Logic.EventManager.Instance;
+            eventManager.Insert(new Logic.Interaction { lhs = data.lhsValue, rhs = data.rhsValue });
 
-            if (!_world.Colliders.TryGetCollider(data.rhsValue, out Collider rcollider))
-                return new Result(Protocol.Code.Error.NullReferenceCollider);
-
-            if (!ReceiverHelper.ValidateInteract(ref lcollider, ref rcollider))
-                return new Result(Protocol.Code.Error.IllegalityDataForInteraction);
-
-            var eventManager = Logic.EventManager.Locator;
-            eventManager.Insert(eventManager.CurrentFrame, new Logic.Interaction { lhs = data.lhsValue, rhs = data.rhsValue });
-
+            var sceneIter = scene.GetEnumerator();
+            while (sceneIter.MoveNext())
+            {
+                var subscriber = sceneIter.Current;
+                subscriber.DataWriter.Put((int)Protocol.Code.Packet.Interaction);
+                subscriber.DataWriter.Put(data);
+            }
+            
             return new Result();
         }
     }

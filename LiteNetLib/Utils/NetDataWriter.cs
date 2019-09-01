@@ -103,8 +103,9 @@ namespace LiteNetLib.Utils
         public int Length
         {
             get { return _position; }
+            set { _position = value; }
         }
-
+        
         public void Put(float value)
         {
             if (_autoResize)
@@ -251,6 +252,13 @@ namespace LiteNetLib.Utils
                 ResizeIfNeed(_position + 1);
             _data[_position] = (byte)(value ? 1 : 0);
             _position++;
+        }
+
+        public void PutAt(int position, int value)
+        {
+            if (position + 4 > _position)
+                throw new ArgumentOutOfRangeException();
+            FastBitConverter.GetBytes(_data, position, value);
         }
 
         public void PutArray(float[] value)

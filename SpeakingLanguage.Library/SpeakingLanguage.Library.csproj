@@ -67,7 +67,11 @@
     <Compile Include="Collection\umnHeap.cs" />
     <Compile Include="Collection\umnMarshal.cs" />
     <Compile Include="Collection\umnSize.cs" />
+    <Compile Include="FastBitConverter.cs" />
     <Compile Include="HashHelper.cs" />
+    <Compile Include="SingletonEx.cs" />
+    <Compile Include="Singleton.cs" />
+    <Compile Include="SingletonDoubleCheck.cs" />
     <Compile Include="TypeCollection.cs" />
     <Compile Include="SerializeHelper.cs" />
     <Compile Include="BitConverter.cs" />
@@ -96,7 +100,7 @@
     <Compile Include="Temp\Provider.cs" />
     <Compile Include="ObjectPool.cs" />
     <Compile Include="ServiceAttribute.cs" />
-    <Compile Include="Singleton.cs" />
+    <Compile Include="SingletonLazy.cs" />
     <Compile Include="StringRefComparer.cs" />
     <Compile Include="TextTraceListener.cs" />
     <Compile Include="Manager\Ticker.cs" />

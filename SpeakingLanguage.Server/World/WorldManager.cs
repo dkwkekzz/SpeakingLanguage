@@ -4,31 +4,31 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Server
 {
-    internal partial class WorldManager
+    internal sealed class WorldManager : Library.SingletonLazy<WorldManager>
     {
-        private static readonly Lazy<WorldManager> lazy = new Lazy<WorldManager>(() => new WorldManager());
-
-        public static WorldManager Locator => lazy.Value;
-        public static bool IsCreated => lazy.IsValueCreated;
-        
         public SceneCollection Scenes { get; private set; }
-        public AgentCollection Agents { get; private set; }
         public ColliderCollection Colliders { get; private set; }
-
-        private Logic.Service _logicService;
-        public ref Logic.Service Service => ref _logicService;
-
-        private WorldManager()
-        {
-        }
+        public AgentCollection Agents { get; private set; }
+        public User.Factory UserFactory { get; private set; }
+        public Database Database { get; private set; }
         
         public void Install(ref Logic.StartInfo info)
         {
-            _logicService = new Logic.Service(ref info);
-
             Scenes = new SceneCollection(info.default_scenecount);
-            Agents = new AgentCollection(info.default_agentcount);
-            Colliders = new ColliderCollection(info.default_agentcount);
+            Colliders = new ColliderCollection(info.default_usercount);
+            Agents = new AgentCollection(info.default_usercount, info.default_dummycount);
+            UserFactory = new User.Factory(info.default_usercount);
+            Database = new Database();
+        }
+
+        public void PullData()
+        {
+            var userIter = Agents.GetUserEnumerator();
+            while (userIter.MoveNext())
+            {
+                var user = userIter.Current;
+                user.FlushData();
+            }
         }
     }
 }

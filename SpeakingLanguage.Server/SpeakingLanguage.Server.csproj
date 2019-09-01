@@ -46,6 +46,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Network\ReceiverHelper.cs" />
+    <Compile Include="World\Agent\Dummy.cs" />
+    <Compile Include="World\Agent\IAgent.cs" />
     <Compile Include="World\Collider\Collider.cs" />
     <Compile Include="World\Collider\ColliderCollection.cs" />
     <Compile Include="World\Scene\SceneCollection.cs" />
@@ -55,7 +57,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Network\ServerListener.cs" />
-    <Compile Include="World\Agent\Agent.cs" />
+    <Compile Include="World\Agent\User.cs" />
     <Compile Include="Interaction.cs" />
     <Compile Include="World\Database.cs" />
     <Compile Include="World\Agent\ISubscriber.cs" />

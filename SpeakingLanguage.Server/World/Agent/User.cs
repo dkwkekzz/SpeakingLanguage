@@ -5,11 +5,11 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Server
 {
-    internal class Agent : ISubscriber, IDisposable
+    internal sealed class User : ISubscriber, IDisposable
     {
         public class Factory
         {
-            private Queue<Agent> _pool = new Queue<Agent>();
+            private readonly Queue<User> _pool = new Queue<User>();
 
             public Factory() : this(0)
             {
@@ -17,55 +17,55 @@ namespace SpeakingLanguage.Server
 
             public Factory(int capacity)
             {
+                _pool = new Queue<User>(capacity);
                 for (int i = 0; i != capacity; i++)
-                    _pool.Enqueue(new Agent());
+                    _pool.Enqueue(new User());
             }
 
-            public Agent GetAgent()
+            public User Create(int id)
             {
+                User agent;
                 if (_pool.Count == 0)
-                    return new Agent();
+                    agent = new User();
+                else
+                    agent = _pool.Dequeue();
 
-                return _pool.Dequeue();
+                agent.Id = id;
+                return agent;
             }
 
-            public void PutAgent(Agent agent)
+            public void Destroy(User agent)
             {
                 agent.Dispose();
                 _pool.Enqueue(agent);
             }
         }
-
-        public enum ESort
-        {
-            NPC = 0,
-            PC,
-        }
-
+        
         private readonly List<IScene> _subscribeScenes = new List<IScene>(4);
+        private NetPeer _peer;
 
         // ISubscriber
         public int Id { get; private set; }
         public Logic.slObjectHandle SubjectHandle { get; private set; }
+        public NetDataWriter DataWriter { get; private set; }
         
-        public NetPeer Peer { get; private set; }
-        public ESort Sort => Peer != null ? ESort.PC : ESort.NPC;
-
-        private Agent()
+        private User()
         {
-        }
-
-        public void ConstructUser(NetPeer peer)
-        {
-            _subscribeScenes.Clear();
-            SubjectHandle = 0;
-            Id = peer.Id;
-            Peer = peer;
         }
 
         public void Dispose()
         {
-            ClearSubscribe();
+            _subscribeScenes.Clear();
+            Id = -1;
+        }
+
+        public void CapturePeer(NetPeer peer)
+        {
+            _peer = peer;
+            if (null == DataWriter)
+                DataWriter = new NetDataWriter();
+            else
+                DataWriter.Reset();
         }
 
         public Logic.slObjectHandle CaptureSubject(int subjectValue)
@@ -112,17 +112,10 @@ namespace SpeakingLanguage.Server
             return false;
         }
 
-        public void ClearSubscribe()
+        public void FlushData()
         {
-            _subscribeScenes.Clear();
-        }
-
-        public void Push(NetDataWriter writer)
-        {
-            if (Peer != null)
-            {
-                Peer.Send(writer, DeliveryMethod.ReliableOrdered);
-            }
+            _peer.Send(DataWriter, DeliveryMethod.ReliableOrdered);
+            DataWriter.Reset();
         }
     }
 }

@@ -5,6 +5,7 @@ namespace SpeakingLanguage.Server
 {
     internal struct Collider
     {
+        public bool isCreated;
         public Logic.Position position;
         public Logic.Detection detection;
     }

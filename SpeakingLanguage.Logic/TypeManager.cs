@@ -20,12 +20,13 @@ namespace SpeakingLanguage.Logic
         public static TypeHandle SHChunk { get; } = new TypeHandle { key = -1, value = typeof(Library.umnChunk), size = Marshal.SizeOf<Library.umnChunk>() };
         public static TypeHandle SHObject { get; } = new TypeHandle { key = -2, value = typeof(slObject), size = Marshal.SizeOf<slObject>() };
 
-        public static TypeHandle SHDefaultState { get; } = new TypeHandle { key = 0, value = typeof(Default), size = Marshal.SizeOf<Default>() };
-        public static TypeHandle SHControlState { get; } = new TypeHandle { key = 1, value = typeof(Control), size = Marshal.SizeOf<Control>() };
+        public static TypeHandle SHNull { get; } = new TypeHandle { key = 0, value = null, size = 0 };
+        public static TypeHandle SHDefaultState { get; } = new TypeHandle { key = 1, value = typeof(Default), size = Marshal.SizeOf<Default>() };
+        public static TypeHandle SHControlState { get; } = new TypeHandle { key = 2, value = typeof(Control), size = Marshal.SizeOf<Control>() };
 
         static TypeManager()
         {
-            Build();
+            //Build();
         }
 
         public static void Build()
@@ -35,6 +36,7 @@ namespace SpeakingLanguage.Logic
             
             var dicHandle = new Dictionary<Type, TypeHandle>()
             {
+                { SHNull.value, SHNull },
                 { SHDefaultState.value, SHDefaultState },
                 { SHControlState.value, SHControlState },
             };

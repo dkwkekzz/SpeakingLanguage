@@ -18,6 +18,8 @@ namespace SpeakingLanguage.Server
             }
         }
 
+        public static readonly IScene LobbyScene;
+
         private Dictionary<SceneHandle, IScene> _dicScene;
         private Scene.Factory _factory;
 

@@ -111,18 +111,7 @@ namespace SpeakingLanguage.Library
             Buffer.MemoryCopy(e, ptr.ToPointer(), _szElement, _szElement);
             return (T*)ptr;
         }
-
-        public T* EmplaceBack(T* e)
-        {
-            if (Capacity <= _szElement * Length)
-                ThrowHelper.ThrowCapacityOverflow($"Capacity:{Capacity.ToString()}");
-
-            var ofs = Length++ * _szElement;
-            var ptr = umnChunk.GetPtr(_chk) + ofs;
-            UnmanagedHelper.MoveMemory(ptr.ToPointer(), e, _szElement);
-            return (T*)ptr;
-        }
-
+        
         public T* PopBack()
         {
             if (Length <= 0)

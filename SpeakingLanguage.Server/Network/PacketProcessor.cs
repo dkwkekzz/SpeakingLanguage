@@ -1,16 +1,24 @@
 ﻿using LiteNetLib;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 
 namespace SpeakingLanguage.Server.Network
 {
-    internal class PacketProcessor : IDisposable
+    internal sealed class PacketProcessor : IDisposable
     {
         private ServerListener _serverListener;
 
+        public PacketProcessor()
+        {
+        }
+
         public void Dispose()
         {
+            if (_serverListener == null)
+                return;
+
             var server = _serverListener.Server;
             server.Stop();
 
@@ -21,12 +29,16 @@ namespace SpeakingLanguage.Server.Network
                 server.Statistics.PacketsSent);
         }
 
-        public PacketProcessor(ref Logic.StartInfo info)
+        public void Run(int port)
         {
+            Console.WriteLine("=== SpeakingLanguage Server ===");
+
+            //var timer = new Stopwatch();
+            //timer.Start();
             _serverListener = new ServerListener();
 
             var server = new NetManager(_serverListener);
-            if (!server.Start(info.port))
+            if (!server.Start(port))
             {
                 Console.WriteLine("Server start failed");
                 Console.ReadKey();
@@ -36,11 +48,36 @@ namespace SpeakingLanguage.Server.Network
 
             var receiver = new PacketReceiver();
             _serverListener.Receiver = receiver;
-        }
 
-        public void Update()
-        {
-            _serverListener.Server.PollEvents();
+            var worldManager = WorldManager.Instance;
+            var eventManager = Logic.EventManager.Instance;
+            while (!Console.KeyAvailable)
+            {
+                eventManager.FrameEnter();
+
+                server.PollEvents();
+                worldManager.PullData();
+                
+                var ret = eventManager.ExecuteFrame();
+                ret.Display();
+                if (ret.Leg >= 0)
+                    continue;
+                
+                Thread.Sleep(-ret.Leg);
+                //Thread.Sleep(15);
+
+                //timer.Restart();
+                //
+                //server.PollEvents();
+                //
+                //timer.Stop();
+                //var elapsed = timer.ElapsedMilliseconds;
+                //var leg = (int)elapsed - 16667;
+                //if (leg >= 0)
+                //    continue;
+                //
+                //Thread.Sleep(-leg);
+            }
         }
     }
 }

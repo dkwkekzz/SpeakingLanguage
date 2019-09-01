@@ -29,12 +29,18 @@ namespace SpeakingLanguage.Logic
             public bool MoveNext()
             {
                 if (null == cur)
-                {
                     cur = Library.umnChunk.GetPtr<slObject>(root);
-                }
                 else
+                    cur = slObjectHelper.GetNext(cur);
+
+                if (null == cur)
+                    return false;
+
+                while (cur->handle.value < 0)
                 {
                     cur = slObjectHelper.GetNext(cur);
+                    if (cur == null)
+                        break;
                 }
                 
                 return null != cur;
@@ -47,15 +53,17 @@ namespace SpeakingLanguage.Logic
         }
         
         private readonly Library.umnMarshal _umnAllocator;
-        private Library.umnStack _frontStack;
-        private Library.umnStack _backStack;
+        private Library.umnStack _readStack;
+        private Library.umnStack _writeStack;
         private Library.umnHashMap<slObjectEqualityComparer, slObjectHandle, slObject> _lookup;
+
+        public int Count => _lookup.Count;
 
         public slObjectCollection(int defaultObjectCount)
         {
             _umnAllocator = new Library.umnMarshal();
-            _frontStack = new Library.umnStack(_umnAllocator.Alloc(defaultObjectCount * 64));
-            _backStack = new Library.umnStack(_umnAllocator.Alloc(defaultObjectCount * 64));
+            _readStack = new Library.umnStack(_umnAllocator.Alloc(defaultObjectCount * 64));
+            _writeStack = new Library.umnStack(_umnAllocator.Alloc(defaultObjectCount * 64));
             _lookup = Library.umnHashMap<slObjectEqualityComparer, slObjectHandle, slObject>.CreateNew(ref _umnAllocator, defaultObjectCount);
         }
 
@@ -67,17 +75,17 @@ namespace SpeakingLanguage.Logic
 
         public Enumerator GetEnumerator()
         {
-            return new Enumerator(_frontStack.Root);
+            return new Enumerator(_readStack.Root);
         }
 
         IEnumerator<slObject> IEnumerable<slObject>.GetEnumerator()
         {
-            return new Enumerator(_frontStack.Root);
+            return new Enumerator(_readStack.Root);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return new Enumerator(_frontStack.Root);
+            return new Enumerator(_readStack.Root);
         }
         
         public void Dispose()
@@ -88,14 +96,14 @@ namespace SpeakingLanguage.Logic
         public void SwapBuffer()
         {
             // lookup reset at last step for multithreading
-            var iter = new Enumerator(_backStack.Root);
+            var iter = new Enumerator(_writeStack.Root);
             while (iter.MoveNext())
             {
                 var objPtr = iter.Current;
                 _lookup[&objPtr->handle] = objPtr;
             }
 
-            Library.umnStack.Swap(ref _frontStack, ref _backStack);
+            Library.umnStack.Swap(ref _readStack, ref _writeStack);
         }
 
         public slObject* Find(slObjectHandle handle)
@@ -106,9 +114,18 @@ namespace SpeakingLanguage.Logic
             return _lookup[handle];
         }
 
-        public void InsertFront(ref Library.Reader reader, int size)
+        public void InsertFront(ref Library.Reader reader)
         {
-            var objPtr = (slObject*)_frontStack.Push(ref reader, size);
+            var objPtr = (slObject*)_readStack.Push(ref reader);
+            if (null == objPtr)
+            {
+                bool read = reader.ReadInt(out int handleValue);
+                if (!read || handleValue < 0)
+                    Library.ThrowHelper.ThrowWrongArgument($"Fail to deserialize object");
+
+                objPtr = slObject.CreateNew(ref _readStack, handleValue);
+            }
+
             _lookup[&objPtr->handle] = objPtr;
         }
 
@@ -117,13 +134,13 @@ namespace SpeakingLanguage.Logic
             var objPtr = (slObject*)ctx.ObjectPtr.ToPointer();
             objPtr->capacity = ctx.ObjectLength + ctx.StackOffset;
 
-            _backStack.Push(objPtr, ctx.ObjectLength);
-            _backStack.Push(ctx.StackPtr.ToPointer(), ctx.StackOffset);
+            _writeStack.Push(objPtr, ctx.ObjectLength);
+            _writeStack.Push(ctx.StackPtr.ToPointer(), ctx.StackOffset);
         }
         
-        public slObject* Create(int dataIndex)
+        public slObject* Create(int handleValue)
         {
-            var pObj = slObject.CreateNew(ref _backStack, GenerateHandle);
+            var pObj = slObject.CreateNew(ref _writeStack, handleValue);
             _lookup.Add(&pObj->handle, pObj);
             return pObj;
         }
@@ -134,6 +151,7 @@ namespace SpeakingLanguage.Logic
             objChk->Disposed = true;
 
             _lookup.Remove(&obj->handle);
+            obj->Dispose();
         }
 
     }

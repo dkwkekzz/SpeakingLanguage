@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="Code.cs" />
     <Compile Include="Define.cs" />
+    <Compile Include="Packet\AuthenticationData.cs" />
     <Compile Include="Packet\InteractionData.cs" />
     <Compile Include="Packet\KeyboardData.cs" />
     <Compile Include="Packet\ObjectData.cs" />

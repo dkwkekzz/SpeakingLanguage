@@ -46,6 +46,11 @@ namespace SpeakingLanguage.Library
                 size);
         }
 
+        public int Count
+        {
+            get { return count - freeCount; }
+        }
+
         public TValue* this[TKey key]
         {
             get

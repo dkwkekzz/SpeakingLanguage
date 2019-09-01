@@ -20,7 +20,8 @@ namespace SpeakingLanguage.Logic.Process
                 var pSubject = colObj.Find(selectedSubjectHandle);
                 if (null == pSubject)
                 {
-                    Library.Tracer.Error($"no found subject with handle at streaming: {selectedSubjectHandle.ToString()}");
+                    Library.Tracer.Error($"[Logic::Process::Interactor] No found subject with handle: {selectedSubjectHandle.ToString()}");
+                    exist = graph.MoveNext();
                     continue;
                 }
 
@@ -56,13 +57,23 @@ namespace SpeakingLanguage.Logic.Process
 
                 colAct.InvokeSelf(ref actionCtx, ref stateSyncPair.subject);
 
+                var subjectLogicState = slObjectHelper.GetDefaultState(pSubject);
                 do
                 {
                     var selectedTargetHandle = graph.CurrentValue;
                     var pTarget = colObj.Find(selectedTargetHandle);
                     if (null == pTarget)
                     {
-                        Library.Tracer.Error($"no found target with handle at streaming: {selectedTargetHandle.ToString()}");
+                        Library.Tracer.Error($"[Logic::Process::Interactor] No found target with handle: {selectedTargetHandle.ToString()}");
+                        exist = graph.MoveNext();
+                        continue;
+                    }
+
+                    var targetLogicState = slObjectHelper.GetDefaultState(pTarget);
+                    if (!ValidateHelper.ValidateInteract(subjectLogicState, targetLogicState))
+                    {
+                        Library.Tracer.Error($"[Logic::Process::Interactor] Fail to validate interation: {selectedSubjectHandle.ToString()} to {selectedTargetHandle.ToString()}");
+                        exist = graph.MoveNext();
                         continue;
                     }
 
