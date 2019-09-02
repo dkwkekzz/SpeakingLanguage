@@ -35,6 +35,7 @@ namespace SpeakingLanguage.Logic
         public void Dispose()
         {
             colObj.Dispose();
+            itrGraph.Dispose();
         }
 
         public unsafe void DeserializeObject(ref Library.Reader reader)
@@ -65,6 +66,7 @@ namespace SpeakingLanguage.Logic
         public FrameResult End()
         {
             colObj.SwapBuffer();
+            itrGraph.Reset();
 
             return new FrameResult
             {

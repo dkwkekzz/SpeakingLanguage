@@ -3,15 +3,8 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Library.Collection
 {
-    public struct OptimizedDisjointSet<TKey>
+    public struct OptimizedDisjointSet
     {
-        private struct Value
-        {
-            public int parent;
-            public int rank;
-            public int size;
-        }
-        
         private int[] _parent, _rank, _size;
 
         public OptimizedDisjointSet(int n)

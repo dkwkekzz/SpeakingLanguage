@@ -44,21 +44,18 @@ namespace SpeakingLanguage.Logic
             _controllers.Add(stEvent);
         }
 
-        public void Insert(Interaction stEvent)
+        public void InsertInteraction(int subjectHandleValue, int targetHandleValue)
         {
-            var lhsValue = stEvent.lhs.value;
-            var rhsValue = stEvent.rhs.value;
-            if (lhsValue == rhsValue)
+            if (subjectHandleValue == targetHandleValue)
             {
-                Library.Tracer.Error($"could not self interact: {lhsValue.ToString()} to {rhsValue.ToString()}");
+                Library.Tracer.Error($"You cannot self interact: {subjectHandleValue.ToString()}");
                 return;
             }
 
-            _interactions.Add(new Interaction
-            {
-                lhs = lhsValue < rhsValue ? stEvent.lhs : stEvent.rhs,
-                rhs = lhsValue < rhsValue ? stEvent.rhs : stEvent.lhs,
-            });
+            if (subjectHandleValue > targetHandleValue)
+                Library.Algorithms.Swap(ref subjectHandleValue, ref targetHandleValue);
+
+            _logicService.itrGraph.Insert(subjectHandleValue, targetHandleValue);
         }
         
         public void FrameEnter()

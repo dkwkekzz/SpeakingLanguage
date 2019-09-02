@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Logic
 {
-    public struct Interaction : IEventData<Interaction>
+    internal struct Interaction : IEventData<Interaction>
     {
         public slObjectHandle lhs;
         public slObjectHandle rhs;

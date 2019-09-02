@@ -6,37 +6,39 @@ namespace SpeakingLanguage.Logic.Collection
 {
     internal unsafe struct InteractGroup :IEnumerator<Interaction>
     {
-        private Library.umnArray<Interaction> _arrInter;
+        private readonly Library.umnArray<Interaction>.Indexer _interactions;
+        private int _begin, _current, _end;
+        
+        public int Length => _end - _begin + 1;
 
-        public int Size => _arrInter.Length;
-
-        public Interaction Current => *(_arrInter.PopBack());
+        public Interaction Current => *_interactions[_current];
         object IEnumerator.Current => Current;
 
-        public InteractGroup(Library.umnChunk* chk)
+        public InteractGroup(Library.umnArray<Interaction>.Indexer indexer, int begin, int end)
         {
-            _arrInter = new Library.umnArray<Interaction>(chk);
+            _interactions = indexer;
+            _begin = begin;
+            _end = end;
+            _current = -1;
         }
-
-        public void Insert(Interaction st)
-        {
-            _arrInter.PushBack(&st);
-        }
-
+        
         public void Dispose()
         {
         }
 
         public bool MoveNext()
         {
-            if (_arrInter.Length <= 0)
-                return false;
+            if (_current == -1)
+                _current = _begin;
+            else
+                _current++;
 
-            return true;
+            return _current < _end;
         }
 
         public void Reset()
         {
+            _current = -1;
         }
     }
 }

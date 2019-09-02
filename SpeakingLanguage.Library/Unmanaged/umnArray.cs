@@ -10,20 +10,20 @@ namespace SpeakingLanguage.Library
     {
         public struct Enumerator : IEnumerator
         {
-            private readonly umnChunk* _chk;
+            private readonly IntPtr _head;
             private readonly int _capacity;
             private int _ofs;
             private int _sz;
 
-            public Enumerator(umnChunk* chk, int len)
+            public Enumerator(IntPtr head, int len)
             {
                 _sz = sizeof(T);
                 _capacity = len * _sz;
-                _chk = chk;
+                _head = head;
                 _ofs = -_sz;
             }
 
-            public T* Current => (T*)(umnChunk.GetPtr(_chk) + _ofs);
+            public T* Current => (T*)(_head + _ofs);
             object IEnumerator.Current => *Current;
 
             public bool MoveNext()
@@ -40,25 +40,46 @@ namespace SpeakingLanguage.Library
             }
         }
 
-        private readonly umnChunk* _chk;
+        public struct Indexer
+        {
+            private readonly IntPtr _head;
+            private readonly int _szElement;
+
+            public T* this[int index]
+            {
+                get
+                {
+                    var ofs = index * _szElement;
+                    return (T*)(_head + ofs);
+                }
+            }
+
+            public Indexer(IntPtr head, int szElement)
+            {
+                _head = head;
+                _szElement = szElement;
+            }
+        }
+
+        private readonly IntPtr _head;
         private readonly int _szElement;
         
         public int Capacity { get; }
         public int Length { get; private set; }
+        public bool IsCreated => _head == IntPtr.Zero;
 
         public T* this[int index]
         {
             get
             {
                 var ofs = index * _szElement;
-                var ptr = umnChunk.GetPtr(_chk);
-                return (T*)(ptr + ofs);
+                return (T*)(_head + ofs);
             }
             set
             {
                 var ofs = index * _szElement;
-                var ptr = umnChunk.GetPtr(_chk) + ofs;
-                Buffer.MemoryCopy(value, ptr.ToPointer(), _szElement, _szElement);
+                var ptr = (T*)(_head + ofs);
+                *ptr = *value;
             }
         }
         
@@ -72,7 +93,7 @@ namespace SpeakingLanguage.Library
 
         public umnArray(umnChunk* chk)
         {
-            _chk = chk;
+            _head = umnChunk.GetPtr(chk);
             _szElement = Marshal.SizeOf(typeof(T));
             Length = 0;
 
@@ -86,19 +107,23 @@ namespace SpeakingLanguage.Library
 
         public void CClear()
         {
-            var ptr = umnChunk.GetPtr(_chk).ToPointer();
-            UnmanagedHelper.Memset(ptr, 0, _chk->length);
+            UnmanagedHelper.Memset(_head.ToPointer(), 0, Capacity);
             Length = 0;
         }
 
         public Enumerator GetEnumerator()
         {
-            return new Enumerator(_chk, Length);
+            return new Enumerator(_head, Length);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        public Indexer GetIndexer()
+        {
+            return new Indexer(_head, _szElement);
         }
 
         public T* PushBack(T* e)
@@ -107,23 +132,35 @@ namespace SpeakingLanguage.Library
                 ThrowHelper.ThrowCapacityOverflow($"Capacity:{Capacity.ToString()}");
 
             var ofs = Length++ * _szElement;
-            var ptr = umnChunk.GetPtr(_chk) + ofs;
-            Buffer.MemoryCopy(e, ptr.ToPointer(), _szElement, _szElement);
-            return (T*)ptr;
+            var ptr = (T*)(_head + ofs);
+            *ptr = *e;
+            return ptr;
         }
-        
+
+        public T* PushBack(T e)
+        {
+            if (Capacity <= _szElement * Length)
+                ThrowHelper.ThrowCapacityOverflow($"Capacity:{Capacity.ToString()}");
+
+            var ofs = Length++ * _szElement;
+            var ptr = (T*)(_head + ofs);
+            *ptr = e;
+            return ptr;
+        }
+
         public T* PopBack()
         {
             if (Length <= 0)
                 ThrowHelper.ThrowCapacityOverflow($"Length:{Length.ToString()}");
 
             var ofs = --Length * _szElement;
-            return (T*)(umnChunk.GetPtr(_chk) + ofs);
+            return (T*)(_head + ofs);
         }
 
         public void Dispose()
         {
-            _chk->Disposed = true;
+            var chk = umnChunk.GetChunk(_head);
+            chk->Disposed = true;
         }
     }
 }
