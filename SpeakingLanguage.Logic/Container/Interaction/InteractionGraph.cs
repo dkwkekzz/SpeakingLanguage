@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SpeakingLanguage.Logic.Collection
+namespace SpeakingLanguage.Logic.Container
 {
     // umn버전으로 바꿔야함... service안의 객체들은 umn으로 접근해야함
     internal struct InteractionGraph : IDisposable
@@ -35,7 +35,7 @@ namespace SpeakingLanguage.Logic.Collection
         private readonly int _defaultInteractCount;
 
         private Dictionary<slObjectHandle, EdgeList>.Enumerator _graphEnumerator;
-        private int _currentInter;
+        private int _eventCount;
 
         public InteractionGraph(int defaultObjectCount, int defaultInteractCount)
         {
@@ -48,7 +48,7 @@ namespace SpeakingLanguage.Logic.Collection
             _defaultInteractCount = defaultInteractCount;
 
             _graphEnumerator = _dicGraph.GetEnumerator();
-            _currentInter = 0;
+            _eventCount = 0;
         }
 
         public void Dispose()
@@ -71,6 +71,7 @@ namespace SpeakingLanguage.Logic.Collection
                 return;
 
             list.Add(target);
+            _eventCount++;
         }
 
         public bool Remove(slObjectHandle subject)
@@ -89,11 +90,14 @@ namespace SpeakingLanguage.Logic.Collection
             _arrInter.Clear();
 
             _graphEnumerator = _dicGraph.GetEnumerator();
-            _currentInter = 0;
+            _eventCount = 0;
         }
 
         public bool TryGetInteractGroup(int capacity, out InteractGroup group)
         {
+            if (capacity < 0)
+                capacity = _eventCount;
+
             int begin = _arrInter.Length;
             int count = 0;
             while (_graphEnumerator.MoveNext())

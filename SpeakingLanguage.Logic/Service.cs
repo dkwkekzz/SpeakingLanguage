@@ -7,7 +7,7 @@ namespace SpeakingLanguage.Logic
     {
         internal readonly slActionCollection colAct;
         internal readonly slObjectCollection colObj;
-        internal readonly Collection.InteractionGraph itrGraph;
+        internal readonly Container.InteractionGraph itrGraph;
 
         // tick = ms / 10000
         public long CurrentTick => Library.Ticker.GlobalTicks;
@@ -24,7 +24,7 @@ namespace SpeakingLanguage.Logic
         {
             colAct = new slActionCollection();
             colObj = new slObjectCollection(info.default_objectcount);
-            itrGraph = new Collection.InteractionGraph(info.default_objectcount, info.default_interactcount);
+            itrGraph = new Container.InteractionGraph(info.default_objectcount, info.default_interactcount);
 
             BeginTick = Library.Ticker.GlobalTicks;
             Delta = 0;

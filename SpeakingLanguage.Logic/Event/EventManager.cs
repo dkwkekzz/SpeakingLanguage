@@ -15,8 +15,9 @@ namespace SpeakingLanguage.Logic
     public sealed class EventManager : Library.SingletonLazy<EventManager>
     {
         private Service _logicService;
-        private int _currentFrame;
-        public int CurrentFrame => _currentFrame;
+        private IProcessor _notifier;
+
+        public int CurrentFrame { get; private set; }
 
         //private readonly List<int> _tempList = new List<int>();
         //private readonly Dictionary<int, int> _tempDic = new Dictionary<int, int>();
@@ -30,6 +31,10 @@ namespace SpeakingLanguage.Logic
         public void Install(ref StartInfo info)
         {
             _logicService = new Service(ref info);
+            _notifier = new Process.Notifier(ref info);
+            _notifier.Awake();
+
+            CurrentFrame = 0;
             //_controllers = new DataList<Controller>(32);
             //_interactions = new DataList<Interaction>(32, new InteractionComparer());
         }
@@ -37,6 +42,7 @@ namespace SpeakingLanguage.Logic
         public void Uninstall()
         {
             _logicService.Dispose();
+            _notifier.Dispose();
         }
 
         public void Insert(Controller stEvent)
@@ -61,17 +67,12 @@ namespace SpeakingLanguage.Logic
         public void FrameEnter()
         {
             _logicService.Begin();
-            _currentFrame++;
-            //_controllers.Swap();
-            //_interactions.Swap();
+            CurrentFrame++;
         }
         
         public FrameResult ExecuteFrame()
         {
-            Process.Director.Execute(this, ref _logicService);
-            Process.Interactor.Execute(this, ref _logicService);
-            Process.Factory.Execute(this, ref _logicService);
-
+            _notifier.Signal(ref _logicService);
             return _logicService.End();
         }
 

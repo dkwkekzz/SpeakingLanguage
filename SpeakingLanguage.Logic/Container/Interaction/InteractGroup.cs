@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace SpeakingLanguage.Logic.Collection
+namespace SpeakingLanguage.Logic.Container
 {
     internal unsafe struct InteractGroup :IEnumerator<Interaction>
     {

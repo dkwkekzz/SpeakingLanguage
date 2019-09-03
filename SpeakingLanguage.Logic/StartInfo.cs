@@ -12,6 +12,8 @@ namespace SpeakingLanguage.Logic
         public int default_frameRate;
         public int default_objectcount;
         public int default_interactcount;
+        public int default_workercount;
+        public int default_jobchunklength;
 
         // unused
         public int max_byte_world_service;
