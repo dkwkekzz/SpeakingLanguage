@@ -51,6 +51,7 @@
     <Compile Include="Collection\ArrayEnumerator.cs" />
     <Compile Include="AssemblyHelper.cs" />
     <Compile Include="BoxedWriter.cs" />
+    <Compile Include="Collection\DisjointMap.cs" />
     <Compile Include="Collection\OptimizedDisjointSet.cs" />
     <Compile Include="Unmanaged\IumnAllocator.cs" />
     <Compile Include="Unmanaged\IumnEqualityComparer.cs" />
