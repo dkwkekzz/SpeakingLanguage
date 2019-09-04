@@ -13,7 +13,8 @@ namespace SpeakingLanguage.Logic.Process
             var interIter = group.GetEnumerator();
             while (interIter.MoveNext())
             {
-                var selectedSubjectHandle = interIter.CurrentSubject;
+                var pair = interIter.Current;
+                var selectedSubjectHandle = pair.handle;
                 var pSubject = colObj.Find(selectedSubjectHandle);
                 if (null == pSubject)
                 {
@@ -53,9 +54,10 @@ namespace SpeakingLanguage.Logic.Process
 
                 colAct.InvokeSelf(ref actionCtx, ref stateSyncPair.subject);
 
-                for (int i = 0; i != interIter.TargetLength; i++)
+                while (interIter.MoveNextChild())
                 {
-                    var selectedTargetHandle = interIter.Current;
+                    var tPair = interIter.Current;
+                    var selectedTargetHandle = tPair.handle;
                     var pTarget = colObj.Find(selectedTargetHandle);
                     if (null == pTarget)
                     {

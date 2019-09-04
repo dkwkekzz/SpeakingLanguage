@@ -7,10 +7,10 @@ namespace SpeakingLanguage.Logic
     {
         public int Compare(Interaction x, Interaction y)
         {
-            var ret = x.lhs.value.CompareTo(y.lhs.value);
+            var ret = x.subject.value.CompareTo(y.subject.value);
             if (ret != 0)
                 return ret;
-            return x.rhs.value.CompareTo(y.rhs.value);
+            return x.target.value.CompareTo(y.target.value);
         }
     }
 }

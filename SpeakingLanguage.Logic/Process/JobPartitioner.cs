@@ -35,10 +35,11 @@ namespace SpeakingLanguage.Logic.Process
 
         public int CollectJob(ref Service service, int workerCount)
         {
+            var objIter = service.colObj.GetEnumerator();
             var count = 0;
             if (workerCount == 1)
             {
-                if (!service.itrGraph.TryGetInteractGroup(-1, out Container.InteractGroup group))
+                if (!service.itrGraph.TryGetInteractGroup(ref objIter, -1, out Container.InteractGroup group))
                     return count;
 
                 _chunks.Push(group);
@@ -65,7 +66,7 @@ namespace SpeakingLanguage.Logic.Process
             {
                 for (int i = 0; i != workerCount; i++)
                 {
-                    if (!service.itrGraph.TryGetInteractGroup(offset, out Container.InteractGroup group))
+                    if (!service.itrGraph.TryGetInteractGroup(ref objIter, offset, out Container.InteractGroup group))
                         return count;
 
                     _chunks.Push(group);

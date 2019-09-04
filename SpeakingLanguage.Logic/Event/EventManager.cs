@@ -58,10 +58,20 @@ namespace SpeakingLanguage.Logic
                 return;
             }
 
+            var stInter = new Interaction
+            {
+                subject = subjectHandleValue,
+                target = targetHandleValue,
+                dir = InteractDirection.Forward,
+            };
+            
             if (subjectHandleValue > targetHandleValue)
-                Library.Algorithms.Swap(ref subjectHandleValue, ref targetHandleValue);
+            {
+                stInter.dir = InteractDirection.Backward;
+                Library.Algorithms.Swap(ref stInter.subject, ref stInter.target);
+            }
 
-            _logicService.itrGraph.Insert(subjectHandleValue, targetHandleValue);
+            _logicService.itrGraph.Insert(ref stInter);
         }
         
         public void FrameEnter()

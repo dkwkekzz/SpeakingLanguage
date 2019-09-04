@@ -47,6 +47,7 @@
     <Compile Include="Container\Action\slAction.cs" />
     <Compile Include="Container\Action\Attribute\TargetAttribute.cs" />
     <Compile Include="Container\Interaction\InteractGroup.cs" />
+    <Compile Include="Container\Interaction\InteractPair.cs" />
     <Compile Include="Event\Controller.cs" />
     <Compile Include="Event\DataList.cs" />
     <Compile Include="Event\EventManager.cs" />
@@ -74,7 +75,7 @@
     <Compile Include="TypeManager.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Process\Job\Interactor.cs" />
-    <Compile Include="Event\Interaction.cs" />
+    <Compile Include="Container\Interaction\Interaction.cs" />
     <Compile Include="Service.cs" />
     <Compile Include="Container\State\StateSyncPair.cs" />
     <Compile Include="Container\State\Position.cs" />
