@@ -5,7 +5,70 @@ namespace SpeakingLanguage.Logic.Process
 {
     internal static class Interactor
     {
-        public static unsafe void Execute(EventManager eventManager, ref Service service)
+        public static unsafe void Execute(ref Service service, ref Container.InteractGroup group)
+        {
+            ref readonly var colAct = ref service.colAct;
+            ref readonly var colObj = ref service.colObj;
+
+            var interIter = group.GetEnumerator();
+            while (interIter.MoveNext())
+            {
+                var selectedSubjectHandle = interIter.CurrentSubject;
+                var pSubject = colObj.Find(selectedSubjectHandle);
+                if (null == pSubject)
+                {
+                    Library.Tracer.Error($"[Logic::Process::Interactor] No found subject with handle: {selectedSubjectHandle.ToString()}");
+                    continue;
+                }
+
+                // set subject frame
+                pSubject->frame = service.FrameCount;
+
+                // invoke subject
+                var stateSyncPair = new StateSyncPair();
+
+                var subjectStateLookup = stackalloc Library.umnChunk*[8 * sizeof(StateSync)];
+                var subjectIter = pSubject->GetEnumerator();
+                var subjectStateTypeHandle = -1;
+                while (subjectIter.MoveNext())
+                {
+                    var chk = subjectIter.Current;
+                    if (subjectStateTypeHandle == chk->typeHandle)
+                        continue;
+
+                    subjectStateTypeHandle = chk->typeHandle;
+                    subjectStateLookup[subjectStateTypeHandle] = chk;
+
+                    stateSyncPair.subject.Insert(subjectStateTypeHandle);
+                }
+
+                byte* subjectStateStack = stackalloc byte[1024];
+                var actionCtx = new slActionContext
+                {
+                    subject = new slObjectContext(pSubject, subjectStateLookup, subjectStateStack),
+                    delta = service.Delta,
+                    beginTick = service.BeginTick,
+                    currentTick = service.CurrentTick,
+                };
+
+                colAct.InvokeSelf(ref actionCtx, ref stateSyncPair.subject);
+
+                for (int i = 0; i != interIter.TargetLength; i++)
+                {
+                    var selectedTargetHandle = interIter.Current;
+                    var pTarget = colObj.Find(selectedTargetHandle);
+                    if (null == pTarget)
+                    {
+                        Library.Tracer.Error($"[Logic::Process::Interactor] No found target with handle: {selectedTargetHandle.ToString()}");
+                        continue;
+                    }
+
+                }
+            }
+
+        }
+
+        public static unsafe void Execute2(EventManager eventManager, ref Service service)
         {
             ref readonly var colAct = ref service.colAct;
             ref readonly var colObj = ref service.colObj;
@@ -31,7 +94,7 @@ namespace SpeakingLanguage.Logic.Process
                 // invoke subject
                 var stateSyncPair = new StateSyncPair();
 
-                var subjectStateLookup = stackalloc Library.umnChunk*[128];
+                var subjectStateLookup = stackalloc Library.umnChunk*[8 * sizeof(StateSync)];
                 var subjectIter = pSubject->GetEnumerator();
                 var subjectStateTypeHandle = -1;
                 while (subjectIter.MoveNext())

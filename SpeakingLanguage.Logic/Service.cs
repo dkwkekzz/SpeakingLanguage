@@ -15,6 +15,7 @@ namespace SpeakingLanguage.Logic
         public int Delta { get; private set; }
         public int FrameRate { get; private set; }
         public int FrameTick { get; private set; }
+        public int FrameCount { get; private set; }
 
         public Service(StartInfo info) : this(ref info)
         {
@@ -30,6 +31,7 @@ namespace SpeakingLanguage.Logic
             Delta = 0;
             FrameRate = info.default_frameRate;
             FrameTick = 1000 * 10000 / FrameRate;
+            FrameCount = 0;
         }
 
         public void Dispose()

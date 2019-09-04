@@ -26,12 +26,13 @@ namespace SpeakingLanguage.Logic.Container
             }
         }
 
+        // [!] 혼자인 객체라도 전부 넣어주면 별도의 과정이 필요없다. 
         private readonly Dictionary<slObjectHandle, EdgeList> _dicGraph;
         private readonly Queue<EdgeList> _listPool;
         private readonly Queue<slObjectHandle> _queue;
 
         private readonly Library.umnMarshal _allocator;
-        private readonly Library.umnArray<Interaction> _arrInter;
+        private readonly Library.umnArray<int> _arrInter;
         private readonly int _defaultInteractCount;
 
         private Dictionary<slObjectHandle, EdgeList>.Enumerator _graphEnumerator;
@@ -44,7 +45,7 @@ namespace SpeakingLanguage.Logic.Container
             _queue = new Queue<slObjectHandle>();
 
             _allocator = new Library.umnMarshal();
-            _arrInter = Library.umnArray<Interaction>.CreateNew(ref _allocator, defaultObjectCount * defaultInteractCount);
+            _arrInter = Library.umnArray<int>.CreateNew(ref _allocator, defaultObjectCount * defaultInteractCount);
             _defaultInteractCount = defaultInteractCount;
 
             _graphEnumerator = _dicGraph.GetEnumerator();
@@ -67,6 +68,7 @@ namespace SpeakingLanguage.Logic.Container
                 _dicGraph.Add(subject, list);
             }
             
+            // [!] 양방향 여부를 구분해서 넣을 필요가 있다.
             if (list.Contains(target))
                 return;
 
@@ -134,10 +136,20 @@ namespace SpeakingLanguage.Logic.Container
                 var here = _queue.Dequeue();
                 if (!_dicGraph.TryGetValue(here, out EdgeList thereList))
                     continue;
-                
+
                 thereList.Order = ++order;
+                unsafe
+                {
+                    // rule: subject -> target1, target2, ... -1, subject -> t1, t2...
+                    _arrInter.PushBack(here.value);
+                }
 
                 var length = thereList.Count;
+                unsafe
+                {
+                    _arrInter.PushBack(length);
+                }
+
                 for (int i = 0; i != length; i++)
                 {
                     var there = thereList[i];
@@ -145,7 +157,8 @@ namespace SpeakingLanguage.Logic.Container
 
                     unsafe
                     {
-                        _arrInter.PushBack(new Interaction { lhs = here, rhs = there });
+                        //_arrInter.PushBack(new Interaction { lhs = here, rhs = there });
+                        _arrInter.PushBack(there.value);
                     }
                     count++;
                 }

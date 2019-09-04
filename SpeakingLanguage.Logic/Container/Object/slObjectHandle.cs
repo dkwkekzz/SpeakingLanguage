@@ -22,5 +22,7 @@ namespace SpeakingLanguage.Logic
         public static implicit operator slObjectHandle(int h) => new slObjectHandle { value = h };
         public static bool operator ==(slObjectHandle key, int h) => key.value == h;
         public static bool operator !=(slObjectHandle key, int h) => key.value != h;
+        public static bool operator ==(slObjectHandle lhs, slObjectHandle rhs) => lhs.value == rhs.value;
+        public static bool operator !=(slObjectHandle lhs, slObjectHandle rhs) => lhs.value != rhs.value;
     }
 }
