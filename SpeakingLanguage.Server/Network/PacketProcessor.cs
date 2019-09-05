@@ -56,7 +56,7 @@ namespace SpeakingLanguage.Server.Network
                 eventManager.FrameEnter();
 
                 server.PollEvents();
-                worldManager.PullData();
+                worldManager.FlushUser();
                 
                 var ret = eventManager.ExecuteFrame();
                 ret.Display();
@@ -64,19 +64,6 @@ namespace SpeakingLanguage.Server.Network
                     continue;
                 
                 Thread.Sleep(-ret.Leg);
-                //Thread.Sleep(15);
-
-                //timer.Restart();
-                //
-                //server.PollEvents();
-                //
-                //timer.Stop();
-                //var elapsed = timer.ElapsedMilliseconds;
-                //var leg = (int)elapsed - 16667;
-                //if (leg >= 0)
-                //    continue;
-                //
-                //Thread.Sleep(-leg);
             }
         }
     }

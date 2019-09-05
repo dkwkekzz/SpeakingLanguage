@@ -12,7 +12,7 @@ namespace SpeakingLanguage.ClientSample
         private ClientListener _clientListener;
         private bool running = false;
 
-        public void Run(ref Logic.StartInfo info)
+        public void Run(int port)
         {
             Console.WriteLine("=== SpeakingLanguage ClientSample ===");
 
@@ -30,7 +30,7 @@ namespace SpeakingLanguage.ClientSample
                 Console.WriteLine("Client1 start failed");
                 return;
             }
-            client1.Connect("127.0.0.1", info.port, Protocol.Define.GAME_KEY);
+            client1.Connect("127.0.0.1", port, Protocol.Define.GAME_KEY);
 
             //client2
             NetManager client2 = new NetManager(_clientListener)
@@ -40,7 +40,7 @@ namespace SpeakingLanguage.ClientSample
             };
 
             client2.Start();
-            client2.Connect("::1", info.port, Protocol.Define.GAME_KEY);
+            client2.Connect("::1", port, Protocol.Define.GAME_KEY);
 
             running = true;
             TestInput(client1.FirstPeer);

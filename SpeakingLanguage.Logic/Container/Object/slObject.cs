@@ -24,7 +24,7 @@ namespace SpeakingLanguage.Logic
                 {
                     begin = (Library.umnChunk*)((IntPtr)pObj + sizeof(slObject));
                     cur = null;
-                    capacity = pObj->capacity;
+                    capacity = pObj->Capacity;
                     offset = 0;
                 }
             }
@@ -57,10 +57,9 @@ namespace SpeakingLanguage.Logic
         }
         
         public slObjectHandle handle;
-        public int capacity;
-        public int frame;
-        
-        public static slObject* CreateNew<TAllocator>(ref TAllocator allocator, int handle)
+        public int Capacity { get; private set; }
+
+        public static slObject* CreateDefault<TAllocator>(ref TAllocator allocator, int handle)
             where TAllocator : unmanaged, Library.IumnAllocator
         {
             var szObj = sizeof(slObject);
@@ -73,7 +72,30 @@ namespace SpeakingLanguage.Logic
             chkDefaultState->typeHandle = TypeManager.SHDefaultState.key;
             chkDefaultState->length = szDefaultState;
             
-            objPtr->capacity = sizeof(Library.umnChunk) + szDefaultState;
+            objPtr->Capacity = sizeof(Library.umnChunk) + szDefaultState;
+
+            return objPtr;
+        }
+
+        public static slObject* CreateControl<TAllocator>(ref TAllocator allocator, int handle)
+            where TAllocator : unmanaged, Library.IumnAllocator
+        {
+            var szObj = sizeof(slObject);
+            var objChk = allocator.Alloc(szObj);
+            var objPtr = Library.umnChunk.GetPtr<slObject>(objChk);
+            objPtr->handle = handle;
+
+            var szDefaultState = TypeManager.SHDefaultState.size;
+            var chkDefaultState = allocator.Calloc(szDefaultState);
+            chkDefaultState->typeHandle = TypeManager.SHDefaultState.key;
+            chkDefaultState->length = szDefaultState;
+
+            var szControlState = TypeManager.SHControlState.size;
+            var chkControlState = allocator.Calloc(szControlState);
+            chkControlState->typeHandle = TypeManager.SHControlState.key;
+            chkControlState->length = szControlState;
+
+            objPtr->Capacity = sizeof(Library.umnChunk) + szDefaultState + sizeof(Library.umnChunk) + szControlState;
 
             return objPtr;
         }
@@ -87,10 +109,15 @@ namespace SpeakingLanguage.Logic
         {
             handle = -1;
         }
-        
+
+        public void Append(int offset)
+        {
+            Capacity += offset;
+        }
+
         public void Append(Library.umnChunk* chk)
         {
-            capacity += sizeof(Library.umnChunk) + chk->length;
+            Capacity += sizeof(Library.umnChunk) + chk->length;
         }
     }
 

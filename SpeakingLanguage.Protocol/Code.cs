@@ -26,11 +26,15 @@ namespace SpeakingLanguage.Protocol
             NullReferenceAgent,
             NullReferenceCollider,
             NullReferenceSubsrciber,
+            NullReferenceSubjectHandle,
             DuplicateAgent,
             OverflowSubscribe,
             FailToAuthentication,
             IllegalityDataForSelectSubject,
             IllegalityDataForInteraction,
+            FailToSerialize,
+            FailToDeserialize,
+            FailToInteraction,
             __MAX__
         }
     }

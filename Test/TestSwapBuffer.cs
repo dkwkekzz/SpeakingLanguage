@@ -96,6 +96,7 @@ namespace Test
                 {
                     var st1 = (ProjectileStruct*)(buffer + i * sz);
                     UpdateProjectile(st1, 0.5f);
+                    //*(ProjectileStruct*)(buffer + i * sz) = *st1;
                 }
             }
 
@@ -103,7 +104,7 @@ namespace Test
             {
                 var sz = sizeof(ProjectileStruct);
                 var buffer = *(_buffers[_bufIndex]);
-                for (int i = 0; i != count; i += 2)
+                for (int i = 0; i != count; i ++)
                 {
                     var st1 = (ProjectileStruct*)(buffer + i * sz);
                     UpdateProjectile(st1, 0.5f);
@@ -157,25 +158,30 @@ namespace Test
 
         static void Main()
         {
-            int count = 10000;
+            int count = 50000;
             using (var buffer = new SwapBuffer(count))
             {
                 var timer = new Stopwatch();
-                int refCount = 0;
-                var elapsed = 0L;
-                while (++refCount > 0)
-                {
-                    timer.Restart();
-                    //buffer.ExecuteNormal(count);
-                    buffer.ExecuteNormal2x(count);
-                    //buffer.ExecuteSwap(count);
-                    //buffer.ExecuteCopy(count);
-                    timer.Stop();
+                timer.Start();
 
-                    elapsed += timer.ElapsedTicks;
-                    Console.WriteLine($"elapsed: {(elapsed / refCount).ToString()}");
+                for (int i = 0; i != 1000; i++)
+                {
+                    buffer.ExecuteNormal(count);
                 }
-                
+
+                timer.Stop();
+                Console.WriteLine($"elapsed: {timer.ElapsedMilliseconds.ToString()}");
+
+                timer.Restart();
+
+                for (int i = 0; i != 1000; i++)
+                {
+                    buffer.ExecuteSwap(count);
+                }
+
+                timer.Stop();
+                Console.WriteLine($"elapsed: {timer.ElapsedMilliseconds.ToString()}");
+
                 Console.ReadLine();
             }
         }

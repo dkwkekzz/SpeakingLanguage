@@ -4,30 +4,14 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Logic
 {
-    /// <summary>
-    /// 1. serialize관련 함수를 모두 여기로 뺀다. 즉, service는 데이터만 제공해주며, 진입지점과 어떻게 집어넣을지는 eventmanager에서 관리한다.
-    /// 2. 집어넣는 작업과 로직수행작업을 절대로 동시에하지 않는다. 
-    /// 3. 2번으로 인해서 datalist에 담지 않고, service에 즉시 집어넣는다. 시리얼라이즈도 마찬가지이다.
-    /// 4. 시작시에 그래프를 그루핑한다. scc로 구분된 그룹으로 나누어 이를 스레드에게 분배한다. 
-    /// 5. 각 그룹에서는 엑션을 시작한다. 최초에 마주한 객체에대하여 self를 수행하고 이후 dfs로 연결된 노드끼리 complex를 수행한다. 
-    /// 6. target의 add는 postprocess를 이용하여 처리하도록 한다.
-    /// </summary>
     public sealed class EventManager : Library.SingletonLazy<EventManager>
     {
         private Service _logicService;
         private IProcessor _notifier;
 
-        public int CurrentFrame { get; private set; }
-
-        //private readonly List<int> _tempList = new List<int>();
-        //private readonly Dictionary<int, int> _tempDic = new Dictionary<int, int>();
-        //private readonly Queue<int> _tempQueue = new Queue<int>();
-        //
-        //private DataList<Controller> _controllers;
-        //private DataList<Interaction> _interactions;
-        //
-        //public ref Service Service => ref _logicService;
-
+        internal ref Service Service => ref _logicService;
+        internal int CurrentFrame { get; private set; }
+        
         public void Install(ref StartInfo info)
         {
             _logicService = new Service(ref info);
@@ -35,8 +19,6 @@ namespace SpeakingLanguage.Logic
             _notifier.Awake();
 
             CurrentFrame = 0;
-            //_controllers = new DataList<Controller>(32);
-            //_interactions = new DataList<Interaction>(32, new InteractionComparer());
         }
 
         public void Uninstall()
@@ -44,22 +26,35 @@ namespace SpeakingLanguage.Logic
             _logicService.Dispose();
             _notifier.Dispose();
         }
-        
-        public unsafe void InsertKeyboard(int subjectHandleValue, int key, int value)
+
+        public unsafe EventResult DeserializeObject(ref Library.Reader reader)
+        {
+            _logicService.colObj.InsertFront(ref reader);
+            return new EventResult(true);
+        }
+
+        public unsafe EventResult SerializeObject(slObjectHandle handle, ref Library.Writer writer)
+        {
+            var obj = _logicService.colObj.Find(handle);
+            if (obj == null)
+                return new EventResult(false, $"No has object: {handle.ToString()}");
+
+            var size = obj->Capacity + sizeof(slObject);
+            writer.WriteInt(size);
+            writer.WriteMemory(obj, size);
+
+            return new EventResult(true);
+        }
+
+        public unsafe EventResult InsertKeyboard(int subjectHandleValue, int key, int value)
         {
             var pSubject = _logicService.colObj.Find(subjectHandleValue);
             if (null == pSubject)
-            {
-                Library.Tracer.Error($"[InsertKeyboard] Null reference subject handle: {subjectHandleValue.ToString()}");
-                return;
-            }
+                return new EventResult(false, $"[InsertKeyboard] Null reference subject handle: {subjectHandleValue.ToString()}");
 
             var controlState = slObjectHelper.GetControlState(pSubject);
             if (null == controlState)
-            {
-                Library.Tracer.Error($"[InsertKeyboard] Null reference control state: {subjectHandleValue.ToString()}");
-                return;
-            }
+                return new EventResult(false, $"[InsertKeyboard] Null reference control state: {subjectHandleValue.ToString()}");
 
             var consoleKey = (ConsoleKey)key;
             switch (consoleKey)
@@ -98,36 +93,30 @@ namespace SpeakingLanguage.Logic
                     controlState->keyFire &= (value << 6);
                     break;
             }
+            return new EventResult(true);
         }
 
-        public unsafe void InsertTouch(int subjectHandleValue, int target, int fire)
+        public unsafe EventResult InsertTouch(int subjectHandleValue, int target, int fire)
         {
             var pSubject = _logicService.colObj.Find(subjectHandleValue);
             if (null == pSubject)
-            {
-                Library.Tracer.Error($"[InsertTouch] Null reference subject handle: {subjectHandleValue.ToString()}");
-                return;
-            }
+                return new EventResult(false, $"[InsertTouch] Null reference subject handle: {subjectHandleValue.ToString()}");
 
             var controlState = slObjectHelper.GetControlState(pSubject);
             if (null == controlState)
-            {
-                Library.Tracer.Error($"[InsertTouch] Null reference control state: {subjectHandleValue.ToString()}");
-                return;
-            }
+                return new EventResult(false, $"[InsertTouch] Null reference control state: {subjectHandleValue.ToString()}");
 
             controlState->touchTarget = target;
             controlState->touchFire = fire;
+
+            return new EventResult(true);
         }
 
-        public unsafe void InsertInteraction(int subjectHandleValue, int targetHandleValue)
+        public unsafe EventResult InsertInteraction(int subjectHandleValue, int targetHandleValue)
         {
             if (subjectHandleValue == targetHandleValue)
-            {
-                Library.Tracer.Error($"[InsertInteraction] You cannot self interact: {subjectHandleValue.ToString()}");
-                return;
-            }
-            
+                return new EventResult(false, $"[InsertInteraction] You cannot self interact: {subjectHandleValue.ToString()}");
+
             var stInter = new Interaction
             {
                 subject = subjectHandleValue,
@@ -135,6 +124,8 @@ namespace SpeakingLanguage.Logic
             };
             
             _logicService.itrGraph.Insert(ref stInter);
+
+            return new EventResult(true);
         }
         
         public void FrameEnter()

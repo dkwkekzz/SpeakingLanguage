@@ -10,11 +10,6 @@ namespace SpeakingLanguage.Logic.Process
             ref readonly var colAct = ref service.colAct;
             ref readonly var colObj = ref service.colObj;
             
-            // 일단... 스윕버퍼는 취소
-            // 여기서는 실제메모리에 모두 쓴다.
-            // 추가되는 상태는 별도 커맨드 버퍼로 넘긴다.
-            // 처리방법은 
-
             var interIter = group.GetEnumerator();
             while (interIter.MoveNext())
             {
@@ -27,8 +22,20 @@ namespace SpeakingLanguage.Logic.Process
                     continue;
                 }
 
-                // set subject frame
-                pSubject->frame = service.FrameCount;
+                // execute default logic
+                var subjectLogicState = slObjectHelper.GetDefaultState(pSubject);
+                var life = subjectLogicState->lifeCycle;
+                if (life.value == 0)
+                {
+                    colObj.Destroy(pSubject);
+                    continue;
+                }
+
+                var spawner = subjectLogicState->spawner;
+                if (spawner.value > 0)
+                {
+                    colObj.Create(spawner.value);
+                }
 
                 // invoke subject
                 var stateSyncPair = new StateSyncPair();
@@ -47,10 +54,11 @@ namespace SpeakingLanguage.Logic.Process
 
                     stateSyncPair.subject.Insert(subjectStateTypeHandle);
                 }
-                
+
+                byte* stackPtr = stackalloc byte[slSubject.STACK_BUFFER_SIZE];
                 var actionCtx = new slActionContext
                 {
-                    subject = new slObjectContext(pSubject, subjectStateLookup),
+                    subject = new slSubject(pSubject, subjectStateLookup, stackPtr),
                     delta = service.Delta,
                     beginTick = service.BeginTick,
                     currentTick = service.CurrentTick,
@@ -58,7 +66,7 @@ namespace SpeakingLanguage.Logic.Process
                 
                 colAct.InvokeSelf(ref actionCtx, ref stateSyncPair.subject);
 
-                var subjectLogicState = slObjectHelper.GetDefaultState(pSubject);
+                // iterate targets
                 while (interIter.MoveNextChild())
                 {
                     var targetPair = interIter.Current;
@@ -95,10 +103,12 @@ namespace SpeakingLanguage.Logic.Process
                         stateSyncPair.target.Insert(subjectStateTypeHandle);
                     }
                     
-                    actionCtx.target = new slObjectContext(pTarget, targetStateLookup);
+                    actionCtx.target = new slTarget(pTarget, targetStateLookup);
 
                     colAct.InvokeComplex(ref actionCtx, ref stateSyncPair);
                 }
+
+                colObj.InsertBack(ref actionCtx.subject);
             }
 
         }

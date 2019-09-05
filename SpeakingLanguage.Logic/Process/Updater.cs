@@ -23,6 +23,7 @@ namespace SpeakingLanguage.Logic.Process
             {
                 Library.Tracer.Write($"[Updater] start run!");
 
+                ref var service = ref EventManager.Instance.Service;
                 var sync = _jobctx.SyncHandle;
                 sync.SignalCompleted();
 
@@ -38,12 +39,7 @@ namespace SpeakingLanguage.Logic.Process
                         while (jobIter.MoveNext())
                         {
                             var groupIter = jobIter.Current;
-                            while (groupIter.MoveNext())
-                            {
-                                var interact = groupIter.Current;
-
-                                // execute job
-                            }
+                            Interactor.Execute(ref service, ref groupIter);
                         }
 
                         Thread.Yield();

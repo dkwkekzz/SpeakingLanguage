@@ -10,7 +10,6 @@ namespace SpeakingLanguage.Server
         {
             var subjectHandle = ctx.subject.Handle;
             var logicState = ctx.subject.Get<Logic.Default>();
-
             WorldManager.Instance.Colliders.Update(subjectHandle.value, ref logicState.position, ref logicState.detection);
         }
     }

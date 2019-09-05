@@ -15,25 +15,19 @@ namespace SpeakingLanguage.Logic
     {
         private static readonly TypeManager _instance = new TypeManager();
 
-        private static Dictionary<Type, TypeHandle> _dicHandle;
-
-        public static TypeHandle SHChunk { get; } = new TypeHandle { key = -1, value = typeof(Library.umnChunk), size = Marshal.SizeOf<Library.umnChunk>() };
-        public static TypeHandle SHObject { get; } = new TypeHandle { key = -2, value = typeof(slObject), size = Marshal.SizeOf<slObject>() };
-
+        private IReadOnlyDictionary<Type, TypeHandle> _dicHandle;
+        
         public static TypeHandle SHNull { get; } = new TypeHandle { key = 0, value = null, size = 0 };
         public static TypeHandle SHDefaultState { get; } = new TypeHandle { key = 1, value = typeof(Default), size = Marshal.SizeOf<Default>() };
         public static TypeHandle SHControlState { get; } = new TypeHandle { key = 2, value = typeof(Control), size = Marshal.SizeOf<Control>() };
 
-        static TypeManager()
+        public TypeManager()
         {
-            //Build();
+            Build();
         }
 
-        public static void Build()
+        public void Build()
         {
-            if (_dicHandle != null)
-                _dicHandle.Clear();
-            
             var dicHandle = new Dictionary<Type, TypeHandle>()
             {
                 { SHNull.value, SHNull },
@@ -56,7 +50,7 @@ namespace SpeakingLanguage.Logic
 
         public static TypeHandle GetStateHandle(Type t)
         {
-            return _dicHandle[t];
+            return _instance._dicHandle[t];
         }
     }
 }

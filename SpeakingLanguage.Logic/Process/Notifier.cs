@@ -12,7 +12,7 @@ namespace SpeakingLanguage.Logic.Process
 
         private readonly CancellationTokenSource _cts;
         private readonly List<Updater> _lstUpdater;
-
+        
         public SyncHandle SyncHandle => _syncHandle;
         public JobPartitioner JobPartitioner => _jobIter;
         public CancellationToken Token => _cts.Token;
@@ -52,12 +52,7 @@ namespace SpeakingLanguage.Logic.Process
                 while (_jobIter.MoveNext())
                 {
                     var groupIter = _jobIter.Current;
-                    while (groupIter.MoveNext())
-                    {
-                        var interact = groupIter.Current;
-
-                        // execute job
-                    }
+                    Interactor.Execute(ref service, ref groupIter);
                 }
 
                 Library.Tracer.Write($"[Notifier] waiting...");

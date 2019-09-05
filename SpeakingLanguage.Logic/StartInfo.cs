@@ -5,10 +5,6 @@ namespace SpeakingLanguage.Logic
 {
     public struct StartInfo
     {
-        public int port;
-        public int default_usercount;
-        public int default_dummycount;
-        public int default_scenecount;
         public int default_frameRate;
         public int default_objectcount;
         public int default_interactcount;

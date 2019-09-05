@@ -61,10 +61,10 @@
     <Compile Include="Interaction.cs" />
     <Compile Include="World\Database.cs" />
     <Compile Include="World\Agent\ISubscriber.cs" />
-    <Compile Include="World\LogicProcessor.cs" />
     <Compile Include="World\Scene\Scene.cs" />
     <Compile Include="World\Scene\IScene.cs" />
     <Compile Include="World\Scene\SceneHandle.cs" />
+    <Compile Include="World\StartInfo.cs" />
     <Compile Include="World\WorldManager.cs" />
   </ItemGroup>
   <ItemGroup>

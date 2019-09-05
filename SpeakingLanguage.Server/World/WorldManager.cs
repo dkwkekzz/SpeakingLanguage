@@ -12,7 +12,7 @@ namespace SpeakingLanguage.Server
         public User.Factory UserFactory { get; private set; }
         public Database Database { get; private set; }
         
-        public void Install(ref Logic.StartInfo info)
+        public void Install(ref World.StartInfo info)
         {
             Scenes = new SceneCollection(info.default_scenecount);
             Colliders = new ColliderCollection(info.default_usercount);
@@ -21,7 +21,7 @@ namespace SpeakingLanguage.Server
             Database = new Database();
         }
 
-        public void PullData()
+        public void FlushUser()
         {
             var userIter = Agents.GetUserEnumerator();
             while (userIter.MoveNext())

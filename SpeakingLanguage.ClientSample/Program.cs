@@ -24,11 +24,15 @@ namespace SpeakingLanguage.ClientSample
             
             var startInfo = new Logic.StartInfo()
             {
-                port = int.Parse(ConfigurationManager.AppSettings["port"]),
+                default_frameRate = "default_frameRate".ParseConfigOrDefault(60),
+                default_objectcount = "default_objectcount".ParseConfigOrDefault(10),
+                default_interactcount = "default_interactcount".ParseConfigOrDefault(100),
+                default_workercount = "default_workercount".ParseConfigOrDefault(1),
+                default_jobchunklength = "default_jobchunklength".ParseConfigOrDefault(16),
             };
 
             var processor = new PacketProcessor();
-            processor.Run(ref startInfo);
+            processor.Run("port".ParseConfig());
         }
     }
 }

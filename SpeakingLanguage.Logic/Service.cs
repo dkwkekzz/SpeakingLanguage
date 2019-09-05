@@ -15,7 +15,6 @@ namespace SpeakingLanguage.Logic
         public int Delta { get; private set; }
         public int FrameRate { get; private set; }
         public int FrameTick { get; private set; }
-        public int FrameCount { get; private set; }
 
         public Service(StartInfo info) : this(ref info)
         {
@@ -24,39 +23,19 @@ namespace SpeakingLanguage.Logic
         public Service(ref StartInfo info)
         {
             colAct = new slActionCollection();
-            colObj = new slObjectCollection(info.default_objectcount);
-            itrGraph = new Container.InteractionGraph(info.default_objectcount, info.default_interactcount);
+            colObj = new slObjectCollection(Config.default_objectcount);
+            itrGraph = new Container.InteractionGraph(Config.default_objectcount, Config.default_interactcount);
 
             BeginTick = Library.Ticker.GlobalTicks;
             Delta = 0;
-            FrameRate = info.default_frameRate;
+            FrameRate = Config.default_frameRate;
             FrameTick = 1000 * 10000 / FrameRate;
-            FrameCount = 0;
         }
 
         public void Dispose()
         {
             colObj.Dispose();
             itrGraph.Dispose();
-        }
-
-        public unsafe void DeserializeObject(ref Library.Reader reader)
-        {
-            colObj.InsertFront(ref reader);
-        }
-        
-        public unsafe void SerializeObject(slObjectHandle handle, ref Library.Writer writer)
-        {
-            var obj = colObj.Find(handle);
-            if (obj == null)
-            {
-                Library.Tracer.Error($"No has object: {handle.ToString()}");
-                return;
-            }
-
-            var size = obj->capacity + sizeof(slObject);
-            writer.WriteInt(size);
-            writer.WriteMemory(obj, size);
         }
 
         public void Begin()
@@ -67,7 +46,7 @@ namespace SpeakingLanguage.Logic
 
         public FrameResult End()
         {
-            //colObj.SwapBuffer();
+            colObj.SwapBuffer();
             itrGraph.Reset();
 
             return new FrameResult

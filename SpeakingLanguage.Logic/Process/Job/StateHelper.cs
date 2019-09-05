@@ -12,5 +12,6 @@ namespace SpeakingLanguage.Logic.Process
             var distance = lstate->detection.radius + rstate->detection.radius;
             return diffX * diffX + diffY * diffY >= distance * distance;
         }
+        
     }
 }

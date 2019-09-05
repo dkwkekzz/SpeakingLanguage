@@ -75,11 +75,8 @@ namespace SpeakingLanguage.Library
         public void* Push(ref Reader reader)
         {
             var ret = reader.ReadInt(out int size);
-            if (!ret)
-                return null;
-
-            if (size == 0)
-                return null;
+            if (!ret) return null;
+            if (size == 0) return null;
             
             var szChk = umnSize.umnChunk;
             var remained = _rootChk->length - _current;

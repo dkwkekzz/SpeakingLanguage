@@ -123,24 +123,24 @@ namespace SpeakingLanguage.Logic
                 if (!read || handleValue < 0)
                     Library.ThrowHelper.ThrowWrongArgument($"Fail to deserialize object");
 
-                objPtr = slObject.CreateNew(ref _readStack, handleValue);
+                objPtr = slObject.CreateDefault(ref _readStack, handleValue);
             }
 
             _lookup[&objPtr->handle] = objPtr;
         }
 
-        //public void InsertBack(ref slObjectContext ctx)
-        //{   
-        //    var objPtr = (slObject*)ctx.ObjectPtr.ToPointer();
-        //    objPtr->capacity = ctx.ObjectLength + ctx.StackOffset;
-        //
-        //    _writeStack.Push(objPtr, ctx.ObjectLength);
-        //    _writeStack.Push(ctx.StackPtr.ToPointer(), ctx.StackOffset);
-        //}
+        public void InsertBack(ref slSubject subject)
+        {   
+            var objPtr = (slObject*)subject.ObjectPtr.ToPointer();
+            objPtr->Append(subject.StackOffset);
+        
+            _writeStack.Push(objPtr, subject.ObjectLength);
+            _writeStack.Push(subject.StackPtr.ToPointer(), subject.StackOffset);
+        }
         
         public slObject* Create(int handleValue)
         {
-            var pObj = slObject.CreateNew(ref _writeStack, handleValue);
+            var pObj = slObject.CreateDefault(ref _writeStack, handleValue);
             _lookup.Add(&pObj->handle, pObj);
             return pObj;
         }

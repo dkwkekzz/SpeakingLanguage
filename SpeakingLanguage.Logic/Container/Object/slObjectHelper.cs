@@ -7,7 +7,7 @@ namespace SpeakingLanguage.Logic
     {
         public static slObject* GetNext(slObject* curObj)
         {
-            var nextChkPtr = (IntPtr)curObj + sizeof(slObject) + curObj->capacity;
+            var nextChkPtr = (IntPtr)curObj + sizeof(slObject) + curObj->Capacity;
             if (((Library.umnChunk*)nextChkPtr)->length == 0)
                 return null;
 
@@ -20,7 +20,7 @@ namespace SpeakingLanguage.Logic
             var ptr = (IntPtr)obj + sizeof(slObject) + sizeof(Library.umnChunk);
             return (Default*)ptr.ToPointer();
         }
-
+        
         public static Control* GetControlState(slObject* obj)
         {
             var iter = (Library.umnChunk*)((IntPtr)obj + sizeof(slObject) + sizeof(Library.umnChunk) + sizeof(Default));
