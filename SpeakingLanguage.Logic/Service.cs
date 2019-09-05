@@ -67,7 +67,7 @@ namespace SpeakingLanguage.Logic
 
         public FrameResult End()
         {
-            colObj.SwapBuffer();
+            //colObj.SwapBuffer();
             itrGraph.Reset();
 
             return new FrameResult

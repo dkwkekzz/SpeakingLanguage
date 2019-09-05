@@ -129,14 +129,14 @@ namespace SpeakingLanguage.Logic
             _lookup[&objPtr->handle] = objPtr;
         }
 
-        public void InsertBack(ref slObjectContext ctx)
-        {   // 삭제된것은 지워야함...
-            var objPtr = (slObject*)ctx.ObjectPtr.ToPointer();
-            objPtr->capacity = ctx.ObjectLength + ctx.StackOffset;
-
-            _writeStack.Push(objPtr, ctx.ObjectLength);
-            _writeStack.Push(ctx.StackPtr.ToPointer(), ctx.StackOffset);
-        }
+        //public void InsertBack(ref slObjectContext ctx)
+        //{   
+        //    var objPtr = (slObject*)ctx.ObjectPtr.ToPointer();
+        //    objPtr->capacity = ctx.ObjectLength + ctx.StackOffset;
+        //
+        //    _writeStack.Push(objPtr, ctx.ObjectLength);
+        //    _writeStack.Push(ctx.StackPtr.ToPointer(), ctx.StackOffset);
+        //}
         
         public slObject* Create(int handleValue)
         {

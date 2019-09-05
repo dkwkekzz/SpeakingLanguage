@@ -157,6 +157,15 @@ namespace SpeakingLanguage.Library
             return (T*)(_head + ofs);
         }
 
+        public T* GetLast()
+        {
+            if (Length <= 0)
+                return null;
+
+            var ofs = (Length - 1) * _szElement;
+            return (T*)(_head + ofs);
+        }
+
         public void Dispose()
         {
             var chk = umnChunk.GetChunk(_head);

@@ -8,7 +8,7 @@ namespace SpeakingLanguage.Logic.Container
     // umn버전으로 바꿔야함... service안의 객체들은 umn으로 접근해야함
     internal struct InteractionGraph : IDisposable
     {
-        private sealed class EdgeList : List<InteractPair>
+        private sealed class EdgeList : List<slObjectHandle>
         {
             public int Index { get; }
             public int Order { get; set; }
@@ -25,18 +25,10 @@ namespace SpeakingLanguage.Logic.Container
                 Order = 0;
             }
         }
-
-        private struct EdgeBlock
-        {
-            public slObjectHandle e1;
-            public slObjectHandle e2;
-            public slObjectHandle e3;
-            public slObjectHandle e4;
-        }
         
         private readonly Dictionary<slObjectHandle, EdgeList> _dicGraph;
         private readonly Queue<EdgeList> _listPool;
-        private readonly Queue<InteractPair> _queue;
+        private readonly Queue<slObjectHandle> _queue;
 
         private readonly Library.umnMarshal _allocator;
         private readonly Library.umnArray<InteractPair> _arrPair;
@@ -46,7 +38,7 @@ namespace SpeakingLanguage.Logic.Container
         {
             _dicGraph = new Dictionary<slObjectHandle, EdgeList>(defaultObjectCount);
             _listPool = new Queue<EdgeList>();
-            _queue = new Queue<InteractPair>();
+            _queue = new Queue<slObjectHandle>();
 
             _allocator = new Library.umnMarshal();
             _arrPair = Library.umnArray<InteractPair>.CreateNew(ref _allocator, defaultObjectCount * defaultInteractCount);
@@ -68,29 +60,12 @@ namespace SpeakingLanguage.Logic.Container
                     list = new EdgeList(_dicGraph.Count, _defaultInteractCount);
                 _dicGraph.Add(stInter.subject, list);
             }
-
-            var target = new InteractPair(stInter.target, (int)stInter.dir);
-            int targetIndex;
-            if ((targetIndex = list.IndexOf(target)) > 0)
-            {
-                var temp = list[targetIndex];
-                switch (temp.Direction)
-                {
-                    case InteractDirection.Forward:
-                        temp.value = (int)InteractDirection.BidirectForwardFirst;
-                        list[targetIndex] = temp;
-                        break;
-                    case InteractDirection.Backward:
-                        temp.value = (int)InteractDirection.BidirectBackwardFirst;
-                        list[targetIndex] = temp;
-                        break;
-                }
-                return;
-            }
-
-            list.Add(target);
+            
+            // [!] 성능상 문제. 
+            if (!list.Contains(stInter.target))
+                list.Add(stInter.target);
         }
-
+        
         public bool Remove(slObjectHandle subject)
         {
             _listPool.Enqueue(_dicGraph[subject]);
@@ -114,17 +89,7 @@ namespace SpeakingLanguage.Logic.Container
             while (objIter.MoveNext())
             {
                 var pObj = objIter.Current;
-                var handle = pObj->handle;
-                if (!_dicGraph.TryGetValue(handle, out EdgeList edgeList))
-                {
-                    _arrPair.PushBack(new InteractPair(handle, 0));
-                    continue;
-                }
-
-                if (edgeList.Order > 0)
-                    continue;
-
-                count += _bfsSelect(new InteractPair(handle, edgeList.Count));
+                count += _bfsSelect(pObj->handle);
                 if (capacity >= 0 && count >= capacity)
                     break;
             }
@@ -139,10 +104,9 @@ namespace SpeakingLanguage.Logic.Container
             return true;
         }
 
-        private unsafe int _bfsSelect(InteractPair first)
+        private unsafe int _bfsSelect(slObjectHandle first)
         {
-            if (_queue.Count > 0)
-                _queue.Clear();
+            Library.Tracer.Assert(_queue.Count == 0);
 
             int count = 0;
             
@@ -150,20 +114,22 @@ namespace SpeakingLanguage.Logic.Container
             while (_queue.Count > 0)
             {
                 var here = _queue.Dequeue();
-                _arrPair.PushBack(here);
 
-                if (!_dicGraph.TryGetValue(here.handle, out EdgeList thereList))
+                int length = 0;
+                if (_dicGraph.TryGetValue(here, out EdgeList thereList))
+                    length = thereList.Count;
+
+                _arrPair.PushBack(new InteractPair(here, length));
+                count++;
+
+                if (thereList.Order > 0 || length == 0)
                     continue;
                 thereList.Order = 1;
 
-                var length = thereList.Count;
                 for (int i = 0; i != length; i++)
                 {
                     var there = thereList[i];
                     _queue.Enqueue(there);
-                    
-                    _arrPair.PushBack(there);
-                    count++;
                 }
             }
 

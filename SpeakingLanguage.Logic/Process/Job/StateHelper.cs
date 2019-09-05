@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Logic.Process
 {
-    internal static class ValidateHelper
+    internal static class StateHelper
     {
         public static unsafe bool ValidateInteract(Default* lstate, Default* rstate)
         {

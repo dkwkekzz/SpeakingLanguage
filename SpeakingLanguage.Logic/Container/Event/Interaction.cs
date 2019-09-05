@@ -3,20 +3,10 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Logic
 {
-    internal enum InteractDirection
-    {
-        None,
-        Forward = 1000,
-        Backward,
-        BidirectForwardFirst,
-        BidirectBackwardFirst,
-    }
-
-    internal struct Interaction : IEventData<Interaction>
+    internal struct Interaction : IEquatable<Interaction>
     {
         public slObjectHandle subject;
         public slObjectHandle target;
-        public InteractDirection dir;
 
         public bool Equals(Interaction other)
         {

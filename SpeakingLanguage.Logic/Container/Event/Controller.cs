@@ -10,17 +10,17 @@ namespace SpeakingLanguage.Logic
         Touch,
     }
 
-    public struct Controller : IEventData<Controller>
+    public struct Controller : IEquatable<Controller>
     {
         public ControlType type;
-        public int objectHandleValue;
+        public int subjectHandleValue;
         public int key;
         public int value;
 
         public bool Equals(Controller other)
         {
             return type == other.type
-                && objectHandleValue == other.objectHandleValue
+                && subjectHandleValue == other.subjectHandleValue
                 && key == other.key
                 && value == other.value;
         }

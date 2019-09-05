@@ -48,10 +48,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes.cs" />
+    <None Include="TestMemory.cs" />
+    <None Include="TestTLS.cs" />
     <None Include="TestReflection.cs" />
-    <Compile Include="TestSCC.cs" />
+    <None Include="TestSCC.cs" />
     <None Include="TestComparer.cs" />
-    <None Include="TestSwapBuffer.cs" />
+    <Compile Include="TestSwapBuffer.cs" />
     <None Include="TestTable.cs" />
     <None Include="TestAttribute.cs" />
     <None Include="TestClassStruct.cs" />

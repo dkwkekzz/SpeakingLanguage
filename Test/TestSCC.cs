@@ -60,18 +60,18 @@ namespace Test
 
     class TestSCC
     {
-        static void Main()
+        static unsafe void Main()
         {
-            var disjoint = new OptimizedDisjointSet(100);
-            disjoint.Merge(0, 2);
-            disjoint.Merge(1, 2);
-            disjoint.Merge(2, 3);
-            disjoint.Merge(4, 5);
-            disjoint.Merge(3, 4);
-            disjoint.Merge(4, 7);
-            disjoint.Merge(4, 6);
-            disjoint.Merge(2, 3);
-
+            //var disjoint = new OptimizedDisjointSet(100);
+            //disjoint.Merge(0, 2);
+            //disjoint.Merge(1, 2);
+            //disjoint.Merge(2, 3);
+            //disjoint.Merge(4, 5);
+            //disjoint.Merge(3, 4);
+            //disjoint.Merge(4, 7);
+            //disjoint.Merge(4, 6);
+            //disjoint.Merge(2, 3);
+            
             Console.ReadLine();
         }
     }

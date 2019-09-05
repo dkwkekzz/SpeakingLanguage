@@ -99,6 +99,17 @@ namespace Test
                 }
             }
 
+            public void ExecuteNormal2x(int count)
+            {
+                var sz = sizeof(ProjectileStruct);
+                var buffer = *(_buffers[_bufIndex]);
+                for (int i = 0; i != count; i += 2)
+                {
+                    var st1 = (ProjectileStruct*)(buffer + i * sz);
+                    UpdateProjectile(st1, 0.5f);
+                }
+            }
+
             public void ExecuteSwap(int count)
             {
                 var sz = sizeof(ProjectileStruct);
@@ -156,8 +167,9 @@ namespace Test
                 {
                     timer.Restart();
                     //buffer.ExecuteNormal(count);
+                    buffer.ExecuteNormal2x(count);
                     //buffer.ExecuteSwap(count);
-                    buffer.ExecuteCopy(count);
+                    //buffer.ExecuteCopy(count);
                     timer.Stop();
 
                     elapsed += timer.ElapsedTicks;

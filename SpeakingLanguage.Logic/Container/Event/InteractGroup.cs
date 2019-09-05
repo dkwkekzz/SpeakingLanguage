@@ -39,10 +39,10 @@ namespace SpeakingLanguage.Logic.Container
                     return false;
 
                 if (ChildLength != 0)
-                    Library.ThrowHelper.ThrowWrongState($"Please call MoveNextChild to end: {ChildLength.ToString()}");
+                    Library.ThrowHelper.ThrowWrongState($"Please call MoveNextChild to end. ChildLength: {ChildLength.ToString()}");
 
                 ++_current;
-                ChildLength = _interactions[_current]->value;
+                ChildLength = _interactions[_current]->count;
                 return _current < _end;
             }
 
@@ -57,8 +57,9 @@ namespace SpeakingLanguage.Logic.Container
                 if (ChildLength == 0)
                     return false;
 
+                ++_current;
                 --ChildLength;
-                return ++_current < _end;
+                return _current < _end;
             }
 
             public void Reset()

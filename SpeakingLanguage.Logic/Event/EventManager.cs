@@ -44,33 +44,96 @@ namespace SpeakingLanguage.Logic
             _logicService.Dispose();
             _notifier.Dispose();
         }
-
-        public void Insert(Controller stEvent)
+        
+        public unsafe void InsertKeyboard(int subjectHandleValue, int key, int value)
         {
-            _controllers.Add(stEvent);
-        }
-
-        public void InsertInteraction(int subjectHandleValue, int targetHandleValue)
-        {
-            if (subjectHandleValue == targetHandleValue)
+            var pSubject = _logicService.colObj.Find(subjectHandleValue);
+            if (null == pSubject)
             {
-                Library.Tracer.Error($"You cannot self interact: {subjectHandleValue.ToString()}");
+                Library.Tracer.Error($"[InsertKeyboard] Null reference subject handle: {subjectHandleValue.ToString()}");
                 return;
             }
 
+            var controlState = slObjectHelper.GetControlState(pSubject);
+            if (null == controlState)
+            {
+                Library.Tracer.Error($"[InsertKeyboard] Null reference control state: {subjectHandleValue.ToString()}");
+                return;
+            }
+
+            var consoleKey = (ConsoleKey)key;
+            switch (consoleKey)
+            {
+                case ConsoleKey.LeftArrow:
+                    controlState->direction &= value;
+                    break;
+                case ConsoleKey.RightArrow:
+                    controlState->direction &= (value << 2);
+                    break;
+                case ConsoleKey.UpArrow:
+                    controlState->direction &= (value << 4);
+                    break;
+                case ConsoleKey.DownArrow:
+                    controlState->direction &= (value << 8);
+                    break;
+                case 0: // ctrl
+                    controlState->keyFire &= (value);
+                    break;
+                case (ConsoleKey)1: // alt
+                    controlState->keyFire &= (value << 1);
+                    break;
+                case (ConsoleKey)2: // shift
+                    controlState->keyFire &= (value << 2);
+                    break;
+                case ConsoleKey.A:
+                    controlState->keyFire &= (value << 3);
+                    break;
+                case ConsoleKey.S:
+                    controlState->keyFire &= (value << 4);
+                    break;
+                case ConsoleKey.D:
+                    controlState->keyFire &= (value << 5);
+                    break;
+                case ConsoleKey.W:
+                    controlState->keyFire &= (value << 6);
+                    break;
+            }
+        }
+
+        public unsafe void InsertTouch(int subjectHandleValue, int target, int fire)
+        {
+            var pSubject = _logicService.colObj.Find(subjectHandleValue);
+            if (null == pSubject)
+            {
+                Library.Tracer.Error($"[InsertTouch] Null reference subject handle: {subjectHandleValue.ToString()}");
+                return;
+            }
+
+            var controlState = slObjectHelper.GetControlState(pSubject);
+            if (null == controlState)
+            {
+                Library.Tracer.Error($"[InsertTouch] Null reference control state: {subjectHandleValue.ToString()}");
+                return;
+            }
+
+            controlState->touchTarget = target;
+            controlState->touchFire = fire;
+        }
+
+        public unsafe void InsertInteraction(int subjectHandleValue, int targetHandleValue)
+        {
+            if (subjectHandleValue == targetHandleValue)
+            {
+                Library.Tracer.Error($"[InsertInteraction] You cannot self interact: {subjectHandleValue.ToString()}");
+                return;
+            }
+            
             var stInter = new Interaction
             {
                 subject = subjectHandleValue,
                 target = targetHandleValue,
-                dir = InteractDirection.Forward,
             };
             
-            if (subjectHandleValue > targetHandleValue)
-            {
-                stInter.dir = InteractDirection.Backward;
-                Library.Algorithms.Swap(ref stInter.subject, ref stInter.target);
-            }
-
             _logicService.itrGraph.Insert(ref stInter);
         }
         
