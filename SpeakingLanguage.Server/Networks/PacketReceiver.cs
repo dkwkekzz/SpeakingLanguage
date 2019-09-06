@@ -3,7 +3,7 @@ using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;
 
-namespace SpeakingLanguage.Server.Network
+namespace SpeakingLanguage.Server.Networks
 {
     internal class PacketReceiver
     {
@@ -22,12 +22,14 @@ namespace SpeakingLanguage.Server.Network
 
         private readonly WorldManager _world;
         private readonly NetDataWriter _sendWriter;
+        private readonly IDatabase _database;
         private readonly Func<NetPeer, NetPacketReader, Result>[] _packetActions;
 
         public PacketReceiver()
         {
             _world = WorldManager.Instance;
             _sendWriter = new NetDataWriter(true, 256);
+            _database = new FileDatabase();
             _packetActions = new Func<NetPeer, NetPacketReader, Result>[(int)Protocol.Code.Packet.__MAX__];
             _packetActions[(int)Protocol.Code.Packet.Authentication] = _onAuthentication;
             _packetActions[(int)Protocol.Code.Packet.Terminate] = _onTerminate;
@@ -97,7 +99,7 @@ namespace SpeakingLanguage.Server.Network
             if (!ReceiverHelper.ValidateAuthenticate(ref data))
                 return new Result(Protocol.Code.Error.FailToAuthentication);
 
-            _world.Database.ConstructUser(agent, data.id, data.pswd);
+            _database.ConstructUser(agent, data.id, data.pswd);
             return new Result();
         }
 
@@ -155,7 +157,7 @@ namespace SpeakingLanguage.Server.Network
             if (!_world.Colliders.TryGetCollider(subjectData.handleValue, out Collider collider))
             {
                 Library.Reader objReader;
-                _world.Database.ConstructObject(subjectData.handleValue, out objReader);
+                _database.ConstructObject(subjectData.handleValue, out objReader);
 
                 var eRes = eventManager.DeserializeObject(ref objReader);
                 if (!eRes.Success)

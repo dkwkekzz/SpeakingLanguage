@@ -47,6 +47,7 @@ namespace Test
     class TestTLS
     {
         private static ConcurrentDictionary<int, TLS> _dicTLS = new ConcurrentDictionary<int, TLS>();
+        private static Dictionary<int, TLS> _dicTLS2 = new Dictionary<int, TLS>();
 
         private static void ThreadFun()
         {
@@ -70,11 +71,22 @@ namespace Test
             Console.WriteLine("thread {0} exiting", tid);
         }
 
+        private static void ThreadFun2()
+        {
+            var tid = Thread.CurrentThread.ManagedThreadId;
+            _dicTLS2[tid] = new TLS();
+            for (int i = 0; i != 10000; i++)
+            {
+                _dicTLS2[tid].value += i;
+            }
+            Console.WriteLine("thread {0} exiting: {1}", tid.ToString(), _dicTLS2[tid].value.ToString());
+        }
+
         static void Main()
         {
-            Task.Factory.StartNew(TestTLS.ThreadFun);
+            Task.Factory.StartNew(TestTLS.ThreadFun2);
     
-            Task.Factory.StartNew(TestTLS.ThreadFun);
+            Task.Factory.StartNew(TestTLS.ThreadFun2);
     
             Console.ReadLine();
         }

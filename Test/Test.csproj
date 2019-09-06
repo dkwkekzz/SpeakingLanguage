@@ -50,11 +50,11 @@
   <ItemGroup>
     <Compile Include="Classes.cs" />
     <None Include="TestMemory.cs" />
-    <None Include="TestTLS.cs" />
+    <Compile Include="TestTLS.cs" />
     <None Include="TestReflection.cs" />
     <None Include="TestSCC.cs" />
     <None Include="TestComparer.cs" />
-    <Compile Include="TestSwapBuffer.cs" />
+    <None Include="TestSwapBuffer.cs" />
     <None Include="TestTable.cs" />
     <None Include="TestAttribute.cs" />
     <None Include="TestClassStruct.cs" />

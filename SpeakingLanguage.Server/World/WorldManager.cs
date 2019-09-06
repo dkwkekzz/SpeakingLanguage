@@ -10,7 +10,6 @@ namespace SpeakingLanguage.Server
         public ColliderCollection Colliders { get; private set; }
         public AgentCollection Agents { get; private set; }
         public User.Factory UserFactory { get; private set; }
-        public Database Database { get; private set; }
         
         public void Install(ref World.StartInfo info)
         {
@@ -18,7 +17,6 @@ namespace SpeakingLanguage.Server
             Colliders = new ColliderCollection(info.default_usercount);
             Agents = new AgentCollection(info.default_usercount, info.default_dummycount);
             UserFactory = new User.Factory(info.default_usercount);
-            Database = new Database();
         }
 
         public void FlushUser()

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 
-namespace SpeakingLanguage.Server.Network
+namespace SpeakingLanguage.Server.Networks
 {
     internal sealed class ServerListener : INetEventListener
     {

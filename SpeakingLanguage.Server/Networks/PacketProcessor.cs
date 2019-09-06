@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 
-namespace SpeakingLanguage.Server.Network
+namespace SpeakingLanguage.Server.Networks
 {
     internal sealed class PacketProcessor : IDisposable
     {

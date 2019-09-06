@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace SpeakingLanguage.Server
+namespace SpeakingLanguage.Server.Networks
 {
-    internal class Database
+    internal class FileDatabase : IDatabase
     {
         private byte[] _buffer = new byte[1024];
 

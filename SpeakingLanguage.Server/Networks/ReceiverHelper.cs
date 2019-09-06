@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SpeakingLanguage.Server.Network
+namespace SpeakingLanguage.Server.Networks
 {
     internal static class ReceiverHelper
     {

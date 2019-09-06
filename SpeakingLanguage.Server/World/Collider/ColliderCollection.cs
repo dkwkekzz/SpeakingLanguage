@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace SpeakingLanguage.Server
 {
     internal class ColliderCollection
     {
-        private ConcurrentDictionary<int, Collider> _dicColliders;
+        private Dictionary<int, Collider> _dicColliders;
 
         public ColliderCollection() : this(0)
         {
@@ -14,7 +15,7 @@ namespace SpeakingLanguage.Server
 
         public ColliderCollection(int capacity)
         {
-            _dicColliders = new ConcurrentDictionary<int, Collider>(2, capacity);
+            _dicColliders = new Dictionary<int, Collider>(capacity);
         }
 
         public bool TryGetCollider(int objHandleValue, out Collider collider)

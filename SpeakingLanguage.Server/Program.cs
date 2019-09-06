@@ -47,7 +47,7 @@ namespace SpeakingLanguage.Server
 
             // process
 
-            var processor = new Network.PacketProcessor();
+            var processor = new Networks.PacketProcessor();
             processor.Run(worldInfo.port);
 
             // uninstall
