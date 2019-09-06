@@ -71,24 +71,7 @@ namespace SpeakingLanguage.Library
             _current += size;
             return dest;
         }
-
-        public void* Push(ref Reader reader)
-        {
-            var ret = reader.ReadInt(out int size);
-            if (!ret) return null;
-            if (size == 0) return null;
-            
-            var szChk = umnSize.umnChunk;
-            var remained = _rootChk->length - _current;
-            if (remained < size)
-                ThrowHelper.ThrowOutOfMemory("at umnStack::PushBack");
-
-            var dest = (_rootPtr + _current).ToPointer();
-            reader.ReadMemory(dest, size);
-            _current += size;
-            return dest;
-        }
-
+        
         public void CopyTo(void* dest)
         {
             var ofs = _current;

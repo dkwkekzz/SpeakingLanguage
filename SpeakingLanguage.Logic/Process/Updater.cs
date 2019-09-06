@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 namespace SpeakingLanguage.Logic.Process
 {
-    // merge 만들어야함...
     internal sealed class Updater
     {
         private readonly IJobContext _jobctx;

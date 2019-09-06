@@ -29,32 +29,45 @@ namespace SpeakingLanguage.Logic
 
         public unsafe EventResult DeserializeObject(ref Library.Reader reader)
         {
-            _logicService.colObj.InsertFront(ref reader);
-            return new EventResult(true);
+            var read = reader.ReadInt(out int length);
+            if (!read) return new EventResult(EventError.FailToReadLength);
+
+            if (length == 0)
+            {
+                read = reader.ReadInt(out int handleValue);
+                if (!read || handleValue < 0) return new EventResult(EventError.FailToReadHandle);
+
+                _logicService.colObj.CreateFront(handleValue);
+            }
+            else
+            {
+                _logicService.colObj.InsertFront(reader.Buffer, reader.Position, length);
+            }
+            return new EventResult();
         }
 
         public unsafe EventResult SerializeObject(slObjectHandle handle, ref Library.Writer writer)
         {
             var obj = _logicService.colObj.Find(handle);
             if (obj == null)
-                return new EventResult(false, $"No has object: {handle.ToString()}");
+                return new EventResult(EventError.NullReferenceObject);
 
             var size = obj->Capacity + sizeof(slObject);
             writer.WriteInt(size);
             writer.WriteMemory(obj, size);
 
-            return new EventResult(true);
+            return new EventResult();
         }
 
         public unsafe EventResult InsertKeyboard(int subjectHandleValue, int key, int value)
         {
             var pSubject = _logicService.colObj.Find(subjectHandleValue);
             if (null == pSubject)
-                return new EventResult(false, $"[InsertKeyboard] Null reference subject handle: {subjectHandleValue.ToString()}");
+                return new EventResult(EventError.NullReferenceObject);
 
             var controlState = slObjectHelper.GetControlState(pSubject);
             if (null == controlState)
-                return new EventResult(false, $"[InsertKeyboard] Null reference control state: {subjectHandleValue.ToString()}");
+                return new EventResult(EventError.NullReferenceControlState);
 
             var consoleKey = (ConsoleKey)key;
             switch (consoleKey)
@@ -93,29 +106,29 @@ namespace SpeakingLanguage.Logic
                     controlState->keyFire &= (value << 6);
                     break;
             }
-            return new EventResult(true);
+            return new EventResult();
         }
 
         public unsafe EventResult InsertTouch(int subjectHandleValue, int target, int fire)
         {
             var pSubject = _logicService.colObj.Find(subjectHandleValue);
             if (null == pSubject)
-                return new EventResult(false, $"[InsertTouch] Null reference subject handle: {subjectHandleValue.ToString()}");
+                return new EventResult(EventError.NullReferenceObject);
 
             var controlState = slObjectHelper.GetControlState(pSubject);
             if (null == controlState)
-                return new EventResult(false, $"[InsertTouch] Null reference control state: {subjectHandleValue.ToString()}");
+                return new EventResult(EventError.NullReferenceControlState);
 
             controlState->touchTarget = target;
             controlState->touchFire = fire;
 
-            return new EventResult(true);
+            return new EventResult();
         }
 
         public unsafe EventResult InsertInteraction(int subjectHandleValue, int targetHandleValue)
         {
             if (subjectHandleValue == targetHandleValue)
-                return new EventResult(false, $"[InsertInteraction] You cannot self interact: {subjectHandleValue.ToString()}");
+                return new EventResult( EventError.SelfInteraction);
 
             var stInter = new Interaction
             {
@@ -125,7 +138,7 @@ namespace SpeakingLanguage.Logic
             
             _logicService.itrGraph.Insert(ref stInter);
 
-            return new EventResult(true);
+            return new EventResult();
         }
         
         public void FrameEnter()

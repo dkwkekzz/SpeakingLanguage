@@ -55,13 +55,15 @@ namespace SpeakingLanguage.ClientSample
         {
             var code = Protocol.Code.Packet.None;
             var error = Protocol.Code.Error.None;
+            var logicError = 0;
             if (disconnectInfo.AdditionalData.AvailableBytes > 0)
             {
                 code = (Protocol.Code.Packet)disconnectInfo.AdditionalData.GetInt();
                 error = (Protocol.Code.Error)disconnectInfo.AdditionalData.GetInt();
+                logicError = disconnectInfo.AdditionalData.GetInt();
             }
             
-            Console.WriteLine($"[Client] disconnected: {peer.EndPoint}, code: {code}, error: {error}, reason: {disconnectInfo.Reason}");
+            Console.WriteLine($"[Client] disconnected: {peer.EndPoint}, code: {code}, error: {error}, logicError: {logicError}, reason: {disconnectInfo.Reason}");
         }
 
         public void OnNetworkError(IPEndPoint endPoint, SocketError socketErrorCode)

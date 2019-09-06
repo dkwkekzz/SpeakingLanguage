@@ -34,7 +34,7 @@ namespace SpeakingLanguage.Logic.Process
                 var spawner = subjectLogicState->spawner;
                 if (spawner.value > 0)
                 {
-                    colObj.Create(spawner.value);
+                    colObj.CreateBack(spawner.value);
                 }
 
                 // invoke subject

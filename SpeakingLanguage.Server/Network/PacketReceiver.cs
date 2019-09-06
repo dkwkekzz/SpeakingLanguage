@@ -10,13 +10,13 @@ namespace SpeakingLanguage.Server.Network
         private struct Result
         {
             public Protocol.Code.Error Error { get; }
-            public string SubMsg { get; }
+            public Logic.EventError LogicError { get; }
             public bool Success => Error == Protocol.Code.Error.None;
 
-            public Result(Protocol.Code.Error error, string msg = "")
+            public Result(Protocol.Code.Error error, Logic.EventError eventError = Logic.EventError.None)
             {
                 Error = error;
-                SubMsg = msg;
+                LogicError = eventError;
             }
         }
 
@@ -73,11 +73,12 @@ namespace SpeakingLanguage.Server.Network
             var res = _packetActions[code](peer, reader);
             if (!res.Success)
             {
-                Library.Tracer.Error($"[CastFailure] id: {peer.Id.ToString()}, code: {((Protocol.Code.Packet)code).ToString()}, err: {res.Error.ToString()}, subMsg: {res.SubMsg}");
+                Library.Tracer.Error($"[CastFailure] id: {peer.Id.ToString()}, code: {((Protocol.Code.Packet)code).ToString()}, err: {res.Error.ToString()}, subMsg: {res.LogicError.ToString()}");
 
                 _sendWriter.Reset();
                 _sendWriter.Put(code);
                 _sendWriter.Put((int)res.Error);
+                _sendWriter.Put((int)res.LogicError);
                 peer.Disconnect(_sendWriter);
                 return;
             }
@@ -120,8 +121,8 @@ namespace SpeakingLanguage.Server.Network
 
             var eventManager = Logic.EventManager.Instance;
             var eRes = eventManager.InsertKeyboard(agent.SubjectHandle.value, data.key, data.press ? 1 : 0);
-            if (!eRes.isSuccess)
-                return new Result(Protocol.Code.Error.NullReferenceSubjectHandle);
+            if (!eRes.Success)
+                return new Result(Protocol.Code.Error.NullReferenceSubjectHandle, eRes.error);
 
             var sceneIter = scene.GetEnumerator();
             while (sceneIter.MoveNext())
@@ -157,8 +158,8 @@ namespace SpeakingLanguage.Server.Network
                 _world.Database.ConstructObject(subjectData.handleValue, out objReader);
 
                 var eRes = eventManager.DeserializeObject(ref objReader);
-                if (!eRes.isSuccess)
-                    return new Result(Protocol.Code.Error.FailToDeserialize);
+                if (!eRes.Success)
+                    return new Result(Protocol.Code.Error.FailToDeserialize, eRes.error);
             }
 
             agent.CaptureSubject(subjectData.handleValue);
@@ -203,8 +204,8 @@ namespace SpeakingLanguage.Server.Network
                 {
                     var subjectHandle = sceneIter.Current.SubjectHandle;
                     var eRes = eventManager.SerializeObject(subjectHandle, ref writer);
-                    if (!eRes.isSuccess)
-                        return new Result(Protocol.Code.Error.FailToSerialize);
+                    if (!eRes.Success)
+                        return new Result(Protocol.Code.Error.FailToSerialize, eRes.error);
 
                     subjectCount++;
                 }
@@ -281,8 +282,8 @@ namespace SpeakingLanguage.Server.Network
             
             var eventManager = Logic.EventManager.Instance;
             var eRes = eventManager.InsertInteraction(data.lhsValue, data.rhsValue);
-            if (!eRes.isSuccess)
-                return new Result(Protocol.Code.Error.FailToInteraction);
+            if (!eRes.Success)
+                return new Result(Protocol.Code.Error.FailToInteraction, eRes.error);
 
             var sceneIter = scene.GetEnumerator();
             while (sceneIter.MoveNext())

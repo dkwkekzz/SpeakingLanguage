@@ -114,19 +114,13 @@ namespace SpeakingLanguage.Logic
             return _lookup[handle];
         }
 
-        public void InsertFront(ref Library.Reader reader)
+        public void InsertFront(byte[] buffer, int position, int length)
         {
-            var objPtr = (slObject*)_readStack.Push(ref reader);
-            if (null == objPtr)
+            fixed (byte* headPtr = &buffer[position])
             {
-                bool read = reader.ReadInt(out int handleValue);
-                if (!read || handleValue < 0)
-                    Library.ThrowHelper.ThrowWrongArgument($"Fail to deserialize object");
-
-                objPtr = slObject.CreateDefault(ref _readStack, handleValue);
+                var objPtr = (slObject*)_readStack.Push(headPtr, length);
+                _lookup[&objPtr->handle] = objPtr;
             }
-
-            _lookup[&objPtr->handle] = objPtr;
         }
 
         public void InsertBack(ref slSubject subject)
@@ -137,10 +131,18 @@ namespace SpeakingLanguage.Logic
             _writeStack.Push(objPtr, subject.ObjectLength);
             _writeStack.Push(subject.StackPtr.ToPointer(), subject.StackOffset);
         }
-        
-        public slObject* Create(int handleValue)
+
+        public slObject* CreateFront(int handleValue)
         {
-            var pObj = slObject.CreateDefault(ref _writeStack, handleValue);
+            var pObj = slObject.CreateDefault(ref _readStack, handleValue);
+            _lookup.Add(&pObj->handle, pObj);
+            return pObj;
+        }
+
+        public slObject* CreateBack(int dataIndex)
+        {
+            var newHandle = GenerateHandle;
+            var pObj = slObject.CreateDefault(ref _writeStack, newHandle);
             _lookup.Add(&pObj->handle, pObj);
             return pObj;
         }

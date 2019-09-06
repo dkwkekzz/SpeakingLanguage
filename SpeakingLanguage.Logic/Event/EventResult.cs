@@ -3,15 +3,26 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Logic
 {
+    public enum EventError
+    {
+        None = 0,
+        FailToReadLength,
+        FailToReadHandle,
+        NullReferenceObject,
+        NullReferenceControlState,
+        SelfInteraction,
+    }
+
     public struct EventResult
     {
-        public bool isSuccess;
-        public string message;
+        public EventError error;
+        public int intVal;
+        public bool Success => error == EventError.None;
 
-        public EventResult(bool success, string msg = "")
+        public EventResult(EventError err = EventError.None, int iVal = 0)
         {
-            isSuccess = success;
-            message = msg;
+            error = err;
+            intVal = iVal;
         }
     }
 }

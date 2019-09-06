@@ -23,7 +23,7 @@ namespace SpeakingLanguage.Logic.Process
             _jobIter = new JobPartitioner(info.default_jobchunklength);
             _cts = new CancellationTokenSource();
             _lstUpdater = new List<Updater>(info.default_workercount);
-            for (int i = 0; i != info.default_workercount; i++) _lstUpdater[i] = new Updater(this, i);
+            for (int i = 0; i != info.default_workercount; i++) _lstUpdater.Add(new Updater(this, i));
         }
 
         public void Awake()
