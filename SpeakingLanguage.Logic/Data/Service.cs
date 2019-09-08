@@ -3,14 +3,15 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Logic
 {
-    public struct Service : IDisposable
+    internal struct Service : IDisposable
     {
-        internal readonly slActionCollection colAct;
-        internal readonly slObjectCollection colObj;
-        internal readonly Container.InteractionGraph itrGraph;
-
+        internal slActionCollection colAct;
+        internal slObjectCollection colObj;
+        internal Data.InteractionGraph itrGraph;
+        
         // tick = ms / 10000
         public long CurrentTick => Library.Ticker.GlobalTicks;
+        public long ElapsedTick => CurrentTick - BeginTick;
         public long BeginTick { get; private set; }
         public int Delta { get; private set; }
         public int FrameRate { get; private set; }
@@ -23,12 +24,12 @@ namespace SpeakingLanguage.Logic
         public Service(ref StartInfo info)
         {
             colAct = new slActionCollection();
-            colObj = new slObjectCollection(Config.default_objectcount);
-            itrGraph = new Container.InteractionGraph(Config.default_objectcount, Config.default_interactcount);
+            colObj = new slObjectCollection(info.default_objectcount);
+            itrGraph = new Data.InteractionGraph(info.default_objectcount, info.default_interactcount);
 
             BeginTick = Library.Ticker.GlobalTicks;
             Delta = 0;
-            FrameRate = Config.default_frameRate;
+            FrameRate = info.default_frameRate;
             FrameTick = 1000 * 10000 / FrameRate;
         }
 
@@ -37,20 +38,21 @@ namespace SpeakingLanguage.Logic
             colObj.Dispose();
             itrGraph.Dispose();
         }
-
+        
         public void Begin()
         {
             Delta = (int)(CurrentTick - BeginTick);
             BeginTick = CurrentTick;
         }
 
-        public FrameResult End()
+        public FrameResult End(int currentFrame)
         {
             colObj.SwapBuffer();
             itrGraph.Reset();
 
             return new FrameResult
             {
+                frame = currentFrame,
                 objectCount = colObj.Count,
                 frameTick = FrameTick,
                 elapsed = (int)(CurrentTick - BeginTick),

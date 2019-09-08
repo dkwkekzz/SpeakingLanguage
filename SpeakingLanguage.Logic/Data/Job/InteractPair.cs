@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SpeakingLanguage.Logic.Container
+namespace SpeakingLanguage.Logic.Data
 {
     internal struct InteractPair : IEquatable<InteractPair>, IEquatable<slObjectHandle>
     {

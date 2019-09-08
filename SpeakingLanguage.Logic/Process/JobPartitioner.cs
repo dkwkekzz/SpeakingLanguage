@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace SpeakingLanguage.Logic.Process
 {
-    internal sealed class JobPartitioner : IEnumerator<Container.InteractGroup>
+    internal sealed class JobPartitioner : IEnumerator<Data.InteractGroup>
     {
-        private readonly ConcurrentStack<Container.InteractGroup> _chunks = new ConcurrentStack<Container.InteractGroup>();
+        private readonly ConcurrentStack<Data.InteractGroup> _chunks = new ConcurrentStack<Data.InteractGroup>();
         private readonly int _minJobchunkLength;
 
         public JobPartitioner(int jobchunkLength)
@@ -16,13 +16,13 @@ namespace SpeakingLanguage.Logic.Process
             _minJobchunkLength = jobchunkLength;
         }
 
-        public Container.InteractGroup Current
+        public Data.InteractGroup Current
         {
             get
             {
-                Container.InteractGroup group;
+                Data.InteractGroup group;
                 if (!_chunks.TryPop(out group))
-                    return default(Container.InteractGroup);
+                    return default(Data.InteractGroup);
                 return group;
             }
         }
@@ -39,7 +39,7 @@ namespace SpeakingLanguage.Logic.Process
             var count = 0;
             if (workerCount == 1)
             {
-                if (!service.itrGraph.TryGetInteractGroup(ref objIter, -1, out Container.InteractGroup group))
+                if (!service.itrGraph.TryGetInteractGroup(ref objIter, -1, out Data.InteractGroup group))
                     return count;
 
                 _chunks.Push(group);
@@ -66,7 +66,7 @@ namespace SpeakingLanguage.Logic.Process
             {
                 for (int i = 0; i != workerCount; i++)
                 {
-                    if (!service.itrGraph.TryGetInteractGroup(ref objIter, offset, out Container.InteractGroup group))
+                    if (!service.itrGraph.TryGetInteractGroup(ref objIter, offset, out Data.InteractGroup group))
                         return count;
 
                     _chunks.Push(group);

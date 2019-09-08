@@ -5,6 +5,12 @@ namespace SpeakingLanguage.Server.Networks
 {
     internal static class ReceiverHelper
     {
+        public static long CreateObjectUid(int peerId)
+        {
+            var tick = Library.Ticker.GlobalTicks;
+            return (tick << 4) | (long)peerId;
+        }
+
         public static IScene GetCurrentScene(WorldManager world, User agent)
         {
             var subjectHandle = agent.SubjectHandle;

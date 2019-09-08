@@ -5,11 +5,15 @@ namespace SpeakingLanguage.Logic.Process
 {
     internal static class Interactor
     {
-        public static unsafe void Execute(ref Service service, ref Container.InteractGroup group)
+        public static unsafe void Execute(ref Service service, ref Data.InteractGroup group)
         {
             ref readonly var colAct = ref service.colAct;
-            ref readonly var colObj = ref service.colObj;
-            
+            ref var colObj = ref service.colObj;
+
+            var subjectStateLookup = stackalloc Library.umnChunk*[8 * sizeof(StateSync)];
+            var targetStateLookup = stackalloc Library.umnChunk*[8 * sizeof(StateSync)];
+            var tempStackPtr = stackalloc byte[slSubject.STACK_BUFFER_SIZE];
+
             var interIter = group.GetEnumerator();
             while (interIter.MoveNext())
             {
@@ -25,7 +29,7 @@ namespace SpeakingLanguage.Logic.Process
                 // execute default logic
                 var subjectLogicState = slObjectHelper.GetDefaultState(pSubject);
                 var life = subjectLogicState->lifeCycle;
-                if (life.value == 0)
+                if (life.live && life.value == 0)
                 {
                     colObj.Destroy(pSubject);
                     continue;
@@ -39,8 +43,6 @@ namespace SpeakingLanguage.Logic.Process
 
                 // invoke subject
                 var stateSyncPair = new StateSyncPair();
-
-                var subjectStateLookup = stackalloc Library.umnChunk*[8 * sizeof(StateSync)];
                 var subjectIter = pSubject->GetEnumerator();
                 var subjectStateTypeHandle = -1;
                 while (subjectIter.MoveNext())
@@ -55,10 +57,9 @@ namespace SpeakingLanguage.Logic.Process
                     stateSyncPair.subject.Insert(subjectStateTypeHandle);
                 }
 
-                byte* stackPtr = stackalloc byte[slSubject.STACK_BUFFER_SIZE];
                 var actionCtx = new slActionContext
                 {
-                    subject = new slSubject(pSubject, subjectStateLookup, stackPtr),
+                    subject = new slSubject(pSubject, subjectStateLookup, tempStackPtr),
                     delta = service.Delta,
                     beginTick = service.BeginTick,
                     currentTick = service.CurrentTick,
@@ -87,8 +88,6 @@ namespace SpeakingLanguage.Logic.Process
 
                     // invoke subject and target
                     stateSyncPair.target.Clear();
-
-                    var targetStateLookup = stackalloc Library.umnChunk*[8 * sizeof(StateSync)];
                     var targetStateIter = pTarget->GetEnumerator();
                     var targetStateTypeHandle = -1;
                     while (targetStateIter.MoveNext())

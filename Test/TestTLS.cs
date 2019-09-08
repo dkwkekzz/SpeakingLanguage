@@ -79,6 +79,14 @@ namespace Test
             {
                 _dicTLS2[tid].value += i;
             }
+
+            var ran = new Random();
+            for (int i = 0; i != 100; i++)
+            {
+                var val = ran.Next();
+                _dicTLS2.Add(val, new TLS());
+            }
+
             Console.WriteLine("thread {0} exiting: {1}", tid.ToString(), _dicTLS2[tid].value.ToString());
         }
 

@@ -33,6 +33,13 @@ namespace SpeakingLanguage
             return list;
         }
 
+        public static bool ParseConfigOrDefault(this string appKey, bool defaultVal)
+        {
+            if (!bool.TryParse(ConfigurationManager.AppSettings[appKey], out bool val))
+                return defaultVal;
+            return val;
+        }
+
         public static int ParseConfigOrDefault(this string appKey, int defaultVal)
         {
             if (!int.TryParse(ConfigurationManager.AppSettings[appKey], out int val))

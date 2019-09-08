@@ -21,21 +21,25 @@ namespace SpeakingLanguage.Server.Networks
         }
 
         private readonly WorldManager _world;
-        private readonly NetDataWriter _sendWriter;
         private readonly IDatabase _database;
+        private readonly NetDataWriter _errorWriter;
+        private readonly byte[] _serializeBuffer;
         private readonly Func<NetPeer, NetPacketReader, Result>[] _packetActions;
 
         public PacketReceiver()
         {
             _world = WorldManager.Instance;
-            _sendWriter = new NetDataWriter(true, 256);
             _database = new FileDatabase();
+            _errorWriter = new NetDataWriter(true, 128);
+            _serializeBuffer = new byte[512];
             _packetActions = new Func<NetPeer, NetPacketReader, Result>[(int)Protocol.Code.Packet.__MAX__];
             _packetActions[(int)Protocol.Code.Packet.Authentication] = _onAuthentication;
+            _packetActions[(int)Protocol.Code.Packet.ConstructIdentifier] = _onConstructIdentifier;
             _packetActions[(int)Protocol.Code.Packet.Terminate] = _onTerminate;
             _packetActions[(int)Protocol.Code.Packet.Keyboard] = _onKeyboard;
             _packetActions[(int)Protocol.Code.Packet.Touch] = _onTouch;
             _packetActions[(int)Protocol.Code.Packet.SelectSubject] = _onSelectSubject;
+            _packetActions[(int)Protocol.Code.Packet.CreateSubject] = _onCreateSubject;
             _packetActions[(int)Protocol.Code.Packet.SubscribeScene] = _onSubscribeScene;
             _packetActions[(int)Protocol.Code.Packet.UnsubscribeScene] = _onUnsubscribeScene;
             _packetActions[(int)Protocol.Code.Packet.Interaction] = _onInteraction;
@@ -64,6 +68,8 @@ namespace SpeakingLanguage.Server.Networks
             {
                 iter.Current.CancelNotification(id);
             }
+            
+            agent.Save(_database);
 
             _world.Agents.Remove(agent);
             _world.UserFactory.Destroy(agent);
@@ -77,15 +83,25 @@ namespace SpeakingLanguage.Server.Networks
             {
                 Library.Tracer.Error($"[CastFailure] id: {peer.Id.ToString()}, code: {((Protocol.Code.Packet)code).ToString()}, err: {res.Error.ToString()}, subMsg: {res.LogicError.ToString()}");
 
-                _sendWriter.Reset();
-                _sendWriter.Put(code);
-                _sendWriter.Put((int)res.Error);
-                _sendWriter.Put((int)res.LogicError);
-                peer.Disconnect(_sendWriter);
+                _errorWriter.Reset();
+                _errorWriter.Put((int)Protocol.Code.Packet.None);
+                _errorWriter.Put(code);
+                _errorWriter.Put((int)res.Error);
+                _errorWriter.Put((int)res.LogicError);
+
+                if (!Config.debug)
+                    peer.Disconnect(_errorWriter);
+                else
+                    peer.Send(_errorWriter, DeliveryMethod.ReliableOrdered);
                 return;
             }
 
             Library.Tracer.Write($"[CastSuccess] id: {peer.Id.ToString()}, code: {((Protocol.Code.Packet)code).ToString()}");
+        }
+
+        public void FlushReponses()
+        {
+            _database.FlushResponse();
         }
 
         private Result _onAuthentication(NetPeer peer, NetPacketReader reader)
@@ -99,7 +115,30 @@ namespace SpeakingLanguage.Server.Networks
             if (!ReceiverHelper.ValidateAuthenticate(ref data))
                 return new Result(Protocol.Code.Error.FailToAuthentication);
 
-            _database.ConstructUser(agent, data.id, data.pswd);
+            _database.RequestReadUser(agent, data.id, data.pswd);
+            return new Result();
+        }
+
+        private Result _onConstructIdentifier(NetPeer peer, NetPacketReader reader)
+        {
+            var id = peer.Id;
+            var agent = _world.Agents.GetUser(id);
+            if (agent == null)
+                return new Result(Protocol.Code.Error.NullReferenceAgent);
+
+            var data = reader.Get<Protocol.Packet.AuthenticationData>();
+            if (!ReceiverHelper.ValidateAuthenticate(ref data))
+                return new Result(Protocol.Code.Error.FailToAuthentication);
+
+            var writer = new Library.Writer(_serializeBuffer, 0);
+            writer.WriteString(data.id);
+            writer.WriteString(data.pswd);
+            writer.WriteLong(Library.Ticker.GlobalTicks);
+            writer.WriteInt(0);
+
+            var reader2 = new Library.Reader(_serializeBuffer, writer.Offset);
+            agent.DeserializeInfo(ref reader2);
+
             return new Result();
         }
 
@@ -150,21 +189,32 @@ namespace SpeakingLanguage.Server.Networks
                 return new Result(Protocol.Code.Error.NullReferenceAgent);
             
             var subjectData = reader.Get<Protocol.Packet.ObjectData>();
-            if (!ReceiverHelper.CanCaptureSubject(agent, ref subjectData))
-                return new Result(Protocol.Code.Error.IllegalityDataForSelectSubject);
+            if (!agent.TryCaptureSubject(subjectData.handleValue, out long uid))
+                return new Result(Protocol.Code.Error.NullReferenceSubjectHandle);
 
-            var eventManager = Logic.EventManager.Instance;
-            if (!_world.Colliders.TryGetCollider(subjectData.handleValue, out Collider collider))
-            {
-                Library.Reader objReader;
-                _database.ConstructObject(subjectData.handleValue, out objReader);
+            agent.DataWriter.Put((int)Protocol.Code.Packet.SelectSubject);
+            agent.DataWriter.Put(new Protocol.Packet.ObjectData { handleValue = subjectData.handleValue });
 
-                var eRes = eventManager.DeserializeObject(ref objReader);
-                if (!eRes.Success)
-                    return new Result(Protocol.Code.Error.FailToDeserialize, eRes.error);
-            }
+            return new Result();
+        }
 
-            agent.CaptureSubject(subjectData.handleValue);
+        private Result _onCreateSubject(NetPeer peer, NetPacketReader reader)
+        {
+            var id = peer.Id;
+            var agent = _world.Agents.GetUser(id);
+            if (agent == null)
+                return new Result(Protocol.Code.Error.NullReferenceAgent);
+
+            var objUid = ReceiverHelper.CreateObjectUid(id);
+            var eRes = Logic.EventManager.Instance.CreateObject();
+            if (!eRes.Success)
+                return new Result(Protocol.Code.Error.NullReferenceSubjectHandle, eRes.error); 
+
+            var handleValue = eRes.result;
+            agent.InsertSubject(objUid, handleValue);
+            
+            agent.DataWriter.Put((int)Protocol.Code.Packet.CreateSubject);
+            agent.DataWriter.Put(new Protocol.Packet.ObjectData { handleValue = handleValue });
 
             return new Result();
         }
@@ -176,16 +226,9 @@ namespace SpeakingLanguage.Server.Networks
             if (agent == null)
                 return new Result(Protocol.Code.Error.NullReferenceAgent);
 
-            _sendWriter.Reset();
-            _sendWriter.Put((int)Protocol.Code.Packet.SubscribeScene);
-
-            var lenPos = _sendWriter.Length;
-            _sendWriter.Put(0);
-
             var eventManager = Logic.EventManager.Instance;
 
-            var writer = new Library.Writer(_sendWriter.Data, _sendWriter.Length);
-            var subjectCount = 0;
+            var writer = new Library.Writer(_serializeBuffer, 0);
             var subData = reader.Get<Protocol.Packet.SubscribeData>();
             for (int i = 0; i != subData.count; i++)
             {
@@ -208,14 +251,12 @@ namespace SpeakingLanguage.Server.Networks
                     var eRes = eventManager.SerializeObject(subjectHandle, ref writer);
                     if (!eRes.Success)
                         return new Result(Protocol.Code.Error.FailToSerialize, eRes.error);
-
-                    subjectCount++;
                 }
             }
+            writer.WriteInt(0); // for null subject
 
-            _sendWriter.Length = writer.Offset;
-            _sendWriter.PutAt(lenPos, subjectCount);
-            peer.Send(_sendWriter, DeliveryMethod.ReliableOrdered);
+            agent.DataWriter.Put((int)Protocol.Code.Packet.SubscribeScene);
+            agent.DataWriter.Put(writer.Buffer, 0, writer.Offset);
 
             return new Result();
         }
@@ -226,15 +267,10 @@ namespace SpeakingLanguage.Server.Networks
             var agent = _world.Agents.GetUser(id);
             if (agent == null)
                 return new Result(Protocol.Code.Error.NullReferenceAgent);
-
-            _sendWriter.Reset();
-            _sendWriter.Put((int)Protocol.Code.Packet.UnsubscribeScene);
-
-            var lenPos = _sendWriter.Length;
-            _sendWriter.Put(0);
-
+            
+            agent.DataWriter.Put((int)Protocol.Code.Packet.UnsubscribeScene);
+            
             var subData = reader.Get<Protocol.Packet.SubscribeData>();
-            var subjectCount = 0;
             for (int i = 0; i != subData.count; i++)
             {
                 var data = reader.Get<Protocol.Packet.SceneData>();
@@ -252,9 +288,7 @@ namespace SpeakingLanguage.Server.Networks
                     while (sceneIter.MoveNext())
                     {
                         var subjectHandle = sceneIter.Current.SubjectHandle;
-                        _sendWriter.Put(subjectHandle.value);
-
-                        subjectCount++;
+                        agent.DataWriter.Put(new Protocol.Packet.ObjectData { handleValue = subjectHandle.value });
                     }
                 }
                 else
@@ -263,9 +297,8 @@ namespace SpeakingLanguage.Server.Networks
                 }
             }
 
-            _sendWriter.PutAt(lenPos, subjectCount);  
-            peer.Send(_sendWriter, DeliveryMethod.ReliableOrdered);
-
+            agent.DataWriter.Put(new Protocol.Packet.ObjectData { handleValue = 0 });   // for null subject
+            
             return new Result();
         }
 

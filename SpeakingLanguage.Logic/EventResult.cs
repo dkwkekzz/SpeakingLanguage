@@ -11,18 +11,30 @@ namespace SpeakingLanguage.Logic
         NullReferenceObject,
         NullReferenceControlState,
         SelfInteraction,
+        OverflowObjectCapacity,
     }
 
     public struct EventResult
     {
         public EventError error;
-        public int intVal;
         public bool Success => error == EventError.None;
 
-        public EventResult(EventError err = EventError.None, int iVal = 0)
+        public EventResult(EventError err = EventError.None)
         {
             error = err;
-            intVal = iVal;
+        }
+    }
+
+    public struct EventResult<TResult> where TResult : struct
+    {
+        public EventError error;
+        public TResult result;
+        public bool Success => error == EventError.None;
+
+        public EventResult(EventError err = EventError.None, TResult ret = default)
+        {
+            error = err;
+            result = ret;
         }
     }
 }

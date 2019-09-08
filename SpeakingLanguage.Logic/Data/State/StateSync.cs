@@ -30,10 +30,10 @@ namespace SpeakingLanguage.Logic
 
         public bool Contains(ref StateSync other)
         {
-            return (other.sync01 & sync01) != 0
-                && (other.sync01 & sync02) != 0
-                && (other.sync01 & sync03) != 0
-                && (other.sync01 & sync04) != 0;
+            return (other.sync01 & sync01) == sync01
+                && (other.sync02 & sync02) == sync02
+                && (other.sync03 & sync03) == sync03
+                && (other.sync04 & sync04) == sync04;
         }
         
         public void Insert(int idx)

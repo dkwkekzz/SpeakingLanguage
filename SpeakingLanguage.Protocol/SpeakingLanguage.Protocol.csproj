@@ -47,6 +47,7 @@
     <Compile Include="Packet\InteractionData.cs" />
     <Compile Include="Packet\KeyboardData.cs" />
     <Compile Include="Packet\ObjectData.cs" />
+    <Compile Include="Packet\SerializeResultData.cs" />
     <Compile Include="Packet\SubscribeData.cs" />
     <Compile Include="Packet\SceneData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

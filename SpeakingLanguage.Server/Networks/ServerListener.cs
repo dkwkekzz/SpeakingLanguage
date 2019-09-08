@@ -37,7 +37,7 @@ namespace SpeakingLanguage.Server.Networks
 
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, DeliveryMethod deliveryMethod)
         {
-            Console.WriteLine($"[Server] Peer reveived: {peer.EndPoint}, count: {reader.AvailableBytes.ToString()}");
+            //Console.WriteLine($"[Server] Peer reveived: {peer.EndPoint}, count: {reader.AvailableBytes.ToString()}");
 
             Receiver.OnReceive(peer, reader);
 

@@ -27,23 +27,36 @@ namespace SpeakingLanguage.Logic
             _notifier.Dispose();
         }
 
-        public unsafe EventResult DeserializeObject(ref Library.Reader reader)
+        public unsafe EventResult<int> CreateObject()
         {
-            var read = reader.ReadInt(out int length);
-            if (!read) return new EventResult(EventError.FailToReadLength);
+            var pObj = _logicService.colObj.CreateFront(0);
+            if (null == pObj)
+                return new EventResult<int>(EventError.OverflowObjectCapacity);
 
-            if (length == 0)
+            return new EventResult<int>(EventError.None, pObj->handle.value);
+        }
+
+        public unsafe EventResult<int> DeserializeObject(ref Library.Reader reader)
+        {
+            var read = reader.ReadInt(out int handleValue);
+            if (!read) return new EventResult<int>(EventError.FailToReadHandle);
+
+            if (handleValue == 0)
             {
-                read = reader.ReadInt(out int handleValue);
-                if (!read || handleValue < 0) return new EventResult(EventError.FailToReadHandle);
-
-                _logicService.colObj.CreateFront(handleValue);
+                var pObj = _logicService.colObj.CreateFront(handleValue);
+                if (null == pObj)
+                    return new EventResult<int>(EventError.OverflowObjectCapacity);
             }
             else
             {
-                _logicService.colObj.InsertFront(reader.Buffer, reader.Position, length);
+                read = reader.ReadInt(out int length);
+                if (!read) return new EventResult<int>(EventError.FailToReadLength);
+
+                var pObj = _logicService.colObj.InsertFront(reader.Buffer, reader.Position, length);
+                if (null == pObj)
+                    return new EventResult<int>(EventError.OverflowObjectCapacity);
             }
-            return new EventResult();
+            return new EventResult<int>(EventError.None, handleValue);
         }
 
         public unsafe EventResult SerializeObject(slObjectHandle handle, ref Library.Writer writer)
@@ -53,6 +66,7 @@ namespace SpeakingLanguage.Logic
                 return new EventResult(EventError.NullReferenceObject);
 
             var size = obj->Capacity + sizeof(slObject);
+            writer.WriteInt(handle.value);
             writer.WriteInt(size);
             writer.WriteMemory(obj, size);
 
@@ -135,8 +149,9 @@ namespace SpeakingLanguage.Logic
                 subject = subjectHandleValue,
                 target = targetHandleValue,
             };
-            
-            _logicService.itrGraph.Insert(ref stInter);
+
+            ref readonly var itrGraph = ref _logicService.itrGraph;
+            itrGraph.Insert(ref stInter);
 
             return new EventResult();
         }
@@ -150,7 +165,7 @@ namespace SpeakingLanguage.Logic
         public FrameResult ExecuteFrame()
         {
             _notifier.Signal(ref _logicService);
-            return _logicService.End();
+            return _logicService.End(CurrentFrame);
         }
 
         #region INTERNAL

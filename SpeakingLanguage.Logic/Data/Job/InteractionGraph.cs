@@ -3,11 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SpeakingLanguage.Logic.Container
+namespace SpeakingLanguage.Logic.Data
 {
-    // umn버전으로 바꿔야함... service안의 객체들은 umn으로 접근해야함
+    // job으로 이동
     internal struct InteractionGraph : IDisposable
     {
+        // splaybt로 변경하자. 용량문제를 해결할 수 있다.
         private sealed class EdgeList : List<slObjectHandle>
         {
             public int Index { get; }
@@ -29,10 +30,10 @@ namespace SpeakingLanguage.Logic.Container
         private readonly Dictionary<slObjectHandle, EdgeList> _dicGraph;
         private readonly Queue<EdgeList> _listPool;
         private readonly Queue<slObjectHandle> _queue;
-
-        private readonly Library.umnMarshal _allocator;
-        private readonly Library.umnArray<InteractPair> _arrPair;
         private readonly int _defaultInteractCount;
+
+        private Library.umnMarshal _allocator;
+        private Library.umnArray<InteractPair> _arrPair;
 
         public InteractionGraph(int defaultObjectCount, int defaultInteractCount)
         {
@@ -114,15 +115,15 @@ namespace SpeakingLanguage.Logic.Container
             while (_queue.Count > 0)
             {
                 var here = _queue.Dequeue();
-
                 int length = 0;
-                if (_dicGraph.TryGetValue(here, out EdgeList thereList))
-                    length = thereList.Count;
-
                 _arrPair.PushBack(new InteractPair(here, length));
                 count++;
 
-                if (thereList.Order > 0 || length == 0)
+                if (!_dicGraph.TryGetValue(here, out EdgeList thereList))
+                    continue;
+
+                length = thereList.Count;
+                if (thereList.Order > 0)
                     continue;
                 thereList.Order = 1;
 

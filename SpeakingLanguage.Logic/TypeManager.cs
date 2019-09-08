@@ -11,15 +11,13 @@ namespace SpeakingLanguage.Logic
         public int size;
     }
 
-    internal class TypeManager
+    internal sealed class TypeManager : Library.SingletonLazy<TypeManager>
     {
-        private static readonly TypeManager _instance = new TypeManager();
-
         private IReadOnlyDictionary<Type, TypeHandle> _dicHandle;
-        
-        public static TypeHandle SHNull { get; } = new TypeHandle { key = 0, value = null, size = 0 };
-        public static TypeHandle SHDefaultState { get; } = new TypeHandle { key = 1, value = typeof(Default), size = Marshal.SizeOf<Default>() };
-        public static TypeHandle SHControlState { get; } = new TypeHandle { key = 2, value = typeof(Control), size = Marshal.SizeOf<Control>() };
+
+        public TypeHandle SHNull { get; } = new TypeHandle { key = 0, value = null, size = 0 };
+        public TypeHandle SHDefaultState { get; } = new TypeHandle { key = 1, value = typeof(Default), size = Marshal.SizeOf<Default>() };
+        public TypeHandle SHControlState { get; } = new TypeHandle { key = 2, value = typeof(Control), size = Marshal.SizeOf<Control>() };
 
         public TypeManager()
         {
@@ -30,7 +28,7 @@ namespace SpeakingLanguage.Logic
         {
             var dicHandle = new Dictionary<Type, TypeHandle>()
             {
-                { SHNull.value, SHNull },
+                { typeof(Library.Null), SHNull },
                 { SHDefaultState.value, SHDefaultState },
                 { SHControlState.value, SHControlState },
             };
@@ -50,7 +48,7 @@ namespace SpeakingLanguage.Logic
 
         public static TypeHandle GetStateHandle(Type t)
         {
-            return _instance._dicHandle[t];
+            return Instance._dicHandle[t];
         }
     }
 }

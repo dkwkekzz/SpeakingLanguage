@@ -36,10 +36,12 @@ namespace SpeakingLanguage.Library
             if (remained < totalSize)
                 return null;
 
-            var endChk = (umnChunk*)(_rootPtr + _current + totalSize);
+            var curPtr = _rootPtr + _current;
+            var endChk = (umnChunk*)(curPtr + totalSize);
+            endChk->typeHandle = 0;
             endChk->length = 0;
             
-            var chk = (umnChunk*)(_rootPtr + _current);
+            var chk = (umnChunk*)(curPtr);
             chk->typeHandle = 0;
             chk->length = size;
 
@@ -59,15 +61,19 @@ namespace SpeakingLanguage.Library
             return chk;
         }
         
-        public void* Push(void* src, int size)
+        public void* Push(umnChunk* chk, int size)
         {
-            var szChk = umnSize.umnChunk;
             var remained = _rootChk->length - _current;
-            if (remained < size)
-                ThrowHelper.ThrowOutOfMemory("at umnStack::PushBack");
+            if (remained < size) return null;
 
-            var dest = (_rootPtr + _current).ToPointer();
-            Buffer.MemoryCopy(src, dest, size, size);
+            var curPtr = _rootPtr + _current;
+            var endChk = (umnChunk*)(curPtr + size);
+            endChk->typeHandle = 0;
+            endChk->length = 0;
+
+            var dest = (umnChunk*)curPtr;
+            Buffer.MemoryCopy(chk, dest, size, size);
+
             _current += size;
             return dest;
         }

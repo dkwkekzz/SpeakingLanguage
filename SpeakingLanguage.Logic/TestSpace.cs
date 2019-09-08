@@ -19,10 +19,23 @@ namespace SpeakingLanguage.Logic.TestSpace
 
     }
 
-    class InteractSystem<TState>
+    [Logic.ActionProviderAttribute]
+    internal static class TestSystem
     {
-        private int stateHandle;
+        [Logic.SubjectAttribute(typeof(Logic.Default))]
+        static void Test1(ref Logic.slActionContext ctx)
+        {
+            var subjectHandle = ctx.subject.Handle;
+            var logicState = ctx.subject.GetRef<Logic.Default>();
+            UpdateProjectile(ref logicState, ctx.delta);
+        }
 
+        static unsafe void UpdateProjectile(ref Default logicState, float time)
+        {
+            logicState.position.x += (int)(logicState.detection.radius * time);
+            logicState.position.y += (int)(logicState.detection.radius * time);
+            logicState.position.z += (int)(logicState.detection.radius * time);
+        }
     }
 
     class TestSpace

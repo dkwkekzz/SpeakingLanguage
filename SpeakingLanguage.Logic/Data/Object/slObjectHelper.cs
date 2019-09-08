@@ -26,7 +26,7 @@ namespace SpeakingLanguage.Logic
             var iter = (Library.umnChunk*)((IntPtr)obj + sizeof(slObject) + sizeof(Library.umnChunk) + sizeof(Default));
             while (null != iter)
             {
-                if (iter->typeHandle == TypeManager.SHControlState.key)
+                if (iter->typeHandle == TypeManager.Instance.SHControlState.key)
                     return Library.umnChunk.GetPtr<Control>(iter);
 
                 iter = Library.umnChunk.GetNext(iter);

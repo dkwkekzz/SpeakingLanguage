@@ -49,21 +49,25 @@ namespace SpeakingLanguage.Server.Networks
             var receiver = new PacketReceiver();
             _serverListener.Receiver = receiver;
 
-            var worldManager = WorldManager.Instance;
+            var world = WorldManager.Instance;
             var eventManager = Logic.EventManager.Instance;
             while (!Console.KeyAvailable)
             {
                 eventManager.FrameEnter();
 
                 server.PollEvents();
-                worldManager.FlushUser();
-                
+                world.FlushEvents();
+                receiver.FlushReponses();
+
                 var ret = eventManager.ExecuteFrame();
-                ret.Display();
                 if (ret.Leg >= 0)
                     continue;
-                
+
                 Thread.Sleep(-ret.Leg);
+
+                // for test
+                Console.WriteLine(ret.ToString());
+                Thread.Sleep(1500);
             }
         }
     }

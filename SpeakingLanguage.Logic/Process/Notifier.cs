@@ -23,12 +23,13 @@ namespace SpeakingLanguage.Logic.Process
             _jobIter = new JobPartitioner(info.default_jobchunklength);
             _cts = new CancellationTokenSource();
             _lstUpdater = new List<Updater>(info.default_workercount);
-            for (int i = 0; i != info.default_workercount; i++) _lstUpdater.Add(new Updater(this, i));
+            for (int i = 0; i < info.default_workercount; i++) _lstUpdater.Add(new Updater(this, i));
         }
 
         public void Awake()
         {
-            for (int i = 0; i != _lstUpdater.Count; i++) _lstUpdater[i].Run();
+            var updaterCount = _lstUpdater.Count;
+            for (int i = 0; i != updaterCount; i++) _lstUpdater[i].Run();
             _syncHandle.WaitForComplete();
 
             Library.Tracer.Write($"[Notifier] start run!");
@@ -43,21 +44,20 @@ namespace SpeakingLanguage.Logic.Process
 
         public void Signal(ref Service service)
         {
-            if (_jobIter.CollectJob(ref service, _lstUpdater.Count) > 0)
+            Library.Tracer.Write($"[Notifier] start signal: {service.ElapsedTick.ToString()}");
+
+            var updaterCount = _lstUpdater.Count;
+            if (_jobIter.CollectJob(ref service, updaterCount) > 0)
             {
-                Library.Tracer.Write($"[Notifier] send signal!");
+                Library.Tracer.Write($"[Notifier] send signal: {service.ElapsedTick.ToString()}");
                 _syncHandle.SignalWorking();
 
                 // 여기에 job을 넣을 수 있을까?
-                while (_jobIter.MoveNext())
-                {
-                    var groupIter = _jobIter.Current;
-                    Interactor.Execute(ref service, ref groupIter);
-                }
 
-                Library.Tracer.Write($"[Notifier] waiting...");
                 _syncHandle.WaitForComplete();
             }
+
+            Library.Tracer.Write($"[Notifier] exit signal: {service.ElapsedTick.ToString()}");
         }
     }
 }

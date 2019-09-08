@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace SpeakingLanguage.Logic
 {
@@ -16,10 +17,11 @@ namespace SpeakingLanguage.Logic
             var TSubjectAttribute = typeof(SubjectAttribute);
             var TTargetAttribute = typeof(TargetAttribute);
 
-            var types = Library.AssemblyHelper.CollectType(null);
+            var types = Library.AssemblyHelper.CollectType((Type t) => 
+            { return Attribute.GetCustomAttribute(t, typeof(ActionProviderAttribute)) != null; });
             foreach (var type in types)
             {
-                var mths = type.GetMethods();
+                var mths = type.GetMethods((BindingFlags.Static | BindingFlags.NonPublic) & ~BindingFlags.Instance);
                 for (int i = 0; i != mths.Length; i++)
                 {
                     var mth = mths[i];

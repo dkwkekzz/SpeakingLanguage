@@ -7,51 +7,44 @@ namespace SpeakingLanguage.Logic.Process
     internal sealed class SyncHandle : IDisposable
     {
         private CountdownEvent _completeHandle;
-        private ManualResetEventSlim _waitHandle;
+        private int _frame;
 
+        public int Frame => Volatile.Read(ref _frame);
         public int WorkerCount => _completeHandle.InitialCount;
-        public bool IsCompleted => _completeHandle.IsSet;
+        public bool Completed => _completeHandle.IsSet;
 
         public SyncHandle(int workerCount)
         {
             _completeHandle = new CountdownEvent(workerCount);
-            _waitHandle = new ManualResetEventSlim(false);
+            _frame = 0;
         }
         
         public void Dispose()
         {
             _completeHandle.Dispose();
-            _waitHandle.Dispose();
+            _frame = -1;
         }
 
         public void Reset(int workerCount)
         {
             _completeHandle.Reset(workerCount);
-            _waitHandle.Reset();
         }
 
-        public void SignalCompleted()
+        public int SignalCompleted()
         {
-            _waitHandle.Reset();
-            if (!_completeHandle.IsSet)
-                _completeHandle.Signal();
+            _completeHandle.Signal();
+            return _completeHandle.CurrentCount;
         }
 
         public void SignalWorking()
         {
             _completeHandle.Reset();
-            _waitHandle.Set();
+            Interlocked.Increment(ref _frame);
         }
 
         public void WaitForComplete()
         {
-            if (!_completeHandle.IsSet)
-                _completeHandle.Wait();
-        }
-
-        public void WaitForWork()
-        {
-            _waitHandle.Wait();
+            _completeHandle.Wait();
         }
     }
 }

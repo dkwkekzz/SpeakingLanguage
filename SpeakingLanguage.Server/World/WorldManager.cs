@@ -19,13 +19,13 @@ namespace SpeakingLanguage.Server
             UserFactory = new User.Factory(info.default_usercount);
         }
 
-        public void FlushUser()
+        public void FlushEvents()
         {
             var userIter = Agents.GetUserEnumerator();
             while (userIter.MoveNext())
             {
                 var user = userIter.Current;
-                user.FlushData();
+                user.FlushNetData();
             }
         }
     }

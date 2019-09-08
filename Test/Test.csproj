@@ -50,7 +50,7 @@
   <ItemGroup>
     <Compile Include="Classes.cs" />
     <None Include="TestMemory.cs" />
-    <Compile Include="TestTLS.cs" />
+    <None Include="TestTLS.cs" />
     <None Include="TestReflection.cs" />
     <None Include="TestSCC.cs" />
     <None Include="TestComparer.cs" />
@@ -59,7 +59,7 @@
     <None Include="TestAttribute.cs" />
     <None Include="TestClassStruct.cs" />
     <None Include="TestHeap.cs" />
-    <None Include="TestHashMap.cs" />
+    <Compile Include="TestHashMap.cs" />
     <None Include="TestSplaybt.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace SpeakingLanguage.Logic.Container
+namespace SpeakingLanguage.Logic.Data
 {
     internal unsafe struct InteractGroup : IEnumerable<InteractPair>
     {
@@ -15,6 +15,7 @@ namespace SpeakingLanguage.Logic.Container
             public InteractPair Current => *_interactions[_current];
             object IEnumerator.Current => Current;
             public int ChildLength { get; private set; }
+            public bool IsEmpty => _begin == _end;
 
             public Enumerator(ref InteractGroup group)
             {
@@ -32,16 +33,17 @@ namespace SpeakingLanguage.Logic.Container
 
             public bool MoveNext()
             {
-                if (_current == -1)
-                    _current = _begin;
-
                 if (_current >= _end)
                     return false;
+
+                if (_current == -1)
+                    _current = _begin;
+                else
+                    ++_current;
 
                 if (ChildLength != 0)
                     Library.ThrowHelper.ThrowWrongState($"Please call MoveNextChild to end. ChildLength: {ChildLength.ToString()}");
 
-                ++_current;
                 ChildLength = _interactions[_current]->count;
                 return _current < _end;
             }
@@ -49,11 +51,11 @@ namespace SpeakingLanguage.Logic.Container
             public bool MoveNextChild()
             {
                 if (_current == -1)
-                    _current = _begin;
+                    Library.ThrowHelper.ThrowWrongState($"Please call MoveNext first. ChildLength.");
 
                 if (_current >= _end)
                     return false;
-
+                
                 if (ChildLength == 0)
                     return false;
 
@@ -71,9 +73,9 @@ namespace SpeakingLanguage.Logic.Container
 
         private readonly Library.umnArray<InteractPair>.Indexer _interactions;
         private int _begin, _end;
-        
-        public int Length => _end - _begin + 1;
-        
+
+        public bool IsEmpty => _begin == _end;
+
         public InteractGroup(Library.umnArray<InteractPair>.Indexer indexer, int begin, int end)
         {
             _interactions = indexer;

@@ -28,6 +28,14 @@ namespace SpeakingLanguage.Library
 
             public WrongStateException(string msg) { _msg = msg; }
         }
+
+        public sealed class FailToConvertException : Exception
+        {
+            private string _msg;
+            public override string Message => _msg;
+
+            public FailToConvertException(string msg) { _msg = msg; }
+        }
         
         public static void ThrowCapacityOverflow(string msg = "")
         {
@@ -55,6 +63,11 @@ namespace SpeakingLanguage.Library
         }
 
         public static void ThrowWrongArgument(string msg = "")
+        {
+            throw new ArgumentException(msg);
+        }
+
+        public static void ThrowFailToConvert(string msg = "")
         {
             throw new ArgumentException(msg);
         }

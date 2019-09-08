@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Server
 {
+    [Logic.ActionProviderAttribute]
     internal static class Interaction
     {
         [Logic.SubjectAttribute(typeof(Logic.Default))]

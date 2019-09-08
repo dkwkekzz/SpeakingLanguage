@@ -5,6 +5,9 @@ namespace SpeakingLanguage.Logic
 {
     public struct FrameResult
     {
+        private static long _lastMS;
+
+        public int frame;
         public int objectCount;
         public int frameTick;
         public int elapsed;
@@ -13,12 +16,17 @@ namespace SpeakingLanguage.Logic
 
         public override string ToString()
         {
-            return $"[FrameResult] objectCount: {objectCount.ToString()}, elapsed: {elapsed.ToString()}, leg: {Leg.ToString()}";
+            return $"[FrameResult] frameCount: {frame.ToString()}, objectCount: {objectCount.ToString()}, elapsed: {elapsed.ToString()}, leg: {Leg.ToString()}";
         }
 
-        public void Display()
+        public void Display(int perMS = 1000)
         {
-            Library.Tracer.Write(ToString());
+            var ms = Library.Ticker.ElapsedMS;
+            if (ms - _lastMS > perMS)
+            {
+                Library.Tracer.Write(ToString());
+                _lastMS = ms;
+            } 
         }
     }
 }

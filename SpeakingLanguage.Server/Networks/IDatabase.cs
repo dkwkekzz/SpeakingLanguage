@@ -3,9 +3,12 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Server.Networks
 {
-    internal interface IDatabase
+    internal interface IDatabase : IDisposable
     {
-        void ConstructUser(User agent, string id, string pswd);
-        bool ConstructObject(int handleValue, out Library.Reader reader);
+        void RequestReadUser(User agent, string id, string pswd);
+        void RequestWriteUser(User agent, string fileKey);
+        //void RequestReadObject(User agent, long handleValue);
+        //void RequestWriteObject(User agent, long objUid);
+        void FlushResponse();
     }
 }

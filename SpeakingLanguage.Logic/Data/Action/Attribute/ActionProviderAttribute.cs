@@ -3,9 +3,7 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Logic
 {
-    public struct LifeCycle
+    public class ActionProviderAttribute : Attribute
     {
-        public int value;
-        public long tick;
     }
 }

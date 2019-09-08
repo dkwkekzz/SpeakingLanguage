@@ -14,7 +14,7 @@ namespace SpeakingLanguage.Logic
         private bool isReadonly;
 
         internal IntPtr ObjectPtr => (IntPtr)owner;
-        internal int ObjectLength => owner->Capacity;
+        internal int ObjectLength => sizeof(slObject) + owner->Capacity;
         internal IntPtr StackPtr => tempStackPtr;
         internal int StackOffset => tempOffset;
         internal bool IsReadonly => isReadonly;
@@ -29,7 +29,7 @@ namespace SpeakingLanguage.Logic
             tempOffset = 0;
             isReadonly = true;
         }
-
+        
         public TState Get<TState>() where TState : unmanaged
         {
             var handle = TypeManager.GetStateHandle(typeof(TState)).key;

@@ -2,6 +2,7 @@
 using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,8 +15,6 @@ namespace SpeakingLanguage.ClientSample
 
         public void Run(int port)
         {
-            Console.WriteLine("=== SpeakingLanguage ClientSample ===");
-
             //Client
             _clientListener = new ClientListener();
 
@@ -43,7 +42,7 @@ namespace SpeakingLanguage.ClientSample
             client2.Connect("::1", port, Protocol.Define.GAME_KEY);
 
             running = true;
-            TestInput(client1.FirstPeer);
+            TestInput(new NetPeer[]{ client1.FirstPeer, client2.FirstPeer });
 
             while (running)
             {
@@ -69,59 +68,122 @@ namespace SpeakingLanguage.ClientSample
             Console.ReadKey();
         }
 
-        private void TestInput(NetPeer peer)
+        private static void WriteGuide()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("=== SpeakingLanguage ClientSample ===");
+            sb.AppendLine("=====================");
+            sb.AppendLine("Format:{clientIdx} {반복횟수} {패킷번호} {data총개수} {data번호} {각데이터포맷별 값} {data2번호} ... ");
+            sb.AppendLine("=====================");
+            sb.AppendLine("패킷 번호");
+            for (Protocol.Code.Packet code = 0; code != Protocol.Code.Packet.__MAX__; code++)
+            {
+                sb.AppendLine($"{((int)code).ToString()}. {code.ToString()}");
+            }
+            sb.AppendLine("=====================");
+            sb.AppendLine("데이터 포맷");
+            sb.AppendLine("1. KeyboardData -> format: {press:bool} {consoleKey:int}");
+            sb.AppendLine("2. ObjectData -> format: {handleValue:int}");
+            sb.AppendLine("3. SubscribeData -> format: {worldIndex:int} {count:int}");
+            sb.AppendLine("4. SceneData -> format: {x:int} {y:int} {z:int}");
+            sb.AppendLine("5. InteractionData -> format: {x:int} {y:int}");
+            sb.AppendLine("6. AuthenticationData -> format: {id:string} {pswd:string}");
+            sb.AppendLine("=====================");
+            sb.AppendLine("기타: z: ");
+            sb.AppendLine("=====================");
+            Console.WriteLine(sb.ToString());
+        }
+
+        private void TestInput(NetPeer[] peers)
         {
             Task.Factory.StartNew(() =>
             {
+                WriteGuide();
+
                 var writer = new NetDataWriter();
                 while (running)
                 {
-                    writer.Reset();
-
-                    var input = Console.ReadKey();
-                    var key = input.Key;
-                    switch (input.Key)
+                    try
                     {
-                        case ConsoleKey.LeftArrow:
-                        case ConsoleKey.RightArrow:
-                        case ConsoleKey.UpArrow:
-                        case ConsoleKey.DownArrow:
-                        case ConsoleKey.A:
-                        case ConsoleKey.D:
-                        case ConsoleKey.W:
-                        case ConsoleKey.S:
-                            writer.Put((int)Protocol.Code.Packet.Keyboard);
-                            writer.Put(new Protocol.Packet.KeyboardData { press = true, key = (int)key });
-                            break;
-                        case ConsoleKey.D1:
-                            writer.Put((int)Protocol.Code.Packet.SelectSubject);
-                            writer.Put(new Protocol.Packet.ObjectData { handleValue = (int)key });
-                            break;
-                        case ConsoleKey.D2:
-                            writer.Put((int)Protocol.Code.Packet.SubscribeScene);
-                            writer.Put(new Protocol.Packet.SubscribeData { worldIndex = (int)key, count = 1 });
-                            writer.Put(new Protocol.Packet.SceneData { sceneX = 0, sceneY = 0, sceneZ = 0 });
-                            break;
-                        case ConsoleKey.D3:
-                            writer.Put((int)Protocol.Code.Packet.UnsubscribeScene);
-                            writer.Put(new Protocol.Packet.SubscribeData { worldIndex = (int)key, count = 1, });
-                            writer.Put(new Protocol.Packet.SceneData { sceneX = 0, sceneY = 0, sceneZ = 0 });
-                            break;
-                        case ConsoleKey.Q:
-                            writer.Put((int)Protocol.Code.Packet.Interaction);
-                            writer.Put(new Protocol.Packet.InteractionData
+                        var command = Console.ReadLine();
+                        var words = command.Split(' ');
+                        var clientIdx = int.Parse(words[0]);
+                        var peer = peers[clientIdx];
+
+                        var repeat = int.Parse(words[1]);
+                        for (int i = 0; i != repeat; i++)
+                        {
+                            writer.Reset();
+
+                            var code = int.Parse(words[2]);
+                            writer.Put(code);
+
+                            var dataCnt = int.Parse(words[3]);
+                            for (int j = 0; j != dataCnt; j++)
                             {
-                                lhsValue = 0,
-                                rhsValue = 1
-                            });
-                            break;
-                        case ConsoleKey.Z:
-                            writer.Put((int)Protocol.Code.Packet.Terminate);
-                            running = false;
-                            break;
+                                var dataNum = int.Parse(words[4]);
+                                var startIndex = 5;
+                                switch (dataNum)
+                                {
+                                    case 1:
+                                        writer.Put(new Protocol.Packet.KeyboardData
+                                        {
+                                            press = int.Parse(words[startIndex + j * 2]) == 0 ? false : true,
+                                            key = int.Parse(words[startIndex + j * 2 + 1])
+                                        });
+                                        break;
+                                    case 2:
+                                        if (words.Length > startIndex)
+                                        {
+                                            writer.Put(new Protocol.Packet.ObjectData
+                                            { handleValue = int.Parse(words[startIndex + j]) });
+                                        }
+                                        else
+                                        {
+                                            writer.Put(new Protocol.Packet.ObjectData
+                                            { handleValue = (i + 1) });
+                                        }
+                                        break;
+                                    case 3:
+                                        writer.Put(new Protocol.Packet.SubscribeData
+                                        {
+                                            worldIndex = int.Parse(words[startIndex + j * 2]),
+                                            count = int.Parse(words[startIndex + j * 2 + 1])
+                                        });
+                                        break;
+                                    case 4:
+                                        writer.Put(new Protocol.Packet.SceneData
+                                        {
+                                            sceneX = int.Parse(words[startIndex + j * 3]),
+                                            sceneY = int.Parse(words[startIndex + j * 3 + 1]),
+                                            sceneZ = int.Parse(words[startIndex + j * 3 + 2])
+                                        });
+                                        break;
+                                    case 5:
+                                        writer.Put(new Protocol.Packet.InteractionData
+                                        {
+                                            lhsValue = int.Parse(words[startIndex + j * 2]),
+                                            rhsValue = int.Parse(words[startIndex + j * 2 + 1])
+                                        });
+                                        break;
+                                    case 6:
+                                        writer.Put(new Protocol.Packet.AuthenticationData
+                                        {
+                                            id = words[startIndex + j * 2],
+                                            pswd = words[startIndex + j * 2 + 1]
+                                        });
+                                        break;
+                                }
+                            }
+                            
+                            peer.Send(writer, DeliveryMethod.ReliableOrdered);
+                        }
                     }
-                    
-                    peer.Send(writer, DeliveryMethod.ReliableOrdered);
+                    catch (IndexOutOfRangeException iex) { Console.WriteLine(iex.Message); }
+                    catch (ArgumentOutOfRangeException aex) { Console.WriteLine(aex.Message); }
+                    finally
+                    {
+                    }
                 }
             });   
         }

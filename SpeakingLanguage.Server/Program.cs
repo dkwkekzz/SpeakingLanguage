@@ -37,10 +37,10 @@ namespace SpeakingLanguage.Server
             var logicInfo = new Logic.StartInfo()
             {
                 default_frameRate = "default_frameRate".ParseConfigOrDefault(60),
-                default_objectcount = "default_objectcount".ParseConfigOrDefault(10),
+                default_objectcount = "default_objectcount".ParseConfigOrDefault(10000),
                 default_interactcount = "default_interactcount".ParseConfigOrDefault(100),
-                default_workercount = "default_workercount".ParseConfigOrDefault(1),
-                default_jobchunklength = "default_jobchunklength".ParseConfigOrDefault(16),
+                default_workercount = "default_workercount".ParseConfigOrDefault(4),
+                default_jobchunklength = "default_jobchunklength".ParseConfigOrDefault(32),
             };
             var eventManager = Logic.EventManager.Instance;
             eventManager.Install(ref logicInfo);

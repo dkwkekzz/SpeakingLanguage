@@ -64,12 +64,14 @@ namespace SpeakingLanguage.Logic
         {
             var szObj = sizeof(slObject);
             var objChk = allocator.Alloc(szObj);
+            if (null == objChk) return null;
+
             var objPtr = Library.umnChunk.GetPtr<slObject>(objChk);
             objPtr->handle = handle;
             
-            var szDefaultState = TypeManager.SHDefaultState.size;
+            var szDefaultState = TypeManager.Instance.SHDefaultState.size;
             var chkDefaultState = allocator.Calloc(szDefaultState);
-            chkDefaultState->typeHandle = TypeManager.SHDefaultState.key;
+            chkDefaultState->typeHandle = TypeManager.Instance.SHDefaultState.key;
             chkDefaultState->length = szDefaultState;
             
             objPtr->Capacity = sizeof(Library.umnChunk) + szDefaultState;
@@ -82,17 +84,19 @@ namespace SpeakingLanguage.Logic
         {
             var szObj = sizeof(slObject);
             var objChk = allocator.Alloc(szObj);
+            if (null == objChk) return null;
+
             var objPtr = Library.umnChunk.GetPtr<slObject>(objChk);
             objPtr->handle = handle;
 
-            var szDefaultState = TypeManager.SHDefaultState.size;
+            var szDefaultState = TypeManager.Instance.SHDefaultState.size;
             var chkDefaultState = allocator.Calloc(szDefaultState);
-            chkDefaultState->typeHandle = TypeManager.SHDefaultState.key;
+            chkDefaultState->typeHandle = TypeManager.Instance.SHDefaultState.key;
             chkDefaultState->length = szDefaultState;
 
-            var szControlState = TypeManager.SHControlState.size;
+            var szControlState = TypeManager.Instance.SHControlState.size;
             var chkControlState = allocator.Calloc(szControlState);
-            chkControlState->typeHandle = TypeManager.SHControlState.key;
+            chkControlState->typeHandle = TypeManager.Instance.SHControlState.key;
             chkControlState->length = szControlState;
 
             objPtr->Capacity = sizeof(Library.umnChunk) + szDefaultState + sizeof(Library.umnChunk) + szControlState;
