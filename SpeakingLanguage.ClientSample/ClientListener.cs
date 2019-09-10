@@ -87,9 +87,17 @@ namespace SpeakingLanguage.ClientSample
                 if (reader.AvailableBytes <= 0)
                     return;
 
-                var code = reader.GetInt();
+                var code = (Protocol.Code.Packet)reader.GetInt();
                 _messagesReceivedCount++;
                 Console.WriteLine("[{0}] CNT: {1}, CODE: {2}, MTD: {3}", peer.NetManager.LocalPort, _messagesReceivedCount, code.ToString(), deliveryMethod);
+
+                switch (code)
+                {
+                    case Protocol.Code.Packet.CreateSubject:
+                        var data = reader.Get<Protocol.Packet.ObjectData>();
+                        Console.WriteLine($"[{code}] handle: {data.handleValue.ToString()}");
+                        break;
+                }
             }
         }
 

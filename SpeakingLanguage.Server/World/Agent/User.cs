@@ -46,21 +46,25 @@ namespace SpeakingLanguage.Server
             public string id;
             public string pswd;
             public long createdTicks;
-            public Dictionary<Logic.slObjectHandle, long> subjects;
+            //public Dictionary<Logic.slObjectHandle, long> subjects;
         }
-        
+
         private readonly List<IScene> _subscribeScenes = new List<IScene>(4);
         private NetPeer _peer;
         private Information _info;
 
+        public bool Authentication => _info.createdTicks != 0;
+
         // ISubscriber
         public int Id { get; private set; }
-        public Logic.slObjectHandle SubjectHandle { get; private set; }
+        public Logic.slObjectHandle SubjectHandle => SubjectSelector.Current;
         public NetDataWriter DataWriter { get; private set; }
+
+        public SubjectSelector SubjectSelector { get; } = new SubjectSelector();
 
         private User()
         {
-            _info.subjects = new Dictionary<Logic.slObjectHandle, long>(8);
+            //_info.subjects = new Dictionary<Logic.slObjectHandle, long>(8);
         }
 
         public void Dispose()
@@ -71,12 +75,12 @@ namespace SpeakingLanguage.Server
 
         public void Save(Networks.IDatabase database)
         {
-            if (_info.createdTicks == 0) return;
+            if (!Authentication) return;
 
             database.RequestWriteUser(this, $"user_{_info.id}_{_info.pswd}");
         }
         
-        public void DeserializeInfo(ref Library.Reader reader)
+        public void OnDeserialize(ref Library.Reader reader)
         {
             if (reader.LengthToRead == 0)
             {
@@ -92,37 +96,20 @@ namespace SpeakingLanguage.Server
             read &= reader.ReadInt(out int length);
             if (!read) Library.ThrowHelper.ThrowFailToConvert($"[User::Construct::reader] position:{reader.Position.ToString()}");
 
-            for (int i = 0; i != length; i++)
-            {
-                read &= reader.ReadLong(out long objUid);
-                var eRet = Logic.EventManager.Instance.DeserializeObject(ref reader);
-                if (!eRet.Success) Library.ThrowHelper.ThrowFailToConvert("User::DeserializeInfo");
-
-                var handleValue = eRet.result;
-                _info.subjects.Add(new Logic.slObjectHandle(handleValue), objUid);
-            }
+            SubjectSelector.OnDeserialize(ref reader);
 
             DataWriter.Put((int)Protocol.Code.Packet.DeserializeUser);
             DataWriter.Put(new Protocol.Packet.SerializeResultData { success = true });
             return;
         }
 
-        public void SerializeInfo(ref Library.Writer writer)
+        public void OnSerialize(ref Library.Writer writer)
         {
             writer.WriteString(_info.id);
             writer.WriteString(_info.pswd);
             writer.WriteLong(_info.createdTicks);
-            writer.WriteInt(_info.subjects.Count);
 
-            var iter = _info.subjects.GetEnumerator();
-            while (iter.MoveNext())
-            {
-                var pair = iter.Current;
-                writer.WriteLong(pair.Value);
-
-                var eRet = Logic.EventManager.Instance.SerializeObject(pair.Key.value, ref writer);
-                if (!eRet.Success) Library.ThrowHelper.ThrowFailToConvert("User::SerializeInfo");
-            }
+            SubjectSelector.OnSerialize(ref writer);
 
             DataWriter.Put((int)Protocol.Code.Packet.SerializeUser);
             DataWriter.Put(new Protocol.Packet.SerializeResultData { success = true });
@@ -136,21 +123,7 @@ namespace SpeakingLanguage.Server
             else
                 DataWriter.Reset();
         }
-
-        public void InsertSubject(long objUid, int handleValue)
-        {
-            _info.subjects.Add(new Logic.slObjectHandle(handleValue), objUid);
-        }
-
-        public bool TryCaptureSubject(Logic.slObjectHandle selectedHandle, out long uid)
-        {
-            if (!_info.subjects.TryGetValue(selectedHandle, out uid))
-                return false;
-
-            SubjectHandle = selectedHandle;
-            return true;
-        }
-
+        
         public List<IScene>.Enumerator GetSceneEnumerator()
         {
             return _subscribeScenes.GetEnumerator();

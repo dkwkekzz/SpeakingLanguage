@@ -27,36 +27,46 @@ namespace SpeakingLanguage.Logic
             _notifier.Dispose();
         }
 
-        public unsafe EventResult<int> CreateObject()
+        public unsafe EventResult<slObjectHandle> CreateObject()
         {
             var pObj = _logicService.colObj.CreateFront(0);
             if (null == pObj)
-                return new EventResult<int>(EventError.OverflowObjectCapacity);
+                return new EventResult<slObjectHandle>(EventError.OverflowObjectCapacity);
 
-            return new EventResult<int>(EventError.None, pObj->handle.value);
+            return new EventResult<slObjectHandle>(EventError.None, pObj->handle);
         }
 
-        public unsafe EventResult<int> DeserializeObject(ref Library.Reader reader)
+        public unsafe EventResult DestroyObject(slObjectHandle handle)
+        {
+            var obj = _logicService.colObj.Find(handle);
+            if (obj == null)
+                return new EventResult(EventError.NullReferenceObject);
+
+            _logicService.colObj.Destroy(obj);
+            return new EventResult();
+        }
+
+        public unsafe EventResult<slObjectHandle> DeserializeObject(ref Library.Reader reader)
         {
             var read = reader.ReadInt(out int handleValue);
-            if (!read) return new EventResult<int>(EventError.FailToReadHandle);
+            if (!read) return new EventResult<slObjectHandle>(EventError.FailToReadHandle);
 
             if (handleValue == 0)
             {
                 var pObj = _logicService.colObj.CreateFront(handleValue);
                 if (null == pObj)
-                    return new EventResult<int>(EventError.OverflowObjectCapacity);
+                    return new EventResult<slObjectHandle>(EventError.OverflowObjectCapacity);
             }
             else
             {
                 read = reader.ReadInt(out int length);
-                if (!read) return new EventResult<int>(EventError.FailToReadLength);
+                if (!read) return new EventResult<slObjectHandle>(EventError.FailToReadLength);
 
                 var pObj = _logicService.colObj.InsertFront(reader.Buffer, reader.Position, length);
                 if (null == pObj)
-                    return new EventResult<int>(EventError.OverflowObjectCapacity);
+                    return new EventResult<slObjectHandle>(EventError.OverflowObjectCapacity);
             }
-            return new EventResult<int>(EventError.None, handleValue);
+            return new EventResult<slObjectHandle>(EventError.None, handleValue);
         }
 
         public unsafe EventResult SerializeObject(slObjectHandle handle, ref Library.Writer writer)

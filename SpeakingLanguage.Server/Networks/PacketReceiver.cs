@@ -126,6 +126,9 @@ namespace SpeakingLanguage.Server.Networks
             if (agent == null)
                 return new Result(Protocol.Code.Error.NullReferenceAgent);
 
+            if (agent.Authentication)
+                return new Result(Protocol.Code.Error.AlreadyConstructed);
+
             var data = reader.Get<Protocol.Packet.AuthenticationData>();
             if (!ReceiverHelper.ValidateAuthenticate(ref data))
                 return new Result(Protocol.Code.Error.FailToAuthentication);
@@ -137,7 +140,7 @@ namespace SpeakingLanguage.Server.Networks
             writer.WriteInt(0);
 
             var reader2 = new Library.Reader(_serializeBuffer, writer.Offset);
-            agent.DeserializeInfo(ref reader2);
+            agent.OnDeserialize(ref reader2);
 
             return new Result();
         }
@@ -187,13 +190,18 @@ namespace SpeakingLanguage.Server.Networks
             var agent = _world.Agents.GetUser(id);
             if (agent == null)
                 return new Result(Protocol.Code.Error.NullReferenceAgent);
-            
-            var subjectData = reader.Get<Protocol.Packet.ObjectData>();
-            if (!agent.TryCaptureSubject(subjectData.handleValue, out long uid))
+
+            if (!agent.Authentication)
+                return new Result(Protocol.Code.Error.InvalidAuthentication);
+
+            var data = reader.Get<Protocol.Packet.ObjectData>();
+
+            var selector = agent.SubjectSelector;
+            if (!selector.TryCaptureSubject(data.handleValue, out long uid))
                 return new Result(Protocol.Code.Error.NullReferenceSubjectHandle);
 
             agent.DataWriter.Put((int)Protocol.Code.Packet.SelectSubject);
-            agent.DataWriter.Put(new Protocol.Packet.ObjectData { handleValue = subjectData.handleValue });
+            agent.DataWriter.Put(new Protocol.Packet.ObjectData { handleValue = data.handleValue });
 
             return new Result();
         }
@@ -205,16 +213,20 @@ namespace SpeakingLanguage.Server.Networks
             if (agent == null)
                 return new Result(Protocol.Code.Error.NullReferenceAgent);
 
+            if (!agent.Authentication)
+                return new Result(Protocol.Code.Error.InvalidAuthentication);
+
             var objUid = ReceiverHelper.CreateObjectUid(id);
             var eRes = Logic.EventManager.Instance.CreateObject();
             if (!eRes.Success)
                 return new Result(Protocol.Code.Error.NullReferenceSubjectHandle, eRes.error); 
 
-            var handleValue = eRes.result;
-            agent.InsertSubject(objUid, handleValue);
+            var objHandle = eRes.result;
+            var selector = agent.SubjectSelector;
+            selector.InsertSubject(objUid, objHandle);
             
             agent.DataWriter.Put((int)Protocol.Code.Packet.CreateSubject);
-            agent.DataWriter.Put(new Protocol.Packet.ObjectData { handleValue = handleValue });
+            agent.DataWriter.Put(new Protocol.Packet.ObjectData { handleValue = objHandle.value });
 
             return new Result();
         }

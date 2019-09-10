@@ -48,6 +48,7 @@
     <Compile Include="Config.cs" />
     <Compile Include="Networks\IDatabase.cs" />
     <Compile Include="Networks\ReceiverHelper.cs" />
+    <Compile Include="World\Agent\Components\SubjectSelector.cs" />
     <Compile Include="World\Agent\Dummy.cs" />
     <Compile Include="World\Agent\IAgent.cs" />
     <Compile Include="World\Agent\ISerializable.cs" />

@@ -5,7 +5,7 @@ namespace SpeakingLanguage.Server
 {
     internal interface ISerializable
     {
-        void DeserializeInfo(ref Library.Reader reader);
-        void SerializeInfo(ref Library.Writer writer);
+        void OnDeserialize(ref Library.Reader reader);
+        void OnSerialize(ref Library.Writer writer);
     }
 }

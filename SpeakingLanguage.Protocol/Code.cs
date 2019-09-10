@@ -32,6 +32,8 @@ namespace SpeakingLanguage.Protocol
             NullReferenceCollider,
             NullReferenceSubsrciber,
             NullReferenceSubjectHandle,
+            InvalidAuthentication,
+            AlreadyConstructed,
             DuplicateAgent,
             OverflowSubscribe,
             IllegalityDataForSelectSubject,

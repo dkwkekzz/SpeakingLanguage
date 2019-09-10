@@ -70,7 +70,7 @@ namespace SpeakingLanguage.Server.Networks
                 if (!_readResponses.TryDequeue(out ReadResponse res)) continue;
 
                 var reader = new Library.Reader(res.rawData, res.rawData == null ? 0 : res.rawData.Length);
-                res.agent.DeserializeInfo(ref reader);
+                res.agent.OnDeserialize(ref reader);
             }
 
             while (_writeResponses.Count > 0)
@@ -162,7 +162,7 @@ namespace SpeakingLanguage.Server.Networks
                         using (var stream = File.Create(pathString))
                         {
                             var writer = new Library.Writer(_buffer, 0);
-                            req.agent.SerializeInfo(ref writer);
+                            req.agent.OnSerialize(ref writer);
                             stream.Write(_buffer, 0, writer.Offset);
                         }
                     }

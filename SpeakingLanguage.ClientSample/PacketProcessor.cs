@@ -125,6 +125,8 @@ namespace SpeakingLanguage.ClientSample
                                 var startIndex = 5;
                                 switch (dataNum)
                                 {
+                                    case 0:
+                                        break;
                                     case 1:
                                         writer.Put(new Protocol.Packet.KeyboardData
                                         {
