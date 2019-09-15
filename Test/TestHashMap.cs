@@ -63,10 +63,6 @@ namespace Test
 
         static void Main()
         {
-            var data = new byte[3] { 1, 2, 3 };
-            var _data = new byte[3];
-            Buffer.BlockCopy(data, 0, data, 0, 3);
-            return;
             var timer = new Stopwatch();
             var allocator = new SpeakingLanguage.Library.umnMarshal();
 

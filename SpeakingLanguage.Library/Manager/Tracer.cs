@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace SpeakingLanguage.Library
@@ -15,6 +16,14 @@ namespace SpeakingLanguage.Library
         public static void AddConsoleListener()
         {
             Trace.Listeners.Add(new ConsoleTraceListener());
+        }
+
+        public static string GetCaller(
+            [CallerFilePath] string filePath = null, // __FILE__
+            [CallerLineNumber] int n = 0, // __LINE__
+            [CallerMemberName] string name = null) //__FUNC__
+        {
+            return $"file: {filePath}, line: {n.ToString()}, func: {name}";
         }
 
         public static void Assert(bool condition)
@@ -48,7 +57,7 @@ namespace SpeakingLanguage.Library
             Trace.TraceError(msg);
             Console.ResetColor();
         }
-
+        
         public static void Error(string tag, string msg)
         {
             Console.ForegroundColor = ConsoleColor.Red;

@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Logic.h" />
+    <ClInclude Include="Process\SyncHandle.h">
+      <Filter>Process</Filter>
+    </ClInclude>
+    <ClInclude Include="Process\Notifier.h">
+      <Filter>Process</Filter>
+    </ClInclude>
+    <ClInclude Include="Process\Updater.h">
+      <Filter>Process</Filter>
+    </ClInclude>
+    <ClInclude Include="Process\JobPartitioner.h">
+      <Filter>Process</Filter>
+    </ClInclude>
+    <ClInclude Include="Process\JobContext.h">
+      <Filter>Process</Filter>
+    </ClInclude>
+    <ClInclude Include="Process\CancelTokenSource.h">
+      <Filter>Process</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\spinlock.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\spinwait.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\ticker.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\tracer.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Process\CountdownEvent.h">
+      <Filter>Process</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\timer.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\splay.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="slObjectCollection.h" />
+    <ClInclude Include="slObject.h" />
+    <ClInclude Include="iterator.h" />
+    <ClInclude Include="slChunk.h" />
+    <ClInclude Include="IAllocator.h" />
+    <ClInclude Include="Basic.h" />
+    <ClInclude Include="Constants.h" />
+    <ClInclude Include="InteractionGraph.h" />
+    <ClInclude Include="Utils\disjointset.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="NativeHeap.h" />
+    <ClInclude Include="ObjectHeap.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="Logic.cpp" />
+    <ClCompile Include="Process\Notifier.cpp">
+      <Filter>Process</Filter>
+    </ClCompile>
+    <ClCompile Include="Process\Updater.cpp">
+      <Filter>Process</Filter>
+    </ClCompile>
+    <ClCompile Include="Process\JobPartitioner.cpp">
+      <Filter>Process</Filter>
+    </ClCompile>
+    <ClCompile Include="StartInfo.h" />
+    <ClCompile Include="Utils\tracer.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Process\CountdownEvent.cpp">
+      <Filter>Process</Filter>
+    </ClCompile>
+    <ClCompile Include="Service.h" />
+    <ClCompile Include="slObjectCollection.cpp" />
+    <ClCompile Include="slObject.cpp" />
+    <ClCompile Include="Constants.cpp" />
+    <ClCompile Include="InteractionGraph.cpp" />
+    <ClCompile Include="Utils\disjointset.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="NativeHeap.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Process">
+      <UniqueIdentifier>{8e8e201c-6094-489f-be61-f9a4fe9817ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{3d3d06ba-c5e7-4f61-b6b8-72d01c9cc3f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entity">
+      <UniqueIdentifier>{646715d3-450f-4691-9939-3324e9737c9c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

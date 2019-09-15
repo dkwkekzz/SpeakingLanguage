@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes.cs" />
+    <Compile Include="TestStatic.cs" />
     <None Include="TestMemory.cs" />
     <None Include="TestTLS.cs" />
     <None Include="TestReflection.cs" />
@@ -59,7 +60,7 @@
     <None Include="TestAttribute.cs" />
     <None Include="TestClassStruct.cs" />
     <None Include="TestHeap.cs" />
-    <Compile Include="TestHashMap.cs" />
+    <None Include="TestHashMap.cs" />
     <None Include="TestSplaybt.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
