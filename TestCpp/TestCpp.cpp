@@ -2,15 +2,15 @@
 //
 
 #include "pch.h"
-#include "Logic.h"
-#pragma comment(lib, "SpeakingLanguage.Core.dll")
+//#include "Logic.h"
+//#pragma comment(lib, "SpeakingLanguage.Core.dll")
 
 int main()
 {
     std::cout << "Hello World!\n"; 
 
-	using namespace SpeakingLanguage::Core;
-	Sample(9999);
+	//using namespace SpeakingLanguage::Core;
+	//Sample(9999);
 
 	std::cin.get();
 }

@@ -5,6 +5,7 @@
 namespace SpeakingLanguage {
 	namespace Core {
 
+
 		class slObjectCollection
 		{
 		public:
@@ -16,21 +17,33 @@ namespace SpeakingLanguage {
 			const_iterator begin() const;
 			const_iterator end() const;
 
+			struct Result
+			{
+				slObject* subject;
+				bool resized;
+
+				Result() : subject(nullptr), resized(false) {}
+				Result(slObject* ptr) : subject(ptr), resized(false) {}
+				operator slObject*() { return subject; }
+			};
+
 			explicit slObjectCollection(int defaultObjectCount);
 			~slObjectCollection();
 
 			int GetCount() const;
-			slObject* Find(const slObject::THandle) const;
-			slObject* CreateFront(slObject::THandle);
-			slObject* CreateBack();
-			slObject* InsertFront(const BYTE*, const int, const int);
-			slObject* InsertBack(const BYTE*, const int, const int);
+			Result Find(const slObject::THandle) const;
+			Result CreateFront(slObject::THandle);
+			Result CreateBack();
+			Result InsertFront(const BYTE*, const int, const int);
+			Result InsertBack(const BYTE*, const int, const int);
 			void Destroy(slObject*);
 			void SwapBuffer();
 
 		private:
 			struct Impl;
 			std::unique_ptr<Impl> _pImpl;
+
+			bool resized;
 		};
 	}
 }

@@ -23,8 +23,9 @@ namespace SpeakingLanguage {
 			~InteractionGraph();
 
 			void Insert(const Interaction);
+			void Resize();
 			void Reset();
-			bool TryGetInteractGroup(const_iterator<slObject>&, int, InteractionGroup&);
+			bool TryGetInteractGroup(const_iterator<slObject>&, const_iterator<slObject>&, int, InteractionGroup&);
 
 		private:
 			struct Impl;

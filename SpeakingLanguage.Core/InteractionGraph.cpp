@@ -2,7 +2,6 @@
 #include "InteractionGraph.h"
 #include "ObjectHeap.h"
 #include "Utils/disjointset.h"
-#include "Utils/splay.h"
 
 using namespace SpeakingLanguage::Core;
 
@@ -12,56 +11,38 @@ struct InteractPair
 	int count;
 };
 
-template <>
-struct HandleBlock<4>
+class BlockHead
 {
 public:
-	constexpr int Max() const { return 4; }
-	inline int GetCount() const { return count; }
 	void Insert(slObject::THandle handle, IAllocator* allocator);
-	slObject::THandle* current{ &vals[0] };
+	inline slObject::THandle* Current() { return _head; };
 
 private:
-	int count{ 0 };
-	slObject::THandle vals[4 + 1]{ 0, 0, 0, 0, -1 };
-	slObject::THandle* current{ &vals[0] };
-	HandleBlock<8>* next{ nullptr };
+	int _count{ 0 };
+	int _end{ 0 };
+	slObject::THandle* _head;
+	HandleBlock<4>* _next;
 };
 
-template<int N>
-class HandleBlock
+void
+BlockHead::Insert(slObject::THandle handle, IAllocator* allocator)
 {
-public:
-	HandleBlock() { vals[N] = -1; }
-
-	constexpr int Max() const { return N; }
-	inline int GetCount() const { return count; }
-	void Insert(slObject::THandle handle, IAllocator* allocator);
-
-private:
-	int count{ 0 };
-	slObject::THandle vals[N + 1];
-	HandleBlock<N * 2>* next;
-};
-
-template<int N>
-void 
-HandleBlock<N>::Insert(slObject::THandle handle, IAllocator* allocator)
-{
-	if (count == N)
-	{
-		if (!next)
-		{
-
-			next =
-
-		}
-			next->Insert(handle);
-	}
+	int idx = _count + 1;
+	if (_count + 1 )
 
 	vals[count++] = handle;
 	return true;
 }
+
+template<int N>
+struct HandleBlock
+{
+	constexpr int MAX = N;
+
+	int count{ 0 };
+	slObject::THandle vals[N];
+	HandleBlock<N << 1>* next;
+};
 
 template <>
 struct HandleBlock<256> 
@@ -69,15 +50,16 @@ struct HandleBlock<256>
 
 };
 
+// objectpool의 증가에 다른 resizing
+// 메모리 벡터화
+
 struct InteractionGraph::Impl
 {
-	using HandleBlock = std::deque<slObject::THandle, ObjectHeap<slObject::THandle> >;
-
-	ObjectHeap<slObject::THandle> heap;
+	NativeHeap heap;
 	Utils::disjointset groupSet;
-	std::vector<HandleBlock> linkMap;
-	std::queue<slObject::THandle, HandleBlock> queue;
-	std::vector<InteractPair, ObjectHeap<slObject::THandle>> pairs;
+	std::vector<BlockHead*> linkMap;
+	std::queue<slObject::THandle> queue;
+	std::vector<InteractPair> pairs;
 
 	Impl(int defaultObjectCount);
 
@@ -88,7 +70,7 @@ InteractionGraph::Impl::Impl(int defaultObjectCount) :
 	heap(defaultObjectCount * 1024),
 	groupSet(defaultObjectCount),
 	linkMap(defaultObjectCount),
-	pairs(defaultObjectCount, heap)
+	pairs(defaultObjectCount)
 {
 }
 
@@ -128,6 +110,12 @@ InteractionGraph::InteractionGraph(int defaultObjectCount) : _pImpl(std::make_un
 
 InteractionGraph::~InteractionGraph()
 {
+}
+
+void 
+InteractionGraph::Resize()
+{
+
 }
 
 void 
