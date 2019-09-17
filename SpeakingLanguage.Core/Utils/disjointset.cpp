@@ -19,6 +19,7 @@ disjointset::Find(int u)
 	return _parent[u] = this->Find(_parent[u]);
 }
 
+// 나와 부모가 같은(실제 최종그룹부모) 대상을 캐싱하여 리스트에 담는다.
 void 
 disjointset::Merge(int u, int v)
 {
@@ -44,4 +45,12 @@ disjointset::Reset()
 	for (int i = 0; i != n; i++) _parent[i] = i;
 	for (int i = 0; i != n; i++) _rank[i] = 1;
 	for (int i = 0; i != n; i++) _size[i] = 1;
+}
+
+void
+disjointset::Resize(int capacity)
+{
+	_parent.resize(capacity);
+	_rank.resize(capacity);
+	_size.resize(capacity);
 }

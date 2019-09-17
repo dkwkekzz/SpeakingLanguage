@@ -115,6 +115,7 @@ namespace SpeakingLanguage.Logic.Data
             while (_queue.Count > 0)
             {
                 var here = _queue.Dequeue();
+                // ???
                 int length = 0;
                 _arrPair.PushBack(new InteractPair(here, length));
                 count++;

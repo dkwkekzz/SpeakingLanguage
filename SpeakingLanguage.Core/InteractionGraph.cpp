@@ -5,76 +5,137 @@
 
 using namespace SpeakingLanguage::Core;
 
-struct InteractPair
+template<int N>
+struct HandleBlock
 {
-	slObject::THandle handle;
-	int count;
+	enum { MAX = N };
+
+	slObject::THandle vals[N + 1];
+	HandleBlock<N << 1>* next;
+
+	inline void Initialize() { next = nullptr; vals[N] = -1; }
+
+	slObject::THandle* FindHead(int count, IAllocator* allocator)
+	{
+		if (count < HandleBlock<N>::MAX)
+			return &vals[0] + count;
+
+		if (next == nullptr)
+		{
+			auto* chk = allocator->Alloc(sizeof(HandleBlock<N>));
+			if (nullptr == chk) return nullptr;
+
+			next = chk->Get<HandleBlock<N>>();
+			next->Initialize();
+		}
+
+		return next->FindHead(count - HandleBlock<N>::MAX, allocator);
+	}
+
+	void Flush(std::queue<slObject::THandle>& queue, int count)
+	{
+		for (int i = 0; i < count || i < MAX; i++)
+			queue.emplace(vals[i], 0);
+
+		if (count > MAX)
+			next->Flush(queue, count - MAX);
+	}
+};
+
+template <>
+struct HandleBlock<256>
+{
+	enum { MAX = 256 };
+
+	slObject::THandle vals[256 + 1];
+	HandleBlock<256>* next;
+
+	inline void Initialize() { next = nullptr; vals[256] = -1; }
+
+	slObject::THandle* FindHead(int count, IAllocator* allocator)
+	{
+		if (count < HandleBlock<256>::MAX)
+			return &vals[0] + count;
+
+		if (next == nullptr)
+		{
+			auto* chk = allocator->Alloc(sizeof(HandleBlock<256>));
+			if (nullptr == chk) return nullptr;
+
+			next = chk->Get<HandleBlock<256>>();
+			next->Initialize();
+		}
+
+		return next->FindHead(count - HandleBlock<256>::MAX, allocator);
+	}
 };
 
 class BlockHead
 {
 public:
-	void Insert(slObject::THandle handle, IAllocator* allocator);
-	inline slObject::THandle* Current() { return _head; };
+	void Insert(slObject::THandle handle);
+	inline void Initialize(IAllocator* allocator) { _allocator = allocator; }
+	inline int GetCount() const { return _count; }
+	inline void Mark() { _count = 0; }
+	inline void Flush(std::queue<slObject::THandle>& queue) 
+	{ 
+		_next->Flush(queue, _count); 
+		_count = 0; 
+		_next = nullptr;
+	}
 
 private:
 	int _count{ 0 };
-	int _end{ 0 };
+	slObject::THandle* _begin;
 	slObject::THandle* _head;
 	HandleBlock<4>* _next;
+	IAllocator* _allocator;
 };
 
 void
-BlockHead::Insert(slObject::THandle handle, IAllocator* allocator)
+BlockHead::Insert(slObject::THandle handle)
 {
-	int idx = _count + 1;
-	if (_count + 1 )
+	if (nullptr == _next)
+	{
+		auto* chk = _allocator->Alloc(sizeof(HandleBlock<4>));
+		if (nullptr == chk) return;
 
-	vals[count++] = handle;
-	return true;
+		_next = chk->Get<HandleBlock<4>>();
+		_begin = &_next->vals[0];
+		_head = &_next->vals[0];
+	}
+	else
+	{
+		if (*(++_head) == -1)
+			_head = _next->FindHead(_count, _allocator);
+	}
+
+	*_head = handle;
 }
-
-template<int N>
-struct HandleBlock
-{
-	constexpr int MAX = N;
-
-	int count{ 0 };
-	slObject::THandle vals[N];
-	HandleBlock<N << 1>* next;
-};
-
-template <>
-struct HandleBlock<256> 
-{
-
-};
-
-// objectpool의 증가에 다른 resizing
-// 메모리 벡터화
 
 struct InteractionGraph::Impl
 {
+	//Utils::disjointset groupSet;
 	NativeHeap heap;
-	Utils::disjointset groupSet;
 	std::vector<BlockHead*> linkMap;
 	std::queue<slObject::THandle> queue;
 	std::vector<InteractPair> pairs;
 
 	Impl(int defaultObjectCount);
 
-	int _bfsSelect(slObject::THandle first);
+	Result<int> _bfsSelect(slObject::THandle first);
 };
 
 InteractionGraph::Impl::Impl(int defaultObjectCount) :
+	//groupSet(defaultObjectCount),
 	heap(defaultObjectCount * 1024),
-	groupSet(defaultObjectCount),
 	linkMap(defaultObjectCount),
 	pairs(defaultObjectCount)
 {
 }
 
-int
+// pair을 count랑 짝지어 넣는 방법보다 더 메모리친화적인방법을 생각해보자.
+Result<int>
 InteractionGraph::Impl::_bfsSelect(slObject::THandle first)
 {
 	int count = 0;
@@ -83,22 +144,15 @@ InteractionGraph::Impl::_bfsSelect(slObject::THandle first)
 	while (!queue.empty())
 	{
 		const auto here = queue.front();
-		int length = 0;
+		auto* header = linkMap[here];
+		if (nullptr == header) continue;
+
+		int length = linkMap[here]->GetCount();
 		pairs.emplace_back(new InteractPair{ here, length });
 		count++;
 
-		if (linkMap.count(here) == 0) continue;
-
-		length = thereList.Count;
-		if (thereList.Order > 0)
-			continue;
-		thereList.Order = 1;
-
-		for (int i = 0; i != length; i++)
-		{
-			var there = thereList[i];
-			queue.push(there);
-		}
+		if (length == 0)  continue;
+		header->Flush(queue);
 	}
 
 	return count;
@@ -113,41 +167,38 @@ InteractionGraph::~InteractionGraph()
 }
 
 void 
-InteractionGraph::Resize()
+InteractionGraph::Resize(int capacity)
 {
-
+	_pImpl->linkMap.resize(capacity);
 }
 
-void 
+Result<void>
 InteractionGraph::Insert(const Interaction stInter)
 {
-	_pImpl->groupSet.Merge(stInter.subject, stInter.target);
-	
-	Utils::splay<slObject::THandle>* splay;
-	auto& map = _pImpl->linkMap;
-	if (map.count(stInter.subject) == 0)
+	auto* header = _pImpl->linkMap[stInter.subject];
+	if (nullptr == header)
 	{
-		auto* chk = _pImpl->heap.Alloc(sizeof(Utils::splay<slObject::THandle>));
-		splay = chk->Get<Utils::splay<slObject::THandle>>();
-		map.emplace(stInter.subject, splay);
-	}
-	else
-	{
-		splay = map[stInter.subject];
+		auto* chk = _pImpl->heap.Alloc(sizeof(BlockHead));
+		if (nullptr == chk) return Error::OutOfMemory;
+
+		header = chk->Get<BlockHead>();
+		header->Initialize(&_pImpl->heap);
 	}
 
-	splay->Insert(stInter.target);
+	header->Insert(stInter.target);
+	return Done();
 }
 
 void
 InteractionGraph::Reset()
 {
+	_pImpl->pairs.clear();
 }
 
 bool 
 InteractionGraph::TryGetInteractGroup(const_iterator<slObject>& begin, const_iterator<slObject>& end, int capacity, InteractionGroup& group)
 {
-	int last = _arrPair.Length;
+	int last = _pImpl->pairs.size();
 	int count = 0;
 	for (auto iter = begin; iter != end; iter++)
 	{
@@ -160,7 +211,7 @@ InteractionGraph::TryGetInteractGroup(const_iterator<slObject>& begin, const_ite
 	if (count == 0)
 		return false;
 
-	group = new InteractGroup(_arrPair.GetIndexer(), last, last + count);
+	group = new InteractGroup(_pImpl->pairs, last, last + count);
 	return true;
 }
 

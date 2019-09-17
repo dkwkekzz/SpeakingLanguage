@@ -13,6 +13,7 @@ namespace SpeakingLanguage {
 			int Find(int u);
 			void Merge(int u, int v);
 			void Reset();
+			void Resize(int);
 
 		private:
 			std::vector<int> _parent;

@@ -15,7 +15,6 @@ NativeHeap::~NativeHeap()
 	free(_root);
 }
 
-// [!] 타입마다 핸들을 컴파일타임에 자동으로 계산되도록 해야한다.
 slChunk* 
 NativeHeap::Alloc(int size)
 {
@@ -36,12 +35,18 @@ NativeHeap::Alloc(int size)
 
 bool 
 NativeHeap::Resize(int capacity)
-{	// [!] lock?
+{	
 	auto* newRoot = malloc(capacity + sizeof(slChunk) + 4);
-	if (newRoot == nullptr)
-		return false;
+	if (newRoot == nullptr) return false;
 
-	if (_root != nullptr) free(_root);
+	if (_root != nullptr)
+	{
+		auto* res = memmove(newRoot, _root, _head);
+		if (res == nullptr) return false;
+
+		free(_root);
+	}
+
 	_root = newRoot;
 	_capacity = capacity;
 	return true;

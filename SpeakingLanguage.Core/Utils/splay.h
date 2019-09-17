@@ -15,7 +15,7 @@ namespace SpeakingLanguage {
 				snode* rchild;
 			};
 
-			splay(IAllocator* allocator = nullptr) : _root(nullptr), _allocator(allocator) {}
+			splay(IAllocator* allocator = nullptr) : root(nullptr), _allocator(allocator) {}
 			~splay() {}
 
 			/* RR(Y rotates to the right):
@@ -56,7 +56,7 @@ namespace SpeakingLanguage {
 			void InOrder();
 
 		private:
-			snode* _root;
+			snode* root;
 			IAllocator* _allocator;
 		};
 
@@ -68,9 +68,8 @@ namespace SpeakingLanguage {
 		splay<KEY_TYPE>::snode*
 		splay<KEY_TYPE>::Splay(KEY_TYPE key)
 		{
-			snode* root = _root;
-			if (!root)
-				return nullptr;
+			if (!root) return nullptr;
+
 			snode header;
 			/* header.rchild points to L tree; header.lchild points to R Tree */
 			header.lchild = header.rchild = nullptr;
@@ -131,7 +130,7 @@ namespace SpeakingLanguage {
 			root->lchild = header.rchild;
 			root->rchild = header.lchild;
 
-			return _root = root;
+			return root;
 		}
 
 		template<typename KEY_TYPE>
@@ -172,7 +171,6 @@ namespace SpeakingLanguage {
 			snode* p_node = New_Node(key);
 			if (p_node == nullptr) return nullptr;
 
-			snode* root = _root;
 			if (!root)
 			{
 				root = p_node;
@@ -212,7 +210,6 @@ namespace SpeakingLanguage {
 		splay<KEY_TYPE>::snode*
 		splay<KEY_TYPE>::Delete(KEY_TYPE key)
 		{
-			snode* root = _root;
 			snode* temp;
 			if (!root)
 				return nullptr;
@@ -254,7 +251,6 @@ namespace SpeakingLanguage {
 		void
 		splay<KEY_TYPE>::InOrder()
 		{
-			snode* root = _root;
 			if (root)
 			{
 				InOrder(root->lchild);

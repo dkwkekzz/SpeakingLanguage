@@ -10,12 +10,12 @@ public:
 	LinearLookup(int defaultObjectCount);
 
 	inline int GetCount() { return lookup.size() - _freeCount; }
-	inline int GetThreshold() { return lookup.size(); }
+	inline int GetMax() { return lookup.size(); }
 	inline slObject::THandle PublishHandle() { return _freeCount > 0 ? _freeList : lookup.size(); }
 	inline slObject* operator[](slObject::THandle handle) { return lookup[handle].second; }
 
-	bool Insert(slObject* pObj, bool& resized);
-	bool Delete(slObject* pObj);
+	Result<bool> Insert(slObject* pObj);
+	Result<void> Delete(slObject* pObj);
 
 private:
 	std::vector<std::pair<slObject::THandle, slObject*> > lookup;
@@ -34,18 +34,24 @@ LinearLookup::LinearLookup(int defaultObjectCount) : lookup(defaultObjectCount)
 	}
 }
 
-bool 
-LinearLookup::Insert(slObject* pObj, bool& resized)
+Result<bool>
+LinearLookup::Insert(slObject* pObj)
 {
 	const auto handle = pObj->GetHandle();
-	if (0 == handle) return false;
+	if (0 == handle) return Error::NullReferenceHandle;
 
 	if (_freeList == handle)
 	{
 		auto& freeNode = lookup[_freeList];
 		_freeList = freeNode.first;
 		_freeCount--;
+
+		freeNode.first = handle;
+		freeNode.second = pObj;
+		return true;
 	}
+
+	bool resized = false;
 
 	const int max = lookup.size();
 	if (max <= handle)
@@ -58,6 +64,8 @@ LinearLookup::Insert(slObject* pObj, bool& resized)
 
 		for (int i = max; i != newMax; i++)
 		{
+			if (i == handle) continue;
+
 			auto& freeNode = lookup[i];
 			freeNode.first = _freeList;
 			freeNode.second = nullptr;
@@ -65,18 +73,21 @@ LinearLookup::Insert(slObject* pObj, bool& resized)
 		}
 	}
 
-	lookup[handle] = std::move(std::make_pair(handle, pObj));
-	return true;
+	auto& node = lookup[handle];
+	node.first = handle;
+	node.second = pObj;
+
+	return Done(resized);
 }
 
-bool 
+Result<void>
 LinearLookup::Delete(slObject* pObj)
 {
 	const auto handle = pObj->GetHandle();
-	if (0 == handle) return false;
+	if (0 == handle) return Error::NullReferenceHandle;
 
 	const int max = lookup.size();
-	if (max <= handle) return false;
+	if (max <= handle) return Error::OverflowHandle;
 
 	auto& freeNode = lookup[handle];
 	freeNode.first = _freeList;
@@ -84,7 +95,7 @@ LinearLookup::Delete(slObject* pObj)
 	_freeList = handle;
 	_freeCount++;
 
-	return true;
+	return Done();
 }
 
 struct slObjectCollection::Impl
@@ -142,88 +153,81 @@ slObjectCollection::GetCount() const
 	return _pImpl->lookup.GetCount();
 }
 
-slObjectCollection::Result
+Result<slObject*>
 slObjectCollection::Find(const slObject::THandle handle) const
 {
+	if (_pImpl->lookup.GetMax() <= handle) return Error::OverflowHandle;
+
 	return _pImpl->lookup[handle];
 }
 
-slObjectCollection::Result
+Result<bool>
 slObjectCollection::CreateFront(slObject::THandle handle)
 {
-	slObjectCollection::Result res;
-
 	if (handle == 0)
 		handle = _pImpl->lookup.PublishHandle();
 
-	res.subject = slObject::ConstructDefault(&_pImpl->readStack, handle);
-	if (nullptr != res.subject)
-		_pImpl->lookup.Insert(res.subject, res.resized);
+	auto* pObj = slObject::ConstructDefault(&_pImpl->readStack, handle);
+	if (nullptr == pObj)
+		return Error::NullReferenceHandle;
 
-	return res;
+	return _pImpl->lookup.Insert(pObj);
 }
 
-slObjectCollection::Result
+Result<bool>
 slObjectCollection::CreateBack()
 {
-	slObjectCollection::Result res;
-
 	const auto handle = _pImpl->lookup.PublishHandle();
-	res.subject = slObject::ConstructDefault(&_pImpl->writeStack, handle);
-	if (nullptr != res.subject)
-		_pImpl->lookup.Insert(res.subject, res.resized);
+	auto* pObj = slObject::ConstructDefault(&_pImpl->readStack, handle);
+	if (nullptr == pObj)
+		return Error::NullReferenceHandle;
 
-	return res;
+	return _pImpl->lookup.Insert(pObj);
 }
 
-slObjectCollection::Result
+Result<bool>
 slObjectCollection::InsertFront(const BYTE* buffer, const int position, const int length)
 {
 	auto* chk = _pImpl->readStack.Alloc(length);
-	if (nullptr == chk) return nullptr;
+	if (nullptr == chk) return Error::OutOfMemory;
 
-	slObjectCollection::Result res;
+	auto* pObj = chk->Get<slObject>();
+	auto* ret = memcpy(pObj, buffer + position, length);
+	if (nullptr == ret) return Error::OutOfMemory;
 
-	res.subject = chk->Get<slObject>();
-	auto* ret = memcpy(res.subject, buffer + position, length);
-	if (nullptr == ret) return nullptr;
-
-	_pImpl->lookup.Insert(res.subject, res.resized);
-	return res;
+	return _pImpl->lookup.Insert(pObj);
 }
 
-slObjectCollection::Result
+Result<bool>
 slObjectCollection::InsertBack(const BYTE* buffer, const int position, const int length)
 {
 	auto* chk = _pImpl->writeStack.Alloc(length);
-	if (nullptr == chk) return nullptr;
+	if (nullptr == chk) return Error::OutOfMemory;
 
-	slObjectCollection::Result res;
+	auto* pObj = chk->Get<slObject>();
+	auto* ret = memcpy(pObj, buffer + position, length);
+	if (nullptr == ret) return Error::OutOfMemory;
 
-	res.subject = chk->Get<slObject>();
-	auto* ret = memcpy(res.subject, buffer + position, length);
-	if (nullptr == ret) return nullptr;
-
-	return res;
+	return true;
 }
 
-void 
+Result<void>
 slObjectCollection::Destroy(slObject* obj)
 {
-	_pImpl->lookup.Delete(obj);
 	obj->Release();
+	return _pImpl->lookup.Delete(obj);
 }
 
-void
+Result<void>
 slObjectCollection::SwapBuffer()
 {
-	bool resized = false;
 	for (auto& obj : _pImpl->writeStack)
 	{
 		const auto handle = obj.GetHandle();
 		if (0 == handle) continue;
 
-		_pImpl->lookup.Insert(&obj, resized);
+		auto ret = _pImpl->lookup.Insert(&obj);
+		if (!ret.Success()) return ret.error;
 	}
 
 	ObjectHeap<slObject>::Swap(_pImpl->readStack, _pImpl->writeStack);

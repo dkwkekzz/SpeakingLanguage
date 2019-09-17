@@ -160,6 +160,7 @@
     <ClInclude Include="Process\Notifier.h" />
     <ClInclude Include="Process\SyncHandle.h" />
     <ClInclude Include="Process\Updater.h" />
+    <ClInclude Include="Result.h" />
     <ClInclude Include="slChunk.h" />
     <ClInclude Include="InteractionGraph.h" />
     <ClInclude Include="slObject.h" />
