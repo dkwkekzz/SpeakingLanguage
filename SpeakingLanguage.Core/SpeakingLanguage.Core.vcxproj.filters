@@ -3,7 +3,6 @@
   <ItemGroup>
     <ClInclude Include="targetver.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="Logic.h" />
     <ClInclude Include="Process\SyncHandle.h">
       <Filter>Process</Filter>
     </ClInclude>
@@ -11,12 +10,6 @@
       <Filter>Process</Filter>
     </ClInclude>
     <ClInclude Include="Process\Updater.h">
-      <Filter>Process</Filter>
-    </ClInclude>
-    <ClInclude Include="Process\JobPartitioner.h">
-      <Filter>Process</Filter>
-    </ClInclude>
-    <ClInclude Include="Process\JobContext.h">
       <Filter>Process</Filter>
     </ClInclude>
     <ClInclude Include="Process\CancelTokenSource.h">
@@ -43,35 +36,63 @@
     <ClInclude Include="Utils\splay.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="slObjectCollection.h" />
-    <ClInclude Include="slObject.h" />
-    <ClInclude Include="iterator.h" />
-    <ClInclude Include="slChunk.h" />
-    <ClInclude Include="IAllocator.h" />
-    <ClInclude Include="Basic.h" />
-    <ClInclude Include="Constants.h" />
-    <ClInclude Include="InteractionGraph.h" />
     <ClInclude Include="Utils\disjointset.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="NativeHeap.h" />
-    <ClInclude Include="ObjectHeap.h" />
     <ClInclude Include="Result.h" />
+    <ClInclude Include="slObject.h">
+      <Filter>Models\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="slObjectCollection.h">
+      <Filter>Models\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectHeap.h">
+      <Filter>Models\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="InteractionGraph.h">
+      <Filter>Models\Interact</Filter>
+    </ClInclude>
+    <ClInclude Include="InteractionGroup.h">
+      <Filter>Models\Interact</Filter>
+    </ClInclude>
+    <ClInclude Include="Process\WorkContext.h">
+      <Filter>Process</Filter>
+    </ClInclude>
+    <ClInclude Include="Process\JobPartitioner.h">
+      <Filter>Process</Filter>
+    </ClInclude>
+    <ClInclude Include="Interactor.h">
+      <Filter>Models\Job</Filter>
+    </ClInclude>
+    <ClInclude Include="JobCollection.h">
+      <Filter>Models\Job</Filter>
+    </ClInclude>
+    <ClInclude Include="slChunk.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="NativeHeap.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="IAllocator.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Core.h" />
+    <ClInclude Include="Basic.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="iterator.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="Logic.cpp" />
     <ClCompile Include="Process\Notifier.cpp">
       <Filter>Process</Filter>
     </ClCompile>
     <ClCompile Include="Process\Updater.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    <ClCompile Include="Process\JobPartitioner.cpp">
-      <Filter>Process</Filter>
-    </ClCompile>
-    <ClCompile Include="StartInfo.h" />
     <ClCompile Include="Utils\tracer.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
@@ -79,14 +100,32 @@
       <Filter>Process</Filter>
     </ClCompile>
     <ClCompile Include="Service.h" />
-    <ClCompile Include="slObjectCollection.cpp" />
-    <ClCompile Include="slObject.cpp" />
-    <ClCompile Include="Constants.cpp" />
-    <ClCompile Include="InteractionGraph.cpp" />
     <ClCompile Include="Utils\disjointset.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="NativeHeap.cpp" />
+    <ClCompile Include="Service.cpp" />
+    <ClCompile Include="slObject.cpp">
+      <Filter>Models\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="slObjectCollection.cpp">
+      <Filter>Models\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="InteractionGraph.cpp">
+      <Filter>Models\Interact</Filter>
+    </ClCompile>
+    <ClCompile Include="InteractionGroup.cpp">
+      <Filter>Models\Interact</Filter>
+    </ClCompile>
+    <ClCompile Include="Process\JobPartitioner.cpp">
+      <Filter>Process</Filter>
+    </ClCompile>
+    <ClCompile Include="Interactor.cpp">
+      <Filter>Models\Job</Filter>
+    </ClCompile>
+    <ClCompile Include="NativeHeap.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Core.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Process">
@@ -95,8 +134,20 @@
     <Filter Include="Utils">
       <UniqueIdentifier>{3d3d06ba-c5e7-4f61-b6b8-72d01c9cc3f0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Entity">
+    <Filter Include="Models">
+      <UniqueIdentifier>{2eca356e-b1c0-43ea-b6bf-1518d1af2c64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Models\Object">
       <UniqueIdentifier>{646715d3-450f-4691-9939-3324e9737c9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Models\Interact">
+      <UniqueIdentifier>{9001f8c7-0386-42a3-aa95-ada30c4488e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Models\Job">
+      <UniqueIdentifier>{7347067d-85db-46d9-b704-e9cb5e62b79e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Models\Action">
+      <UniqueIdentifier>{1ff948d2-589a-471c-b7e5-b3d0dbc95e5b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

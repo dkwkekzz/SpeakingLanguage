@@ -25,6 +25,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpeakingLanguage.Core", "Sp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestCpp", "TestCpp\TestCpp.vcxproj", "{B8FEE82A-92BC-45C1-B86E-24093F908171}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpeakingLanguage.Engine", "SpeakingLanguage.Engine\SpeakingLanguage.Engine.vcxproj", "{012EB42F-1118-4CA1-A461-ACB839227897}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -163,6 +165,16 @@ Global
 		{B8FEE82A-92BC-45C1-B86E-24093F908171}.Release|x64.Build.0 = Release|x64
 		{B8FEE82A-92BC-45C1-B86E-24093F908171}.Release|x86.ActiveCfg = Release|Win32
 		{B8FEE82A-92BC-45C1-B86E-24093F908171}.Release|x86.Build.0 = Release|Win32
+		{012EB42F-1118-4CA1-A461-ACB839227897}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{012EB42F-1118-4CA1-A461-ACB839227897}.Debug|x64.ActiveCfg = Debug|x64
+		{012EB42F-1118-4CA1-A461-ACB839227897}.Debug|x64.Build.0 = Debug|x64
+		{012EB42F-1118-4CA1-A461-ACB839227897}.Debug|x86.ActiveCfg = Debug|Win32
+		{012EB42F-1118-4CA1-A461-ACB839227897}.Debug|x86.Build.0 = Debug|Win32
+		{012EB42F-1118-4CA1-A461-ACB839227897}.Release|Any CPU.ActiveCfg = Release|Win32
+		{012EB42F-1118-4CA1-A461-ACB839227897}.Release|x64.ActiveCfg = Release|x64
+		{012EB42F-1118-4CA1-A461-ACB839227897}.Release|x64.Build.0 = Release|x64
+		{012EB42F-1118-4CA1-A461-ACB839227897}.Release|x86.ActiveCfg = Release|Win32
+		{012EB42F-1118-4CA1-A461-ACB839227897}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

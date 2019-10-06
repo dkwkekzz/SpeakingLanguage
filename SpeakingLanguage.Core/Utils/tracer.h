@@ -1,16 +1,14 @@
 #pragma once
 
-namespace SpeakingLanguage {
-	namespace Utils {
+namespace SpeakingLanguage 
+{
+	class tracer
+	{
+	public:
+		static void Log(const std::string&);
+		static void Log(std::string&&);
 
-		class tracer
-		{
-		public:
-			static void Log(const std::string&);
-			static void Log(std::string&&);
-
-		private:
-			tracer() {}
-		};
-	}
+	private:
+		tracer() {}
+	};
 }

@@ -1,23 +1,21 @@
 #pragma once
+#include "Service.h"
+#include "Result.h"
+#include "InteractionGroup.h"
 
-namespace SpeakingLanguage { namespace Core { namespace Process
+namespace SpeakingLanguage { namespace Core
 {
 	class JobPartitioner
 	{
 	public:
-		using JobType = std::pair<int, int>;
+		using JobType = InteractionGroup;
 
 		explicit JobPartitioner(int);
 
 		inline bool HasNext() { return _chunks.unsafe_size() > 0; }
-		inline const JobType& GetCurrent()
-		{
-			JobType job;
-			if (!_chunks.try_pop(job)) return job;
-			return job;
-		}
+		inline bool TryGetCurrent(JobType& outJob) { return _chunks.try_pop(outJob); }
 
-		int CollectJob(int);
+		Result<int> CollectJob(Service&, int);
 		void Reset();
 
 	private:
@@ -25,7 +23,7 @@ namespace SpeakingLanguage { namespace Core { namespace Process
 		const int _minJobchunkLength;
 	};
 } 
-} }
+}
 
 
 //

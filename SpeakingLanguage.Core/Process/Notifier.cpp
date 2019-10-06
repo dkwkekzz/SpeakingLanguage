@@ -1,51 +1,51 @@
 #include "stdafx.h"
 #include "Notifier.h"
-#include "JobContext.h"
 #include "Updater.h"
+#include "WorkContext.h"
+#include "Service.h"
 #include "Utils/tracer.h"
 
-using namespace SpeakingLanguage::Core::Process;
+using namespace SpeakingLanguage::Core;
 
 struct Notifier::Impl
 {
-	JobContext ctx;
 	std::vector<Updater> workers;
 
 	Impl(const StartInfo&);
 };
 
-Notifier::Impl::Impl(const StartInfo& info) : ctx(info)
+Notifier::Impl::Impl(const StartInfo& info)
 {
-	for (int i = 0; i != info.default_workercount; i++) workers.emplace_back(&ctx, i);
+	for (int i = 0; i != info.default_workercount; i++) workers.emplace_back(i);
 }
 
-Notifier::Notifier(const StartInfo& info) : _pImpl(std::make_unique<Notifier::Impl>(info))
+Notifier::Notifier(const StartInfo& info) : _pImpl(std::make_unique<Notifier::Impl>(info)), _pCtx(std::make_shared<WorkContext>(info))
 {
 }
 
 Notifier::~Notifier()
 {
-	_pImpl->ctx.tokenSource.SetValue(1);
+	_pCtx->tokenSource.SetValue(1);
 }
 
 void
 Notifier::Awake()
 {
 	auto& workers = _pImpl->workers;
-	for (auto it = workers.begin(); it != workers.end(); ++it) (*it).Run();
-	_pImpl->ctx.sync.WaitForComplete();
-
-	_pImpl->ctx.tokenSource.SetValue(0);
+	for (auto it = workers.begin(); it != workers.end(); ++it) (*it).Run(_pCtx);
+	
+	_pCtx->sync.WaitForComplete();
+	_pCtx->tokenSource.SetValue(0);
 }
 
 void
-Notifier::Signal()
+Notifier::Signal(Service& service)
 {
 	const int workerCount = _pImpl->workers.size();
-	if (_pImpl->ctx.partitioner.CollectJob(workerCount) == 0)
+	if (_pCtx->partitioner.CollectJob(service, workerCount) == 0)
 		return;
 
-	auto& sync = _pImpl->ctx.sync;
+	auto& sync = _pCtx->sync;
 	sync.SignalWorking();
 	Utils::tracer::Log("signal update!");
 
@@ -56,7 +56,7 @@ Notifier::Signal()
 void
 Notifier::Stop()
 {
-	_pImpl->ctx.tokenSource.SetValue(1);
+	_pCtx->tokenSource.SetValue(1);
 }
 
 

@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "tracer.h"
 
-using namespace SpeakingLanguage::Utils;
+using namespace SpeakingLanguage;
 
 void
 tracer::Log(const std::string& msg)

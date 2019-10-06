@@ -4,19 +4,19 @@
 #include "JobPartitioner.h"
 #include "CancelTokenSource.h"
 
-namespace SpeakingLanguage { namespace Core { namespace Process
+namespace SpeakingLanguage { namespace Core
 {
-	struct JobContext
+	struct WorkContext
 	{
 		SyncHandle sync;
 		JobPartitioner partitioner;
 		CancelTokenSource tokenSource;
 
-		explicit JobContext(const StartInfo& info) :
+		explicit WorkContext(const StartInfo& info) :
 			sync(info.default_workercount),
 			partitioner(info.default_jobchunklength)
 		{
 		}
 	};
 } 
-} }
+}

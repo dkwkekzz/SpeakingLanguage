@@ -1,25 +1,23 @@
 #pragma once
 
-namespace SpeakingLanguage { namespace Core { namespace Process
+namespace SpeakingLanguage { namespace Core
 {
-	struct JobContext;
+	struct WorkContext;
 
 	class Updater
 	{
 	public:
-		explicit Updater(JobContext*, int);
+		explicit Updater(int);
 		Updater(Updater&& other);
 		~Updater();
 
-		void Run();
+		void Run(std::shared_ptr<WorkContext> ctx);
 
 	private:
 		struct Helper;
 
 		std::unique_ptr<std::thread> _pWorker;
-		JobContext* _pCtx;
 		const int _id; 
 	};
-} 
 } }
 

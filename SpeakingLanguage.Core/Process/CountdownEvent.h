@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 
-namespace SpeakingLanguage { namespace Core { namespace Process 
+namespace SpeakingLanguage { namespace Core
 {
 	class CountdownEvent
 	{
@@ -18,4 +18,4 @@ namespace SpeakingLanguage { namespace Core { namespace Process
 		int _initCount;
 		std::atomic<int> _currentCount;
 	};
-} } }
+} } 

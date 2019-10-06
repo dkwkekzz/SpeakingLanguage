@@ -6,6 +6,7 @@ namespace SpeakingLanguage {
 		enum class Error : unsigned char
 		{
 			None = 0,
+			Complete,
 			NullReferenceHandle,
 			OverflowHandle,
 			OutOfMemory,

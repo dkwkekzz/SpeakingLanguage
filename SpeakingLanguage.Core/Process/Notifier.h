@@ -1,8 +1,10 @@
 #pragma once
 #include "StartInfo.h"
 
-namespace SpeakingLanguage { namespace Core { namespace Process
+namespace SpeakingLanguage { namespace Core
 {
+	struct WorkContext;
+
 	class Notifier
 	{
 	public:
@@ -10,12 +12,12 @@ namespace SpeakingLanguage { namespace Core { namespace Process
 		~Notifier();
 
 		void Awake();
-		void Signal();
+		void Signal(Service& service);
 		void Stop();
 
 	private:
 		struct Impl;
 		std::unique_ptr<Impl> _pImpl;
+		std::shared_ptr<WorkContext> _pCtx;
 	};
-} 
 } }

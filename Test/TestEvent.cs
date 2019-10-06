@@ -9,6 +9,17 @@ namespace Test
 {
     using MethodInvoker = Action;
 
+    class Box
+    {
+        public string name;
+        public int health;
+    }
+
+    class BigBox
+    {
+        public Box[] ctr = new Box[10];
+    }
+
     class TestEvent
     {
         public event EventHandler MyEvent;
@@ -29,12 +40,15 @@ namespace Test
             }
         }
 
+        static BigBox gBox = new BigBox();
+
         static void Main()
         {
             var iter = GetCounter().GetEnumerator();
             Console.WriteLine(iter.Current);
             Console.WriteLine(GetCounter2().Current);
 
+            var sBox = new BigBox();
 
             Console.ReadLine();
         }

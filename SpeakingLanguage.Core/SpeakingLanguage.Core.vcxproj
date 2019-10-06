@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -106,6 +106,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;SPEAKINGLANGUAGECORE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>D:\develop\myProject2\SpeakingLanguage\SpeakingLanguage.Core\Utils;D:\develop\myProject2\SpeakingLanguage\SpeakingLanguage.Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -151,11 +152,14 @@
   <ItemGroup>
     <ClInclude Include="Basic.h" />
     <ClInclude Include="IAllocator.h" />
+    <ClInclude Include="InteractionGroup.h" />
+    <ClInclude Include="Interactor.h" />
     <ClInclude Include="iterator.h" />
-    <ClInclude Include="Logic.h" />
+    <ClInclude Include="JobCollection.h" />
+    <ClInclude Include="Core.h" />
     <ClInclude Include="Process\CancelTokenSource.h" />
     <ClInclude Include="Process\CountdownEvent.h" />
-    <ClInclude Include="Process\JobContext.h" />
+    <ClInclude Include="Process\WorkContext.h" />
     <ClInclude Include="Process\JobPartitioner.h" />
     <ClInclude Include="Process\Notifier.h" />
     <ClInclude Include="Process\SyncHandle.h" />
@@ -169,7 +173,6 @@
     <ClInclude Include="ObjectHeap.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="Constants.h" />
     <ClInclude Include="Utils\disjointset.h" />
     <ClInclude Include="Utils\spinlock.h" />
     <ClInclude Include="Utils\spinwait.h" />
@@ -179,25 +182,26 @@
     <ClInclude Include="Utils\tracer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Logic.cpp" />
+    <ClCompile Include="InteractionGroup.cpp" />
+    <ClCompile Include="Interactor.cpp" />
+    <ClCompile Include="Core.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Process\CountdownEvent.cpp" />
     <ClCompile Include="Process\JobPartitioner.cpp" />
     <ClCompile Include="Process\Notifier.cpp" />
     <ClCompile Include="Process\Updater.cpp" />
+    <ClCompile Include="Service.cpp" />
     <ClCompile Include="Service.h" />
     <ClCompile Include="InteractionGraph.cpp" />
     <ClCompile Include="slObject.cpp" />
     <ClCompile Include="slObjectCollection.cpp" />
     <ClCompile Include="NativeHeap.cpp" />
-    <ClCompile Include="StartInfo.h" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Constants.cpp" />
     <ClCompile Include="Utils\disjointset.cpp" />
     <ClCompile Include="Utils\tracer.cpp" />
   </ItemGroup>

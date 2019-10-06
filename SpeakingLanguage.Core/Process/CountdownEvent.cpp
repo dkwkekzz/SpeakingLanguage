@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "CountdownEvent.h"
 
-using namespace SpeakingLanguage::Core::Process;
+using namespace SpeakingLanguage::Core;
 
 CountdownEvent::CountdownEvent(int count) : _initCount(count), _currentCount(count) 
 {

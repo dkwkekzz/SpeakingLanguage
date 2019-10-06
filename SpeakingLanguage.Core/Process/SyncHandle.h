@@ -1,7 +1,7 @@
 #pragma once
 #include "CountdownEvent.h"
 
-namespace SpeakingLanguage { namespace Core { namespace Process
+namespace SpeakingLanguage { namespace Core
 {
 	class SyncHandle
 	{
@@ -34,7 +34,7 @@ namespace SpeakingLanguage { namespace Core { namespace Process
 
 	};
 } 
-} }
+}
 
 
 //internal sealed class SyncHandle : IDisposable

@@ -1,10 +1,10 @@
 #include "stdafx.h"
 #include "Updater.h"
-#include "JobContext.h"
+#include "WorkContext.h"
 #include "Utils/tracer.h"
 #include "Utils/spinwait.h"
 
-using namespace SpeakingLanguage::Core::Process;
+using namespace SpeakingLanguage::Core;
 
 struct Updater::Helper
 {
@@ -45,11 +45,11 @@ Updater::Helper::_spinUntilCompleted(const SyncHandle& sync, const CancelTokenSo
 }
 
 
-Updater::Updater(JobContext* ctx, int id) : _pCtx(ctx), _id(id)
+Updater::Updater(int id) :_id(id)
 {
 }
 
-Updater::Updater(Updater&& other) : _pWorker(std::move(other._pWorker)), _pCtx(other._pCtx), _id(other._id)
+Updater::Updater(Updater&& other) : _pWorker(std::move(other._pWorker)), _id(other._id)
 {
 }
 
@@ -58,18 +58,18 @@ Updater::~Updater()
 }
 
 void
-Updater::Run()
+Updater::Run(std::shared_ptr<WorkContext> ctx)
 {
 	if (_pWorker != nullptr) return;
 
-	_pWorker = std::make_unique<std::thread>([this]()
+	_pWorker = std::make_unique<std::thread>([pCtx = std::move(ctx)]()
 	{
-		auto& sync = _pCtx->sync;
+		auto& sync = pCtx->sync;
 		sync.SignalCompleted();
 
-		auto& jobIter = _pCtx->partitioner;
+		auto& jobIter = pCtx->partitioner;
 
-		const auto& token = _pCtx->tokenSource.GetToken();
+		const auto& token = pCtx->tokenSource.GetToken();
 		while (!token.IsCancel())
 		{
 			const int currentFrame = sync.GetFrame();
@@ -77,6 +77,13 @@ Updater::Run()
 					continue;
 
 			Utils::tracer::Log("execute update...");
+			while (jobIter.HasNext())
+			{
+				JobPartitioner::JobType job;
+				if (!jobIter.TryGetCurrent(job)) continue;
+
+				// execute job
+			}
 
 			sync.SignalCompleted();
 

@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="Utils\disjointset.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\iterator.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\spinlock.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\spinwait.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\splay.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\splay2.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\ticker.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\timer.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\tracer.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Result.h" />
+    <ClInclude Include="StartInfo.h" />
+    <ClInclude Include="Engine.h" />
+    <ClInclude Include="Process\CancelTokenSource.h">
+      <Filter>Process</Filter>
+    </ClInclude>
+    <ClInclude Include="Process\CountdownEvent.h">
+      <Filter>Process</Filter>
+    </ClInclude>
+    <ClInclude Include="Process\Notifier.h">
+      <Filter>Process</Filter>
+    </ClInclude>
+    <ClInclude Include="Process\SyncHandle.h">
+      <Filter>Process</Filter>
+    </ClInclude>
+    <ClInclude Include="Process\WorkContext.h">
+      <Filter>Process</Filter>
+    </ClInclude>
+    <ClInclude Include="Process\Worker.h">
+      <Filter>Process</Filter>
+    </ClInclude>
+    <ClInclude Include="Inject\Injector.h">
+      <Filter>Inject</Filter>
+    </ClInclude>
+    <ClInclude Include="slObject.h" />
+    <ClInclude Include="SyncPair.h" />
+    <ClInclude Include="Error.h" />
+    <ClInclude Include="ISystem.h" />
+    <ClInclude Include="SystemCollection.h" />
+    <ClInclude Include="SimpleSystem.h" />
+    <ClInclude Include="InteractPair.h" />
+    <ClInclude Include="Locator.h" />
+    <ClInclude Include="Interaction.h" />
+    <ClInclude Include="ActionSource.h" />
+    <ClInclude Include="FactoryHelper.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="Utils\disjointset.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\tracer.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="Process\CountdownEvent.cpp">
+      <Filter>Process</Filter>
+    </ClCompile>
+    <ClCompile Include="Process\Notifier.cpp">
+      <Filter>Process</Filter>
+    </ClCompile>
+    <ClCompile Include="Process\Worker.cpp">
+      <Filter>Process</Filter>
+    </ClCompile>
+    <ClCompile Include="Inject\Injector.cpp">
+      <Filter>Inject</Filter>
+    </ClCompile>
+    <ClCompile Include="ErrorDefine.h" />
+    <ClCompile Include="SystemCollection.cpp" />
+    <ClCompile Include="SimpleSystem.cpp" />
+    <ClCompile Include="Locator.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{581e8233-13ce-4f5e-a5ea-3011226b7819}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Process">
+      <UniqueIdentifier>{d3660e0e-fd3f-44ec-bd15-719e30178a2d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inject">
+      <UniqueIdentifier>{0d1bed3a-7db3-4ff5-ba30-1f724db77d93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="System">
+      <UniqueIdentifier>{800dac79-48c2-4363-ad37-ce457c19515b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

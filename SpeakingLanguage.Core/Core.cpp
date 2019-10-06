@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "Logic.h"
+#include "Core.h"
 #include "Process\Notifier.h"
 
 using namespace SpeakingLanguage::Core;
@@ -24,7 +24,7 @@ Sample(int val)
 	info.default_workercount = 4;
 	info.default_jobchunklength = 10;
 
-	auto notifier = new Process::Notifier(info);
+	auto notifier = new Notifier(info);
 	notifier->Awake();
 
 	while (true)

@@ -1,6 +1,5 @@
 #pragma once
 #include "iterator.h"
-#include "slObject.h"
 #include "Result.h"
 
 namespace SpeakingLanguage {

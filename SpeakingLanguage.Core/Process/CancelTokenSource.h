@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 
-namespace SpeakingLanguage { namespace Core { namespace Process
+namespace SpeakingLanguage { namespace Core
 {
 	class CancelTokenSource
 	{
@@ -27,4 +27,4 @@ namespace SpeakingLanguage { namespace Core { namespace Process
 		int _value{0};
 	};
 } 
-} }
+}

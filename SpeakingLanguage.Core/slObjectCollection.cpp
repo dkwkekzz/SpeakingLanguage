@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "slObjectCollection.h"
+#include "slObject.h"
 #include "ObjectHeap.h"
 
 using namespace SpeakingLanguage::Core;
