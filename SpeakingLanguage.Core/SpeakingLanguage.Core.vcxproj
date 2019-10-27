@@ -154,7 +154,6 @@
     <ClInclude Include="IAllocator.h" />
     <ClInclude Include="InteractionGroup.h" />
     <ClInclude Include="Interactor.h" />
-    <ClInclude Include="iterator.h" />
     <ClInclude Include="JobCollection.h" />
     <ClInclude Include="Core.h" />
     <ClInclude Include="Process\CancelTokenSource.h" />
@@ -171,9 +170,11 @@
     <ClInclude Include="slObjectCollection.h" />
     <ClInclude Include="NativeHeap.h" />
     <ClInclude Include="ObjectHeap.h" />
+    <ClInclude Include="StartInfo.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Utils\disjointset.h" />
+    <ClInclude Include="Utils\iterator.h" />
     <ClInclude Include="Utils\spinlock.h" />
     <ClInclude Include="Utils\spinwait.h" />
     <ClInclude Include="Utils\splay.h" />
@@ -190,8 +191,12 @@
     <ClCompile Include="Process\JobPartitioner.cpp" />
     <ClCompile Include="Process\Notifier.cpp" />
     <ClCompile Include="Process\Updater.cpp" />
-    <ClCompile Include="Service.cpp" />
-    <ClCompile Include="Service.h" />
+    <ClCompile Include="Service.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Service.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="InteractionGraph.cpp" />
     <ClCompile Include="slObject.cpp" />
     <ClCompile Include="slObjectCollection.cpp" />

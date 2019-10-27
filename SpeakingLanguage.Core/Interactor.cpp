@@ -16,19 +16,19 @@ Interactor::~Interactor()
 {
 }
 
-Result<void> 
-Interactor::Execute(Service& service, const InteractionGroup& group)
-{
-	slChunk* subjectStateLookup[8 * sizeof(StateSync)];
-	slChunk* targetStateLookup[8 * sizeof(StateSync)];
-	BYTE* targetStateLookup[STACK_BUFFER_SIZE];
-
-	for (const auto& interaction : group)
-	{
-
-	}
-
-}
+//Result<void> 
+//Interactor::Execute(Service& service, const InteractionGroup& group)
+//{
+//	slChunk* subjectStateLookup[8 * sizeof(StateSync)];
+//	slChunk* targetStateLookup[8 * sizeof(StateSync)];
+//	BYTE* targetStateLookup[STACK_BUFFER_SIZE];
+//
+//	for (const auto& interaction : group)
+//	{
+//
+//	}
+//
+//}
 //public static unsafe void Execute(ref Service service, ref Data.InteractGroup group)
 //{
 //	ref readonly var colAct = ref service.colAct;

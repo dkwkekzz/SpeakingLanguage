@@ -14,8 +14,8 @@ namespace SpeakingLanguage {
 			using iterator = iterator<slChunk>;
 			using const_iterator = const_iterator<slChunk>;
 
-			explicit slObject() {}
-			~slObject() {}
+			explicit slObject();
+			~slObject();
 
 			inline iterator begin() { return iterator((slChunk*)((uint64_t)this + sizeof(slObject))); }
 			inline iterator end() { return iterator((slChunk*)((uint64_t)this + sizeof(slObject) + _capacity)); }

@@ -29,7 +29,7 @@ Sample(int val)
 
 	while (true)
 	{
-		notifier->Signal();
+		//notifier->Signal();
 		std::this_thread::sleep_for(1000ms);
 	}
 	notifier->Stop();

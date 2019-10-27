@@ -1,6 +1,6 @@
 #pragma once
-#include "slObject.h"
 #include "iterator.h"
+#include "slObject.h"
 
 namespace SpeakingLanguage {
 	namespace Core {
@@ -9,6 +9,9 @@ namespace SpeakingLanguage {
 		{
 			slObject::THandle handle;
 			int count;
+
+			InteractPair();
+			InteractPair(const slObject::THandle h, int c);
 		};
 
 		class InteractionGroup
@@ -26,8 +29,8 @@ namespace SpeakingLanguage {
 
 		private:
 			const std::vector<InteractPair>* _pairs;
-			const int _begin{ 0 };
-			const int _end{ 0 };
+			int _begin{ 0 };
+			int _end{ 0 };
 		};
 
 	}

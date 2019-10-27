@@ -3,6 +3,7 @@
 #include "ObjectHeap.h"
 #include "Utils/disjointset.h"
 
+using namespace SpeakingLanguage;
 using namespace SpeakingLanguage::Core;
 
 template<int N>
@@ -22,10 +23,10 @@ struct HandleBlock
 
 		if (next == nullptr)
 		{
-			auto* chk = allocator->Alloc(sizeof(HandleBlock<N>));
+			auto* chk = allocator->Alloc(sizeof(HandleBlock<N << 1>));
 			if (nullptr == chk) return nullptr;
 
-			next = chk->Get<HandleBlock<N>>();
+			next = chk->Get<HandleBlock<N << 1>>();
 			next->Initialize();
 		}
 
@@ -35,7 +36,7 @@ struct HandleBlock
 	void Flush(std::queue<slObject::THandle>& queue, int count)
 	{
 		for (int i = 0; i < count && i < MAX; i++)
-			queue.emplace(vals[i], 0);
+			queue.emplace(vals[i]);
 
 		if (count > MAX)
 			next->Flush(queue, count - MAX);
@@ -72,7 +73,7 @@ struct HandleBlock<256>
 	void Flush(std::queue<slObject::THandle>& queue, int count)
 	{
 		for (int i = 0; i < count && i < MAX; i++)
-			queue.emplace(vals[i], 0);
+			queue.emplace(vals[i]);
 
 		if (count > MAX)
 			next->Flush(queue, count - MAX);

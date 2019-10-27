@@ -9,7 +9,7 @@ namespace SpeakingLanguage {
 		class IAllocator
 		{
 		public:
-			virtual ~IAllocator() = 0;
+			virtual ~IAllocator() {}
 			virtual slChunk* Alloc(int size) = 0;
 		};
 	}

@@ -49,12 +49,12 @@ constexpr int sizeOfArr(T (&arr) [N]) { return N; }
 
 int main()
 {
-    std::cout << "Hello World!\n"; 
+    //std::cout << "Hello World!\n"; 
 
 	//using namespace SpeakingLanguage;
-	Sample(9999);
+	//Sample(9999);
 
-	std::cout << "size: " << sizeof(std::bitset<64>) << std::endl;
+	//std::cout << "size: " << sizeof(std::bitset<64>) << std::endl;
 
 	std::cin.get();
 }

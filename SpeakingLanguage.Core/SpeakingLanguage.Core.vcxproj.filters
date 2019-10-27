@@ -80,7 +80,8 @@
     <ClInclude Include="Basic.h">
       <Filter>Models</Filter>
     </ClInclude>
-    <ClInclude Include="iterator.h">
+    <ClInclude Include="StartInfo.h" />
+    <ClInclude Include="Utils\iterator.h">
       <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>

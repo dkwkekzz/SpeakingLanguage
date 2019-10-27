@@ -15,7 +15,7 @@ struct Updater::Helper
 bool
 Updater::Helper::_spinUntilNextFrame(const SyncHandle& sync, int currentFrame, const CancelTokenSource::Token& token)
 {
-	Utils::spinwait spinner;
+	spinwait spinner;
 	while (currentFrame >= sync.GetFrame())
 	{
 		spinner.SpinOnce();
@@ -31,7 +31,7 @@ Updater::Helper::_spinUntilNextFrame(const SyncHandle& sync, int currentFrame, c
 bool
 Updater::Helper::_spinUntilCompleted(const SyncHandle& sync, const CancelTokenSource::Token& token)
 {
-	Utils::spinwait spinner;
+	spinwait spinner;
 	while (!sync.Completed())
 	{
 		spinner.SpinOnce();
@@ -76,7 +76,7 @@ Updater::Run(std::shared_ptr<WorkContext> ctx)
 			if (!Updater::Helper::_spinUntilNextFrame(sync, currentFrame, token))
 					continue;
 
-			Utils::tracer::Log("execute update...");
+			tracer::Log("execute update...");
 			while (jobIter.HasNext())
 			{
 				JobPartitioner::JobType job;

@@ -15,11 +15,11 @@ namespace SpeakingLanguage {
 		template<typename T>
 		struct Result
 		{
-			const T val;
-			const Error error;
+			T val;
+			Error error;
 
-			Result(T v) : val(v), error(0) {}
-			Result(Error err) : val(v), error(err) {}
+			Result(T v) : val(v), error(Error::None) {}
+			Result(Error err) : error(err) {}
 			operator T() { return val; }
 
 			inline bool Success() const { return error == Error::None; }

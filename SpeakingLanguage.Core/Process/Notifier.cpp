@@ -47,10 +47,10 @@ Notifier::Signal(Service& service)
 
 	auto& sync = _pCtx->sync;
 	sync.SignalWorking();
-	Utils::tracer::Log("signal update!");
+	tracer::Log("signal update!");
 
 	sync.WaitForComplete();
-	Utils::tracer::Log("complete update!");
+	tracer::Log("complete update!");
 }
 
 void

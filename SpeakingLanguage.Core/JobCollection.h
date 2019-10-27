@@ -8,7 +8,7 @@ namespace SpeakingLanguage {
 		class JobCollection
 		{
 		public:
-			inline Result<void> Interact(Service& service, InteractionGroup& group) { return _interactor.Execute(service, group); }
+			inline Result<void> Interact(Service& service, InteractionGroup& group) { /*return _interactor.Execute(service, group);*/return Done(); }
 
 		private:
 			Interactor _interactor;

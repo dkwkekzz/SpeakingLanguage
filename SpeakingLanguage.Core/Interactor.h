@@ -12,7 +12,7 @@ namespace SpeakingLanguage {
 			Interactor();
 			~Interactor();
 
-			Result<void> Execute(Service& service, InteractionGroup& group);
+			//Result<void> Execute(Service& service, InteractionGroup& group);
 
 		};
 

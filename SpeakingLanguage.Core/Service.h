@@ -1,4 +1,5 @@
 #pragma once
+#include "stdafx.h"
 #include "StartInfo.h"
 
 namespace SpeakingLanguage { namespace Core
