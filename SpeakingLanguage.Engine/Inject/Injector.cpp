@@ -4,11 +4,6 @@
 
 using namespace SpeakingLanguage;
 
-// 1. regist는 systemcollection으로 뺀다. 곧, actioncollection이 된다.
-// 2. 기존구조와 비슷하게 가져오되 레이아웃만 변경된 상태이어야 할 것이다. 
-// 3. 기존의 스왑하던 방식을 하나의 버퍼만 사용하도록 바꾼다. add와 remove가 발생하면, 이는 한번에 처리하도록 한다.
-// 4. 
-
 // objectPool
 struct Injector::objectPool
 {	

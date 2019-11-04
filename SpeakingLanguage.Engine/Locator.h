@@ -38,7 +38,7 @@ namespace SpeakingLanguage
 		{
 		public:
 			inline T* Get() { return _service.get(); }
-			inline void Provide(T* service) { _service.reset(service); }
+			inline void Provide(T* service) { _service.reset(service); }	// shared로 변경... 공유될수있으므로
 
 		private:
 			std::unique_ptr<T> _service;
@@ -47,8 +47,6 @@ namespace SpeakingLanguage
 
 		static Provider<IInjector<Interaction>> InteractionInjector;
 		static Provider<IInjector<ActionSource>> ActionInjector;
-		static Provider<IProcessor> Processor;
-		static Provider<ICollector<ISystem>> SystemCollector;
 
 	private:
 		Locator();

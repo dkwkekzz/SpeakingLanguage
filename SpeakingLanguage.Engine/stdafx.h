@@ -29,6 +29,7 @@
 #include <chrono>
 #include <exception>
 #include <unordered_map>
+#include <functional>
 #include <cstring>
 #include <cassert>
 #include <cstdlib>

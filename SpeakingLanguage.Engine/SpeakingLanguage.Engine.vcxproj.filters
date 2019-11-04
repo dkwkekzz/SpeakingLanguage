@@ -55,16 +55,35 @@
       <Filter>Inject</Filter>
     </ClInclude>
     <ClInclude Include="slObject.h" />
-    <ClInclude Include="SyncPair.h" />
     <ClInclude Include="Error.h" />
-    <ClInclude Include="ISystem.h" />
-    <ClInclude Include="SystemCollection.h" />
-    <ClInclude Include="SimpleSystem.h" />
-    <ClInclude Include="InteractPair.h" />
     <ClInclude Include="Locator.h" />
-    <ClInclude Include="Interaction.h" />
-    <ClInclude Include="ActionSource.h" />
-    <ClInclude Include="FactoryHelper.h" />
+    <ClInclude Include="InteractPair.h">
+      <Filter>Old</Filter>
+    </ClInclude>
+    <ClInclude Include="FactoryHelper.h">
+      <Filter>Old</Filter>
+    </ClInclude>
+    <ClInclude Include="ISystem.h">
+      <Filter>Old</Filter>
+    </ClInclude>
+    <ClInclude Include="ActionSource.h">
+      <Filter>Old</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleSystem.h">
+      <Filter>Old</Filter>
+    </ClInclude>
+    <ClInclude Include="SyncPair.h">
+      <Filter>Old</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemCollection.h">
+      <Filter>Old</Filter>
+    </ClInclude>
+    <ClInclude Include="Interaction.h">
+      <Filter>Inject</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectSystem.h">
+      <Filter>System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
@@ -89,9 +108,16 @@
       <Filter>Inject</Filter>
     </ClCompile>
     <ClCompile Include="ErrorDefine.h" />
-    <ClCompile Include="SystemCollection.cpp" />
-    <ClCompile Include="SimpleSystem.cpp" />
     <ClCompile Include="Locator.cpp" />
+    <ClCompile Include="SimpleSystem.cpp">
+      <Filter>Old</Filter>
+    </ClCompile>
+    <ClCompile Include="SystemCollection.cpp">
+      <Filter>Old</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectSystem.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Utils">
@@ -105,6 +131,9 @@
     </Filter>
     <Filter Include="System">
       <UniqueIdentifier>{800dac79-48c2-4363-ad37-ce457c19515b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Old">
+      <UniqueIdentifier>{ac80f8da-a1ae-4f21-b1ef-66ca9f50184b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

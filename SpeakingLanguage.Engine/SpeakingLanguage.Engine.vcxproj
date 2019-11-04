@@ -23,7 +23,7 @@
     <ProjectGuid>{012EB42F-1118-4CA1-A461-ACB839227897}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>SpeakingLanguageEngine</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -158,6 +158,7 @@
     <ClInclude Include="Interaction.h" />
     <ClInclude Include="InteractPair.h" />
     <ClInclude Include="ISystem.h" />
+    <ClInclude Include="ObjectSystem.h" />
     <ClInclude Include="Process\CancelTokenSource.h" />
     <ClInclude Include="Process\CountdownEvent.h" />
     <ClInclude Include="Process\Notifier.h" />
@@ -193,6 +194,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Inject\Injector.cpp" />
+    <ClCompile Include="ObjectSystem.cpp" />
     <ClCompile Include="Process\CountdownEvent.cpp" />
     <ClCompile Include="Process\Notifier.cpp" />
     <ClCompile Include="Process\Worker.cpp" />
