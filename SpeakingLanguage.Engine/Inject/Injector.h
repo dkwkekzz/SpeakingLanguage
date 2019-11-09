@@ -4,19 +4,16 @@
 
 namespace SpeakingLanguage
 {
-	class Injector : public IInjector<Law>, public IInjector<Interaction>
+	class Injector
 	{
 	public:
 		explicit Injector();
 		~Injector();
 
-		Result<void> Insert(const Law& action);
-		Result<void> Insert(const Interaction& interaction);
+		Result<void> Insert(const Interaction& itr);
 
 	private:
-		struct objectPool;
-		struct systemNode;
-		std::unique_ptr<objectPool> _objs;
-		std::unique_ptr<systemNode> _root;
+		std::map<slObject::THandle, std::vector<slState::THandle>> _stmap;
+
 	};
 }

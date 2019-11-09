@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{4A3A227D-6679-4AC3-BC63-5EB8438FCF61}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SpeakingLanguage.Logic</RootNamespace>
+    <AssemblyName>SpeakingLanguage.Logic</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Config.cs" />
+    <Compile Include="Data\Action\Attribute\ActionProviderAttribute.cs" />
+    <Compile Include="Data\Action\slActionContext.cs" />
+    <Compile Include="Data\Action\slAction.cs" />
+    <Compile Include="Data\Action\Attribute\TargetAttribute.cs" />
+    <Compile Include="Data\Job\InteractGroup.cs" />
+    <Compile Include="Data\Job\InteractPair.cs" />
+    <Compile Include="Data\Object\slSubject.cs" />
+    <Compile Include="EventManager.cs" />
+    <Compile Include="Data\Job\InteractionGraph.cs" />
+    <Compile Include="EventResult.cs" />
+    <Compile Include="FrameResult.cs" />
+    <Compile Include="Data\Object\slObjectHelper.cs" />
+    <Compile Include="Data\Object\slObjectEqualityComparer.cs" />
+    <Compile Include="Data\Object\slObjectComparer.cs" />
+    <Compile Include="Data\Object\slObjectHandle.cs" />
+    <Compile Include="Data\Object\slTarget.cs" />
+    <Compile Include="Process\IProcessor.cs" />
+    <Compile Include="Process\IJobContext.cs" />
+    <Compile Include="Process\JobPartitioner.cs" />
+    <Compile Include="Process\Notifier.cs" />
+    <Compile Include="Process\SyncHandle.cs" />
+    <Compile Include="Process\Updater.cs" />
+    <Compile Include="Process\Job\StateHelper.cs" />
+    <Compile Include="Data\State\Control.cs" />
+    <Compile Include="Data\State\Detection.cs" />
+    <Compile Include="Data\State\Default.cs" />
+    <Compile Include="TypeManager.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="Process\Job\Interactor.cs" />
+    <Compile Include="Data\Job\Interaction.cs" />
+    <Compile Include="Data\Service.cs" />
+    <Compile Include="Data\State\StateSyncPair.cs" />
+    <Compile Include="Data\State\Position.cs" />
+    <Compile Include="Data\State\StateSync.cs" />
+    <Compile Include="Data\State\Spawner.cs" />
+    <Compile Include="TestSpace.cs" />
+    <Compile Include="Data\Action\slActionCollection.cs" />
+    <Compile Include="Data\State\LifeCycle.cs" />
+    <Compile Include="Data\Object\slObjectCollection.cs" />
+    <Compile Include="Data\Action\Attribute\FrameAttribute.cs" />
+    <Compile Include="Data\Object\slObject.cs" />
+    <Compile Include="Data\Action\Attribute\SubjectAttribute.cs" />
+    <Compile Include="Data\State\IState.cs" />
+    <Compile Include="StartInfo.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SpeakingLanguage.Library\SpeakingLanguage.Library.csproj">
+      <Project>{aad28eed-2523-428d-af3c-59079f0ff3cf}</Project>
+      <Name>SpeakingLanguage.Library</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

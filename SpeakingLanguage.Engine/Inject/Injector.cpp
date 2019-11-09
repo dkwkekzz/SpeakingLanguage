@@ -1,24 +1,8 @@
 #include "stdafx.h"
 #include "Injector.h"
-#include "FactoryHelper.h"
+#include "disjointset.h"
 
 using namespace SpeakingLanguage;
-
-// objectPool
-struct Injector::objectPool
-{	
-	std::unordered_map<slObject::THandle, slObject> map;
-
-	const slObject* find(slObject::THandle handle);
-};
-
-const slObject* Injector::objectPool::find(slObject::THandle handle)
-{
-	const auto& ret = map.find(handle);
-	if (ret == map.cend()) return nullptr;
-
-	return &(*ret).second;
-}
 
 // systemNode
 struct Injector::systemNode
@@ -74,7 +58,7 @@ Result<void> Injector::systemNode::Insert(const SyncPair& sync, const InteractPa
 }
 
 // Injector
-Injector::Injector() : _objs(std::make_unique<objectPool>()), _root(std::make_unique<systemNode>())
+Injector::Injector()
 {
 }
 
@@ -83,20 +67,17 @@ Injector::~Injector()
 {
 }
 
-Result<void> Injector::Insert(const ActionSource& action)
+Result<void> Injector::Insert(const Interaction& itr)
 {
-	return _root->Regist(action);
-}
+	auto& map = this->_stmap;
+	const auto& subIter = map.find(itr.subject);
+	if (subIter == map.end()) return Error::NullReferenceObject;
 
-Result<void> Injector::Insert(const Interaction& interaction)
-{
-	InteractPair itrPair;
-	itrPair.subject = _objs->find(interaction.subject);
-	if (itrPair.subject == nullptr) return Error::NullReferenceObject;
+	const auto& tarIter = map.find(itr.target);
+	if (tarIter == map.end()) return Error::NullReferenceObject;
 
-	itrPair.target = _objs->find(interaction.target);
-	if (itrPair.target == nullptr) return Error::NullReferenceObject;
+	for (const auto& stIter : (*subIter).second)
+	{
 
-	SyncPair syncPair{ itrPair.subject->sync, itrPair.target->sync };
-	return _root->Insert(syncPair, itrPair);
+	}
 }

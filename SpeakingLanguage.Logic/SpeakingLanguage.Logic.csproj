@@ -44,51 +44,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Config.cs" />
-    <Compile Include="Data\Action\Attribute\ActionProviderAttribute.cs" />
-    <Compile Include="Data\Action\slActionContext.cs" />
-    <Compile Include="Data\Action\slAction.cs" />
-    <Compile Include="Data\Action\Attribute\TargetAttribute.cs" />
-    <Compile Include="Data\Job\InteractGroup.cs" />
-    <Compile Include="Data\Job\InteractPair.cs" />
-    <Compile Include="Data\Object\slSubject.cs" />
-    <Compile Include="EventManager.cs" />
-    <Compile Include="Data\Job\InteractionGraph.cs" />
-    <Compile Include="EventResult.cs" />
-    <Compile Include="FrameResult.cs" />
-    <Compile Include="Data\Object\slObjectHelper.cs" />
-    <Compile Include="Data\Object\slObjectEqualityComparer.cs" />
-    <Compile Include="Data\Object\slObjectComparer.cs" />
-    <Compile Include="Data\Object\slObjectHandle.cs" />
-    <Compile Include="Data\Object\slTarget.cs" />
-    <Compile Include="Process\IProcessor.cs" />
-    <Compile Include="Process\IJobContext.cs" />
-    <Compile Include="Process\JobPartitioner.cs" />
-    <Compile Include="Process\Notifier.cs" />
-    <Compile Include="Process\SyncHandle.cs" />
-    <Compile Include="Process\Updater.cs" />
-    <Compile Include="Process\Job\StateHelper.cs" />
-    <Compile Include="Data\State\Control.cs" />
-    <Compile Include="Data\State\Detection.cs" />
-    <Compile Include="Data\State\Default.cs" />
-    <Compile Include="TypeManager.cs" />
-    <Compile Include="Extensions.cs" />
-    <Compile Include="Process\Job\Interactor.cs" />
-    <Compile Include="Data\Job\Interaction.cs" />
-    <Compile Include="Data\Service.cs" />
-    <Compile Include="Data\State\StateSyncPair.cs" />
-    <Compile Include="Data\State\Position.cs" />
-    <Compile Include="Data\State\StateSync.cs" />
-    <Compile Include="Data\State\Spawner.cs" />
-    <Compile Include="TestSpace.cs" />
-    <Compile Include="Data\Action\slActionCollection.cs" />
-    <Compile Include="Data\State\LifeCycle.cs" />
-    <Compile Include="Data\Object\slObjectCollection.cs" />
-    <Compile Include="Data\Action\Attribute\FrameAttribute.cs" />
-    <Compile Include="Data\Object\slObject.cs" />
-    <Compile Include="Data\Action\Attribute\SubjectAttribute.cs" />
-    <Compile Include="Data\State\IState.cs" />
-    <Compile Include="StartInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

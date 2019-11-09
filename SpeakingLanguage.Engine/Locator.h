@@ -38,7 +38,7 @@ namespace SpeakingLanguage
 		{
 		public:
 			inline T* Get() { return _service.get(); }
-			inline void Provide(T* service) { _service.reset(service); }	// shared로 변경... 공유될수있으므로
+			inline void Provide(T* service) { _service = std::make_unique<T>(); }	// shared로 변경... 공유될수있으므로
 
 		private:
 			std::unique_ptr<T> _service;

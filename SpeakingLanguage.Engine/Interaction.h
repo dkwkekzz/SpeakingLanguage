@@ -66,4 +66,9 @@ namespace SpeakingLanguage
 		slObject::THandle subject;
 		slObject::THandle target;
 	};
+
+	struct slState
+	{
+		using THandle = int;
+	};
 }
