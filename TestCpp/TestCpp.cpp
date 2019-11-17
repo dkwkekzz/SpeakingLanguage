@@ -8,53 +8,10 @@
 #include <unordered_map>
 #include <map>
 #include <bitset>
-#include "../SpeakingLanguage.Engine/Engine.h"
-#pragma comment(lib, "SpeakingLanguage.Engine.lib")
-
-using TFunc = std::function<int(int)>;
-std::vector<TFunc> filters;
-
-class Calculator
-{
-public:
-	int Get() { return value; }
-
-private:
-	int value{ 7777 };
-};
-
-void foo()
-{
-	int divisor = 5;
-	filters.emplace_back([=](int value) { return value % divisor; });
-
-	// shared_ptr이 복사되었으므로 2개가 참조되는데 sp가 사라져도 1개가 남으므로 람다의 캡처는 안전해야 한다.
-	// 결과는... 예상대로 복사는 안전하나 참조는 그렇지 않다.
-	auto sp = std::make_shared<Calculator>();
-	filters.emplace_back([sp](int value) { return value % sp->Get(); });
-
-	// 당연히 죽어버리는 코드...
-	//auto rp = new Calculator;
-	//filters.emplace_back([rp](int value) { return value % rp->Get(); });
-	//delete rp;
-}
-
-struct ISystem
-{
-	int val;
-};
-
-template<typename T, int N>
-constexpr int sizeOfArr(T (&arr) [N]) { return N; }
 
 int main()
 {
     //std::cout << "Hello World!\n"; 
-
-	//using namespace SpeakingLanguage;
-	//Sample(9999);
-
-	//std::cout << "size: " << sizeof(std::bitset<64>) << std::endl;
 
 	std::cin.get();
 }

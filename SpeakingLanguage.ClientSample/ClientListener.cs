@@ -54,18 +54,14 @@ namespace SpeakingLanguage.ClientSample
         public void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
         {
             var code = Protocol.Code.Packet.None;
-            var srcCode = Protocol.Code.Packet.None;
             var error = Protocol.Code.Error.None;
-            var logicError = Logic.EventError.None;
             if (disconnectInfo.AdditionalData.AvailableBytes > 0)
             {
                 code = (Protocol.Code.Packet)disconnectInfo.AdditionalData.GetInt();
-                srcCode = (Protocol.Code.Packet)disconnectInfo.AdditionalData.GetInt();
                 error = (Protocol.Code.Error)disconnectInfo.AdditionalData.GetInt();
-                logicError = (Logic.EventError)disconnectInfo.AdditionalData.GetInt();
             }
             
-            Console.WriteLine($"[Client] disconnected: {peer.EndPoint}, code: {code}, error: {error}, logicError: {logicError}, reason: {disconnectInfo.Reason}");
+            Console.WriteLine($"[Client] disconnected: {peer.EndPoint}, code: {code}, error: {error}, reason: {disconnectInfo.Reason}");
         }
 
         public void OnNetworkError(IPEndPoint endPoint, SocketError socketErrorCode)
@@ -94,8 +90,8 @@ namespace SpeakingLanguage.ClientSample
                 switch (code)
                 {
                     case Protocol.Code.Packet.CreateSubject:
-                        var data = reader.Get<Protocol.Packet.ObjectData>();
-                        Console.WriteLine($"[{code}] handle: {data.handleValue.ToString()}");
+                        var data = reader.Get<Protocol.Packet.Synchronization>();
+                        Console.WriteLine($"[{code}] handle: {data.handle.ToString()}");
                         break;
                 }
             }

@@ -54,6 +54,11 @@
     <Compile Include="BoxedWriter.cs" />
     <Compile Include="Collection\DisjointMap.cs" />
     <Compile Include="Collection\OptimizedDisjointSet.cs" />
+    <Compile Include="Data\String128.cs" />
+    <Compile Include="Data\String16.cs" />
+    <Compile Include="Data\String32.cs" />
+    <Compile Include="Data\String64.cs" />
+    <Compile Include="Data\StringHelper.cs" />
     <Compile Include="Unmanaged\IumnAllocator.cs" />
     <Compile Include="Unmanaged\IumnEqualityComparer.cs" />
     <Compile Include="Unmanaged\IumnComparer.cs" />
@@ -71,7 +76,6 @@
     <Compile Include="Unmanaged\umnHeap.cs" />
     <Compile Include="Unmanaged\umnMarshal.cs" />
     <Compile Include="Unmanaged\umnSize.cs" />
-    <Compile Include="FastBitConverter.cs" />
     <Compile Include="HashHelper.cs" />
     <Compile Include="SingletonEx.cs" />
     <Compile Include="Singleton.cs" />

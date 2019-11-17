@@ -6,7 +6,7 @@ using System.Text;
 
 namespace SpeakingLanguage.Library
 {
-    public class Tracer
+    public static class Tracer
     {
         public static void AddTextListener(string logPath)
         {
@@ -23,7 +23,7 @@ namespace SpeakingLanguage.Library
             [CallerLineNumber] int n = 0, // __LINE__
             [CallerMemberName] string name = null) //__FUNC__
         {
-            return $"file: {filePath}, line: {n.ToString()}, func: {name}";
+            return $"filePath: {filePath}, lineNum: {n.ToString()}, memberName: {name}";
         }
 
         public static void Assert(bool condition)
@@ -65,17 +65,17 @@ namespace SpeakingLanguage.Library
             Console.ResetColor();
         }
 
-        public static void Exception(Type caller, Exception e)
+        public static void Exception(object caller, Exception e)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Trace.TraceError($"[{caller.Name}]\n{e.GetType().Name}\n{e.Message}\n{e.StackTrace}");
+            Trace.TraceError($"[{caller.GetType().Name}]\n{e.GetType().Name}\n{e.Message}\n{e.StackTrace}");
             Console.ResetColor();
         }
 
-        public static void Exception(Type caller, Exception e, string msg)
+        public static void Exception(object caller, Exception e, string msg)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Trace.TraceError($"[{caller.Name}]\n{e.Message}\n{e.StackTrace}\n=====\n{msg}");
+            Trace.TraceError($"[{caller.GetType().Name}]\n{e.Message}\n{e.StackTrace}\n=====\n{msg}");
             Console.ResetColor();
         }
     }

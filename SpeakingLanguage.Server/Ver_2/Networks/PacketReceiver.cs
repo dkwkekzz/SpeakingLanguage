@@ -7,162 +7,119 @@ namespace SpeakingLanguage.Server.Networks
 {
     internal class PacketReceiver
     {
-        private readonly Authenticator _authenticator;
-        private readonly IDatabase _database;
-        private readonly Func<Agent, NetPacketReader, Result>[] _packetActions;
-        private readonly NetDataWriter _dataWriter;
-
-        public PacketReceiver(Authenticator auth, IDatabase database)
+        private struct Result
         {
-            _authenticator = auth;
-            _database = database;
-            _dataWriter = new NetDataWriter();
-            _packetActions = new Func<Agent, NetPacketReader, Result>[(int)Protocol.Code.Packet.__MAX__];
+            public Protocol.Code.Error Error { get; }
+            public Logic.EventError LogicError { get; }
+            public bool Success => Error == Protocol.Code.Error.None;
+
+            public Result(Protocol.Code.Error error, Logic.EventError eventError = Logic.EventError.None)
+            {
+                Error = error;
+                LogicError = eventError;
+            }
+        }
+
+        private readonly WorldManager _world;
+        private readonly IDatabase _database;
+        private readonly NetDataWriter _errorWriter;
+        private readonly byte[] _serializeBuffer;
+        private readonly Func<NetPeer, NetPacketReader, Result>[] _packetActions;
+
+        public PacketReceiver()
+        {
+            _world = WorldManager.Instance;
+            _database = new FileDatabase();
+            _errorWriter = new NetDataWriter(true, 128);
+            _serializeBuffer = new byte[512];
+            _packetActions = new Func<NetPeer, NetPacketReader, Result>[(int)Protocol.Code.Packet.__MAX__];
             _packetActions[(int)Protocol.Code.Packet.Authentication] = _onAuthentication;
-            _packetActions[(int)Protocol.Code.Packet.Synchronization] = _onSynchronization;
-            _packetActions[(int)Protocol.Code.Packet.Select] = _onSelect;
-            _packetActions[(int)Protocol.Code.Packet.Subscribe] = _onSubscribe;
-            _packetActions[(int)Protocol.Code.Packet.Control] = _onControl;
+            _packetActions[(int)Protocol.Code.Packet.ConstructIdentifier] = _onConstructIdentifier;
+            _packetActions[(int)Protocol.Code.Packet.Terminate] = _onTerminate;
+            _packetActions[(int)Protocol.Code.Packet.Keyboard] = _onKeyboard;
+            _packetActions[(int)Protocol.Code.Packet.Touch] = _onTouch;
+            _packetActions[(int)Protocol.Code.Packet.SelectSubject] = _onSelectSubject;
+            _packetActions[(int)Protocol.Code.Packet.CreateSubject] = _onCreateSubject;
+            _packetActions[(int)Protocol.Code.Packet.SubscribeScene] = _onSubscribeScene;
+            _packetActions[(int)Protocol.Code.Packet.UnsubscribeScene] = _onUnsubscribeScene;
             _packetActions[(int)Protocol.Code.Packet.Interaction] = _onInteraction;
         }
 
         public void OnEnter(NetPeer peer)
         {
-            var agentCol = World.Instance.AgentCollection;
-
             var id = peer.Id;
-            if (agentCol.Contains(id))
+            var agent = _world.UserFactory.Create(id);
+            if (null == agent)
                 Library.ThrowHelper.ThrowWrongArgument("Duplicate agent id on enter.");
 
-            agentCol.Insert(peer);
+            agent.CapturePeer(peer);
+            _world.Agents.Insert(agent);
         }
 
         public void OnLeave(NetPeer peer)
         {
-            var agentCol = World.Instance.AgentCollection;
-
             var id = peer.Id;
-            if (!agentCol.TryGetAgent(id, out Agent agent))
-                Library.ThrowHelper.ThrowWrongArgument("Not found agent id on leave.");
+            var agent = _world.Agents.GetUser(id);
+            if (agent == null)
+                Library.ThrowHelper.ThrowKeyNotFound("Not found agent id on leave.");
 
-            //_database.RequestSave(agent, Protocol.Code.Packet.Disconnection, AgentHelper.GenerateDataKey(agent.Auth.id, agent.Auth.pswd));
+            var iter = agent.GetSceneEnumerator();
+            while (iter.MoveNext())
+            {
+                iter.Current.CancelNotification(id);
+            }
+            
+            agent.Save(_database);
+
+            _world.Agents.Remove(agent);
+            _world.UserFactory.Destroy(agent);
         }
 
         public void OnReceive(NetPeer peer, NetPacketReader reader)
         {
-            var agentCol = World.Instance.AgentCollection;
-
-            var id = peer.Id;
-            if (!agentCol.TryGetAgent(id, out Agent agent))
-                Library.ThrowHelper.ThrowWrongArgument("Not found agent id on receive.");
-
             var code = reader.GetInt();
-            var res = _packetActions[code](agent, reader);
-            if (!res.IsSuccess)
+            var res = _packetActions[code](peer, reader);
+            if (!res.Success)
             {
-                PacketHelper.CastFailure(agent, _dataWriter, (Protocol.Code.Packet)code, res.Error);
+                Library.Tracer.Error($"[CastFailure] id: {peer.Id.ToString()}, code: {((Protocol.Code.Packet)code).ToString()}, err: {res.Error.ToString()}, subMsg: {res.LogicError.ToString()}");
+
+                _errorWriter.Reset();
+                _errorWriter.Put((int)Protocol.Code.Packet.None);
+                _errorWriter.Put(code);
+                _errorWriter.Put((int)res.Error);
+                _errorWriter.Put((int)res.LogicError);
+
+                if (!Config.debug)
+                    peer.Disconnect(_errorWriter);
+                else
+                    peer.Send(_errorWriter, DeliveryMethod.ReliableOrdered);
                 return;
             }
 
             Library.Tracer.Write($"[CastSuccess] id: {peer.Id.ToString()}, code: {((Protocol.Code.Packet)code).ToString()}");
         }
 
-        private Result _onAuthentication(Agent agent, NetPacketReader reader)
+        public void FlushReponses()
         {
-            if (agent.Authenticated)
-                return new Result(Protocol.Code.Error.DuplicateAuthentication);
+            _database.FlushResponse();
+        }
 
-            var data = reader.Get<Protocol.Packet.Authentication>();
-            _authenticator.Check(agent, Protocol.Code.Packet.Authentication, data.id, data.pswd);
+        private Result _onAuthentication(NetPeer peer, NetPacketReader reader)
+        {
+            var id = peer.Id;
+            var agent = _world.Agents.GetUser(id);
+            if (agent == null)
+                return new Result(Protocol.Code.Error.NullReferenceAgent);
+
+            var data = reader.Get<Protocol.Packet.AuthenticationData>();
+            if (!ReceiverHelper.ValidateAuthenticate(ref data))
+                return new Result(Protocol.Code.Error.FailToAuthentication);
+
+            _database.RequestReadUser(agent, data.id, data.pswd);
             return new Result();
         }
 
-        private Result _onSynchronization(Agent agent, NetPacketReader reader)
-        {
-            //if (!agent.Authenticated)
-            //    return new Result(Protocol.Code.Error.InvaildAuthentication);
-            //
-            //var data = reader.Get<Protocol.Packet.Synchronization>();
-            //var rawData = Logic.Synchronization.Serialize(data.handle);
-            //if (null == rawData)
-            //    return new Result(Protocol.Code.Error.NullReferenceObject);
-            //
-            //agent.DataWriter.Put((int)Protocol.Code.Packet.Synchronization);
-            //agent.DataWriter.Put(new Protocol.Packet.S2C.Synchronization { length = rawData.Length, rawData = rawData });
-            return new Result();
-        }
-
-        private Result _onSelect(Agent agent, NetPacketReader reader)
-        {
-            //if (!agent.Authenticated)
-            //    return new Result(Protocol.Code.Error.InvaildAuthentication);
-            //
-            //var data = reader.Get<Protocol.Packet.Select>();
-            //
-            //_database.RequestLoad(agent, Protocol.Code.Packet.Select, 
-            //    $"{agent.Auth.id}_{agent.Auth.pswd}_{data.subjectKey.ToString()}.slo");
-            return new Result();
-        }
-
-        private Result _onSubscribe(Agent agent, NetPacketReader reader)
-        {
-            //if (!agent.Authenticated)
-            //    return new Result(Protocol.Code.Error.InvaildAuthentication);
-            //
-            //var data = reader.Get<Protocol.Packet.Subscribe>();
-            //var sceneCol = World.Instance.SceneCollection;
-            //if (!sceneCol.TryGetScene(data.sceneIndex, out Scene scene))
-            //    return new Result(Protocol.Code.Error.NullReferenceScene);
-            //
-            //agent.CurrentScene.RemoveSubscriber(agent);
-            //agent.CurrentScene = scene;
-            //agent.CurrentScene.AddSubscriber(agent);
-
-            return new Result();
-        }
-
-        private Result _onControl(Agent agent, NetPacketReader reader)
-        {
-            if (!agent.Authenticated)
-                return new Result(Protocol.Code.Error.InvaildAuthentication);
-
-            var data = reader.Get<Protocol.Packet.Control>();
-            agent.CurrentScene.DataWriter.Put((int)Protocol.Code.Packet.Control);
-            agent.CurrentScene.DataWriter.Put(data);
-
-            // ...
-
-            return new Result();
-        }
-
-        private Result _onInteraction(Agent agent, NetPacketReader reader)
-        {
-            if (!agent.Authenticated)
-                return new Result(Protocol.Code.Error.InvaildAuthentication);
-
-            var scene = ReceiverHelper.GetCurrentScene(_world, agent);
-            if (null == scene)
-                return new Result(Protocol.Code.Error.NullReferenceCollider);
-
-            var data = reader.Get<Protocol.Packet.Interaction>();
-
-            var eventManager = Logic.EventManager.Instance;
-            var eRes = eventManager.InsertInteraction(data.lhsValue, data.rhsValue);
-            if (!eRes.Success)
-                return new Result(Protocol.Code.Error.FailToInteraction, eRes.error);
-
-            var sceneIter = scene.GetEnumerator();
-            while (sceneIter.MoveNext())
-            {
-                var subscriber = sceneIter.Current;
-                subscriber.DataWriter.Put((int)Protocol.Code.Packet.Interaction);
-                subscriber.DataWriter.Put(data);
-            }
-
-            return new Result();
-        }
-
-        private Result _onConstructIdentifier(Agent agent, NetPacketReader reader)
+        private Result _onConstructIdentifier(NetPeer peer, NetPacketReader reader)
         {
             var id = peer.Id;
             var agent = _world.Agents.GetUser(id);
@@ -172,7 +129,7 @@ namespace SpeakingLanguage.Server.Networks
             if (agent.Authentication)
                 return new Result(Protocol.Code.Error.AlreadyConstructed);
 
-            var data = reader.Get<Protocol.Packet.Authentication>();
+            var data = reader.Get<Protocol.Packet.AuthenticationData>();
             if (!ReceiverHelper.ValidateAuthenticate(ref data))
                 return new Result(Protocol.Code.Error.FailToAuthentication);
 
@@ -204,7 +161,7 @@ namespace SpeakingLanguage.Server.Networks
             if (null == scene)
                 return new Result(Protocol.Code.Error.NullReferenceCollider);
 
-            var data = reader.Get<Protocol.Packet.Control>();
+            var data = reader.Get<Protocol.Packet.KeyboardData>();
 
             var eventManager = Logic.EventManager.Instance;
             var eRes = eventManager.InsertKeyboard(agent.SubjectHandle.value, data.key, data.press ? 1 : 0);
@@ -237,14 +194,14 @@ namespace SpeakingLanguage.Server.Networks
             if (!agent.Authentication)
                 return new Result(Protocol.Code.Error.InvalidAuthentication);
 
-            var data = reader.Get<Protocol.Packet.Synchronization>();
+            var data = reader.Get<Protocol.Packet.ObjectData>();
 
             var selector = agent.SubjectSelector;
-            if (!selector.TryCaptureSubject(data.handle, out long uid))
+            if (!selector.TryCaptureSubject(data.handleValue, out long uid))
                 return new Result(Protocol.Code.Error.NullReferenceSubjectHandle);
 
             agent.DataWriter.Put((int)Protocol.Code.Packet.SelectSubject);
-            agent.DataWriter.Put(new Protocol.Packet.Synchronization { handle = data.handle });
+            agent.DataWriter.Put(new Protocol.Packet.ObjectData { handleValue = data.handleValue });
 
             return new Result();
         }
@@ -269,7 +226,7 @@ namespace SpeakingLanguage.Server.Networks
             selector.InsertSubject(objUid, objHandle);
             
             agent.DataWriter.Put((int)Protocol.Code.Packet.CreateSubject);
-            agent.DataWriter.Put(new Protocol.Packet.Synchronization { handle = objHandle.value });
+            agent.DataWriter.Put(new Protocol.Packet.ObjectData { handleValue = objHandle.value });
 
             return new Result();
         }
@@ -284,11 +241,11 @@ namespace SpeakingLanguage.Server.Networks
             var eventManager = Logic.EventManager.Instance;
 
             var writer = new Library.Writer(_serializeBuffer, 0);
-            var subData = reader.Get<Protocol.Packet.Subscribe>();
+            var subData = reader.Get<Protocol.Packet.SubscribeData>();
             for (int i = 0; i != subData.count; i++)
             {
                 var data = reader.Get<Protocol.Packet.SceneData>();
-                var scene = _world.Scenes.Get(new SceneHandle(subData.sceneIndex, data));
+                var scene = _world.Scenes.Get(new SceneHandle(subData.worldIndex, data));
                 if (!scene.TryAddNotification(agent))
                 {
                     scene = _world.Scenes.ExpandScene(scene);
@@ -325,11 +282,11 @@ namespace SpeakingLanguage.Server.Networks
             
             agent.DataWriter.Put((int)Protocol.Code.Packet.UnsubscribeScene);
             
-            var subData = reader.Get<Protocol.Packet.Subscribe>();
+            var subData = reader.Get<Protocol.Packet.SubscribeData>();
             for (int i = 0; i != subData.count; i++)
             {
                 var data = reader.Get<Protocol.Packet.SceneData>();
-                var scene = _world.Scenes.Get(new SceneHandle(subData.sceneIndex, data));
+                var scene = _world.Scenes.Get(new SceneHandle(subData.worldIndex, data));
                 if (!agent.UnsubscribeScene(scene))
                     return new Result(Protocol.Code.Error.NullReferenceScene);
 
@@ -343,16 +300,45 @@ namespace SpeakingLanguage.Server.Networks
                     while (sceneIter.MoveNext())
                     {
                         var subjectHandle = sceneIter.Current.SubjectHandle;
-                        agent.DataWriter.Put(new Protocol.Packet.Synchronization { handle = subjectHandle.value });
+                        agent.DataWriter.Put(new Protocol.Packet.ObjectData { handleValue = subjectHandle.value });
                     }
                 }
                 else
                 {
-                    _world.Scenes.Remove(new SceneHandle(subData.sceneIndex, data));
+                    _world.Scenes.Remove(new SceneHandle(subData.worldIndex, data));
                 }
             }
 
-            agent.DataWriter.Put(new Protocol.Packet.Synchronization { handle = 0 });   // for null subject
+            agent.DataWriter.Put(new Protocol.Packet.ObjectData { handleValue = 0 });   // for null subject
+            
+            return new Result();
+        }
+
+        private Result _onInteraction(NetPeer peer, NetPacketReader reader)
+        {
+            var id = peer.Id;
+            var agent = _world.Agents.GetUser(id);
+            if (agent == null)
+                return new Result(Protocol.Code.Error.NullReferenceAgent);
+
+            var scene = ReceiverHelper.GetCurrentScene(_world, agent);
+            if (null == scene)
+                return new Result(Protocol.Code.Error.NullReferenceCollider);
+
+            var data = reader.Get<Protocol.Packet.InteractionData>();
+            
+            var eventManager = Logic.EventManager.Instance;
+            var eRes = eventManager.InsertInteraction(data.lhsValue, data.rhsValue);
+            if (!eRes.Success)
+                return new Result(Protocol.Code.Error.FailToInteraction, eRes.error);
+
+            var sceneIter = scene.GetEnumerator();
+            while (sceneIter.MoveNext())
+            {
+                var subscriber = sceneIter.Current;
+                subscriber.DataWriter.Put((int)Protocol.Code.Packet.Interaction);
+                subscriber.DataWriter.Put(data);
+            }
             
             return new Result();
         }

@@ -31,6 +31,10 @@ namespace SpeakingLanguage.Server.Networks
 
         public void Run(int port)
         {
+            Console.WriteLine("=== SpeakingLanguage Server ===");
+
+            //var timer = new Stopwatch();
+            //timer.Start();
             _serverListener = new ServerListener();
 
             var server = new NetManager(_serverListener);
@@ -42,28 +46,28 @@ namespace SpeakingLanguage.Server.Networks
             }
             _serverListener.Server = server;
 
-            var responsor = new PostResponsor();
-            _serverListener.Responsor = responsor;
-
-            var auth = new Authenticator(responsor);
-            _serverListener.Authenticator = auth;
-
-            var db = new FileDatabase(responsor);
-            _serverListener.Database = db;
-
-            var receiver = new PacketReceiver(auth, db);
+            var receiver = new PacketReceiver();
             _serverListener.Receiver = receiver;
 
+            var world = WorldManager.Instance;
+            var eventManager = Logic.EventManager.Instance;
             while (!Console.KeyAvailable)
             {
-                responsor.Flush();
+                eventManager.FrameEnter();
+
                 server.PollEvents();
+                world.FlushEvents();
+                receiver.FlushReponses();
 
                 var ret = eventManager.ExecuteFrame();
                 if (ret.Leg >= 0)
                     continue;
 
                 Thread.Sleep(-ret.Leg);
+
+                // for test
+                Console.WriteLine(ret.ToString());
+                Thread.Sleep(1500);
             }
         }
     }

@@ -4,18 +4,18 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Protocol.Packet
 {
-    public struct ObjectData : INetSerializable
+    public struct Select : INetSerializable
     {
-        public int handleValue;
+        public int subjectKey;
 
         public void Deserialize(NetDataReader reader)
         {
-            handleValue = reader.GetInt();
+            subjectKey = reader.GetInt();
         }
 
         public void Serialize(NetDataWriter writer)
         {
-            writer.Put(handleValue);
+            writer.Put(subjectKey);
         }
     }
 }

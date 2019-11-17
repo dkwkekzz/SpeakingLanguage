@@ -29,7 +29,7 @@ namespace SpeakingLanguage.ClientSample
                 Console.WriteLine("Client1 start failed");
                 return;
             }
-            client1.Connect("127.0.0.1", port, Protocol.Define.GAME_KEY);
+            client1.Connect("127.0.0.1", port, Protocol.Constants.GAME_KEY);
 
             //client2
             NetManager client2 = new NetManager(_clientListener)
@@ -39,7 +39,7 @@ namespace SpeakingLanguage.ClientSample
             };
 
             client2.Start();
-            client2.Connect("::1", port, Protocol.Define.GAME_KEY);
+            client2.Connect("::1", port, Protocol.Constants.GAME_KEY);
 
             running = true;
             TestInput(new NetPeer[]{ client1.FirstPeer, client2.FirstPeer });
@@ -128,7 +128,7 @@ namespace SpeakingLanguage.ClientSample
                                     case 0:
                                         break;
                                     case 1:
-                                        writer.Put(new Protocol.Packet.KeyboardData
+                                        writer.Put(new Protocol.Packet.Control
                                         {
                                             press = int.Parse(words[startIndex + j * 2]) == 0 ? false : true,
                                             key = int.Parse(words[startIndex + j * 2 + 1])
@@ -137,19 +137,19 @@ namespace SpeakingLanguage.ClientSample
                                     case 2:
                                         if (words.Length > startIndex)
                                         {
-                                            writer.Put(new Protocol.Packet.ObjectData
-                                            { handleValue = int.Parse(words[startIndex + j]) });
+                                            writer.Put(new Protocol.Packet.Synchronization
+                                            { handle = int.Parse(words[startIndex + j]) });
                                         }
                                         else
                                         {
-                                            writer.Put(new Protocol.Packet.ObjectData
-                                            { handleValue = (i + 1) });
+                                            writer.Put(new Protocol.Packet.Synchronization
+                                            { handle = (i + 1) });
                                         }
                                         break;
                                     case 3:
-                                        writer.Put(new Protocol.Packet.SubscribeData
+                                        writer.Put(new Protocol.Packet.Subscribe
                                         {
-                                            worldIndex = int.Parse(words[startIndex + j * 2]),
+                                            sceneIndex = int.Parse(words[startIndex + j * 2]),
                                             count = int.Parse(words[startIndex + j * 2 + 1])
                                         });
                                         break;
@@ -162,14 +162,14 @@ namespace SpeakingLanguage.ClientSample
                                         });
                                         break;
                                     case 5:
-                                        writer.Put(new Protocol.Packet.InteractionData
+                                        writer.Put(new Protocol.Packet.Interaction
                                         {
                                             lhsValue = int.Parse(words[startIndex + j * 2]),
                                             rhsValue = int.Parse(words[startIndex + j * 2 + 1])
                                         });
                                         break;
                                     case 6:
-                                        writer.Put(new Protocol.Packet.AuthenticationData
+                                        writer.Put(new Protocol.Packet.Authentication
                                         {
                                             id = words[startIndex + j * 2],
                                             pswd = words[startIndex + j * 2 + 1]

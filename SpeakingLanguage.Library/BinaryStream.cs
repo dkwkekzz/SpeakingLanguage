@@ -91,19 +91,7 @@ namespace SpeakingLanguage.Library
 
         public bool Read(out string ret)
         {
-            if (!Read(out int length))
-            {
-                ret = string.Empty;
-                return false;
-            }
-
-            if (LengthToRead < length)
-            {
-                ret = string.Empty;
-                return false;
-            }
-
-            ret = Library.BitConverter.ToString(_buffer, ref _rofs, length);
+            ret = Library.BitConverter.ToString(_buffer, ref _rofs);
             return true;
         }
     }

@@ -12,10 +12,14 @@ namespace SpeakingLanguage.Library
 
         public byte[] Buffer => _buffer;
         public int Offset => _offset;
+        public int Remained => _buffer.Length - _offset;
 
-        public Writer(int capacity)
+        public Writer(int capacity, bool pooling = false)
         {
-            _buffer = Library.Locator.BufferPool.GetBuffer(capacity);
+            if (pooling)
+                _buffer = Library.Locator.BufferPool.GetBuffer(capacity);
+            else
+                _buffer = new byte[capacity];
             _offset = 0;
         }
 
@@ -23,6 +27,18 @@ namespace SpeakingLanguage.Library
         {
             _buffer = buffer;
             _offset = startIndex;
+        }
+
+        public void Reset()
+        {
+            _offset = 0;
+        }
+
+        public void Expand()
+        {
+            var newBuf = new byte[_buffer.Length << 1];
+            System.Buffer.BlockCopy(_buffer, 0, newBuf, 0, _offset);
+            _buffer = newBuf;
         }
 
         public void WriteSuccess()
@@ -97,11 +113,11 @@ namespace SpeakingLanguage.Library
             await stream.WriteAsync(_buffer, 0, _offset);
         }
 
-        public byte[] GetBuffer()
+        public byte[] GetResizedBuffer()
         {
-            var nBuf = new byte[_offset];
-            System.Buffer.BlockCopy(_buffer, 0, nBuf, 0, _offset);
-            return nBuf;
+            var newBuf = new byte[_offset];
+            System.Buffer.BlockCopy(_buffer, 0, newBuf, 0, _offset);
+            return newBuf;
         }
 
         public MemoryStream GetStream()

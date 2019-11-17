@@ -8,18 +8,15 @@ namespace SpeakingLanguage.Protocol
         public enum Packet
         {
             None = 0,
+            Error,
+            Success,
+            Connection,
+            Disconnection,
             Authentication,
-            ConstructIdentifier,
-            Terminate,
-            SerializeUser,
-            DeserializeUser,
-            Keyboard,
-            Touch,
-            SelectSubject,
-            CreateSubject,
-            ResponseSelectSubject,
-            SubscribeScene,
-            UnsubscribeScene,
+            Synchronization,
+            Control,
+            Select,
+            Subscribe,
             Interaction,
             __MAX__
         }
@@ -27,21 +24,15 @@ namespace SpeakingLanguage.Protocol
         public enum Error
         {
             None = 0,
-            NullReferenceScene,
             NullReferenceAgent,
-            NullReferenceCollider,
-            NullReferenceSubsrciber,
-            NullReferenceSubjectHandle,
-            InvalidAuthentication,
-            AlreadyConstructed,
-            DuplicateAgent,
-            OverflowSubscribe,
-            IllegalityDataForSelectSubject,
-            IllegalityDataForInteraction,
-            FailToAuthentication,
-            FailToSerialize,
+            NullReferenceScene,
+            NullReferenceObject,
+            NullReferenceArchtype,
+            DuplicateAuthentication,
+            InvaildAuthentication,
+            NoExistFile,
             FailToDeserialize,
-            FailToInteraction,
+
             __MAX__
         }
     }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace SpeakingLanguage.Protocol.Packet
 {
-    public struct InteractionData : INetSerializable
+    public struct Interaction : INetSerializable
     {
         public int lhsValue;
         public int rhsValue;

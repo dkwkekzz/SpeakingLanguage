@@ -9,14 +9,11 @@ namespace SpeakingLanguage.Server.Networks
     internal sealed class ServerListener : INetEventListener
     {
         public NetManager Server;
-        public PostResponsor Responsor;
-        public Authenticator Authenticator;
-        public IDatabase Database;
         public PacketReceiver Receiver;
 
         public void OnPeerConnected(NetPeer peer)
         {
-            Library.Tracer.Write("[ServerListener] Peer connected: " + peer.EndPoint);
+            Console.WriteLine("[Server] Peer connected: " + peer.EndPoint);
 
             Receiver.OnEnter(peer);
             //var peers = Server.GetPeers(ConnectionState.Connected);
@@ -28,26 +25,34 @@ namespace SpeakingLanguage.Server.Networks
 
         public void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
         {
-            Library.Tracer.Write("[ServerListener] Peer disconnected: " + peer.EndPoint + ", reason: " + disconnectInfo.Reason);
+            Console.WriteLine("[Server] Peer disconnected: " + peer.EndPoint + ", reason: " + disconnectInfo.Reason);
 
             Receiver.OnLeave(peer);
         }
 
         public void OnNetworkError(IPEndPoint endPoint, SocketError socketErrorCode)
         {
-            Library.Tracer.Error("[ServerListener] error: " + socketErrorCode);
+            Console.WriteLine("[Server] error: " + socketErrorCode);
         }
 
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, DeliveryMethod deliveryMethod)
         {
-            Library.Tracer.Write($"[ServerListener] Peer reveived: {peer.EndPoint}, count: {reader.AvailableBytes.ToString()}");
+            //Console.WriteLine($"[Server] Peer reveived: {peer.EndPoint}, count: {reader.AvailableBytes.ToString()}");
 
             Receiver.OnReceive(peer, reader);
+
+            //fragment log
+            if (reader.AvailableBytes == 13218)
+            {
+                Console.WriteLine("[Server] TestFrag: {0}, {1}",
+                    reader.RawData[reader.UserDataOffset],
+                    reader.RawData[reader.UserDataOffset + 13217]);
+            }
         }
 
         public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
         {
-            Library.Tracer.Write($"[ServerListener] ReceiveUnconnected: {reader.GetString(100)}");
+            Console.WriteLine("[Server] ReceiveUnconnected: {0}", reader.GetString(100));
         }
 
         public void OnNetworkLatencyUpdate(NetPeer peer, int latency)
@@ -57,8 +62,11 @@ namespace SpeakingLanguage.Server.Networks
 
         public void OnConnectionRequest(ConnectionRequest request)
         {
-            var acceptedPeer = request.AcceptIfKey(Protocol.Constants.GAME_KEY);
-            Library.Tracer.Write($"[ServerListener] ConnectionRequest. Ep: {request.RemoteEndPoint}, Accepted: {acceptedPeer != null}");
+            var acceptedPeer = request.AcceptIfKey(Protocol.Define.GAME_KEY);
+            Console.WriteLine("[Server] ConnectionRequest. Ep: {0}, Accepted: {1}",
+                request.RemoteEndPoint,
+                acceptedPeer != null);
         }
     }
+
 }

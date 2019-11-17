@@ -29,6 +29,13 @@ namespace SpeakingLanguage.Library
             _length = length;
         }
 
+        public Reader(byte[] buf, int offset, int length)
+        {
+            _buffer = buf;
+            _offset = offset;
+            _length = length;
+        }
+
         public Reader(Stream stream)
         {
             _buffer = new byte[stream.Length];
@@ -87,19 +94,7 @@ namespace SpeakingLanguage.Library
 
         public bool ReadString(out string ret)
         {
-            if (!ReadInt(out int length))
-            {
-                ret = string.Empty;
-                return false;
-            }
-
-            if (LengthToRead < length)
-            {
-                ret = string.Empty;
-                return false;
-            }
-
-            ret = Library.BitConverter.ToString(_buffer, ref _offset, length);
+            ret = Library.BitConverter.ToString(_buffer, ref _offset);
             return true;
         }
 

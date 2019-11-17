@@ -36,3 +36,9 @@ D:\develop\myProject2\SpeakingLanguage\SpeakingLanguage.Library\obj\Debug\Speaki
 D:\develop\myProject2\SpeakingLanguage\SpeakingLanguage.Library\bin\Debug\SpeakingLanguage.Library.dll
 D:\develop\myProject2\SpeakingLanguage\SpeakingLanguage.Library\bin\Debug\SpeakingLanguage.Library.pdb
 D:\develop\myProject2\SpeakingLanguage\SpeakingLanguage.Library\obj\Debug\SpeakingLanguage.Library.csproj.CopyComplete
+D:\develop\SpeakingLanguage\SpeakingLanguage.Library\bin\Debug\SpeakingLanguage.Library.dll
+D:\develop\SpeakingLanguage\SpeakingLanguage.Library\bin\Debug\SpeakingLanguage.Library.pdb
+D:\develop\SpeakingLanguage\SpeakingLanguage.Library\obj\Debug\SpeakingLanguage.Library.csproj.CopyComplete
+D:\develop\SpeakingLanguage\SpeakingLanguage.Library\obj\Debug\SpeakingLanguage.Library.dll
+D:\develop\SpeakingLanguage\SpeakingLanguage.Library\obj\Debug\SpeakingLanguage.Library.pdb
+D:\develop\SpeakingLanguage\SpeakingLanguage.Library\obj\Debug\SpeakingLanguage.Library.csprojAssemblyReference.cache

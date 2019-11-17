@@ -42,14 +42,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Code.cs" />
-    <Compile Include="Define.cs" />
-    <Compile Include="Packet\AuthenticationData.cs" />
-    <Compile Include="Packet\InteractionData.cs" />
-    <Compile Include="Packet\KeyboardData.cs" />
-    <Compile Include="Packet\ObjectData.cs" />
-    <Compile Include="Packet\SerializeResultData.cs" />
-    <Compile Include="Packet\SubscribeData.cs" />
-    <Compile Include="Packet\SceneData.cs" />
+    <Compile Include="Constants.cs" />
+    <Compile Include="Packet\Authentication.cs" />
+    <Compile Include="Packet\Select.cs" />
+    <Compile Include="Packet\Success.cs" />
+    <Compile Include="Packet\Error.cs" />
+    <Compile Include="Packet\Interaction.cs" />
+    <Compile Include="Packet\Control.cs" />
+    <Compile Include="Packet\Synchronization.cs" />
+    <Compile Include="Packet\Subscribe.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
