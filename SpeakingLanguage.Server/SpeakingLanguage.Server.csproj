@@ -48,10 +48,11 @@
     <Compile Include="Collections.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Managers.cs" />
-    <Compile Include="Networks\Authenticator.cs" />
+    <None Include="Temp\Authenticator.cs" />
     <Compile Include="Networks\Database.cs" />
+    <None Include="Temp\Locator.cs" />
     <Compile Include="Networks\PacketHelper.cs" />
-    <Compile Include="Networks\PostResponsor.cs" />
+    <None Include="Temp\PostResponsor.cs" />
     <Compile Include="Objects.cs" />
     <Compile Include="Networks\PacketReceiver.cs" />
     <Compile Include="Networks\ServerListener.cs" />
@@ -107,5 +108,6 @@
       <Name>SpeakingLanguage.Protocol</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

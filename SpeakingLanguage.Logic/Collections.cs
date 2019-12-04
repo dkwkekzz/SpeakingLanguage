@@ -18,7 +18,7 @@ namespace SpeakingLanguage.Logic
     {
     }
 
-    public class MessageQueue : IDynamicCollection
+    class MessageQueue : IDynamicCollection
     {
         public struct SyncData
         {
@@ -125,7 +125,7 @@ namespace SpeakingLanguage.Logic
         }
     }
 
-    public sealed class ArchetypeCollection : IStaticCollection
+    sealed class ArchetypeCollection : IStaticCollection
     {
         private readonly List<Archetype> _types;
 
@@ -275,6 +275,66 @@ namespace SpeakingLanguage.Logic
         public void Reset()
         {
             _links.Clear();
+        }
+    }
+
+    class ControlTower : IDynamicCollection
+    {
+        private readonly Dictionary<int, Controller> _ctrlDic = new Dictionary<int, Controller>();
+
+        public Dictionary<int, Controller>.Enumerator GetEnumerator()
+        {
+            return _ctrlDic.GetEnumerator();
+        }
+
+        public Controller this[int handle]
+        {
+            get 
+            {
+                if (!_ctrlDic.TryGetValue(handle, out Controller ctrl))
+                {
+                    ctrl = new Controller();
+                    _ctrlDic.Add(handle, ctrl);
+                }
+                return ctrl;
+            }
+        }
+
+        public void Insert(slControl itr)
+        {
+            if (!_ctrlDic.TryGetValue(itr.handle, out Controller ctrl))
+            {
+                ctrl = new Controller();
+                _ctrlDic.Add(itr.handle, ctrl);
+            }
+
+            var key = (ConsoleKey)itr.key;
+            var pressVal = itr.press ? 1 : 0;
+            switch (key)
+            {
+                case ConsoleKey.LeftArrow:
+                    ctrl.left = pressVal;
+                    break;
+                case ConsoleKey.RightArrow:
+                    ctrl.right = pressVal;
+                    break;
+                case ConsoleKey.UpArrow:
+                    ctrl.up = pressVal;
+                    break;
+                case ConsoleKey.DownArrow:
+                    ctrl.down = pressVal;
+                    break;
+                case ConsoleKey.A:
+                    ctrl.fire_a = pressVal;
+                    break;
+                case ConsoleKey.S:
+                    ctrl.fire_b = pressVal;
+                    break;
+                case ConsoleKey.Spacebar:
+                    ctrl.space = pressVal;
+                    break;
+            }
+            ctrl.changed = true;
         }
     }
 }

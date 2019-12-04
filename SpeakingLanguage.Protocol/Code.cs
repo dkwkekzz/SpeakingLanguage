@@ -14,9 +14,8 @@ namespace SpeakingLanguage.Protocol
             Disconnection,
             Authentication,
             Synchronization,
-            Control,
-            Select,
             Subscribe,
+            Control,
             Interaction,
             __MAX__
         }
@@ -30,6 +29,7 @@ namespace SpeakingLanguage.Protocol
             NullReferenceArchtype,
             DuplicateAuthentication,
             InvaildAuthentication,
+            InvaildController,
             NoExistFile,
             FailToDeserialize,
 

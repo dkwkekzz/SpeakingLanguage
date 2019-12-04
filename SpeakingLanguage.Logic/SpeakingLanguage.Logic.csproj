@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Archetypes.cs" />
     <Compile Include="Attributes.cs" />
     <Compile Include="Collections.cs" />
     <Compile Include="Config.cs" />

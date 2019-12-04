@@ -259,11 +259,27 @@ namespace SpeakingLanguage.Logic
         }
     }
 
+    public static class Receiver
+    {
+        public static void Interaction(int lhs, int rhs)
+        {
+            var graph = Locator.Instance.Graph;
+            graph.Insert(new slInteraction(lhs, rhs));
+        }
+
+        public static void Control(int handle, bool press, int key)
+        {
+            var tower = Locator.Instance.ControlTower;
+            tower.Insert(new slControl(handle, press, key));
+        }
+    }
+
     public static class Inject
     {
         public static void Execute()
         {
             var graph = Locator.Instance.Graph;
+            var tower = Locator.Instance.ControlTower;
             var pt = Locator.Instance.PropertyTable;
             var lawMed = Locator.Instance.LawMediator;
 
@@ -285,6 +301,21 @@ namespace SpeakingLanguage.Logic
                 }
             }
             graph.Reset();
+
+            var ctrIter = tower.GetEnumerator();
+            while (ctrIter.MoveNext())
+            {
+                var pair = ctrIter.Current;
+                if (!pt.TryGetRow(pair.Key, out PropertyTable.Row row))
+                    continue;
+
+                unsafe
+                {
+                    var controller = PropertyHelper.Get<Property.Controller>(row);
+                    if (pair.Value.changed)
+                        pair.Value.CopyTo(controller);
+                }
+            }
         }
     }
 

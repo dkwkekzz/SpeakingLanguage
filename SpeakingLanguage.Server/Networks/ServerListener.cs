@@ -8,17 +8,12 @@ namespace SpeakingLanguage.Server.Networks
 {
     internal sealed class ServerListener : INetEventListener
     {
-        public NetManager Server;
-        public PostResponsor Responsor;
-        public Authenticator Authenticator;
-        public IDatabase Database;
-        public PacketReceiver Receiver;
+        private readonly PacketReceiver _receiver = new PacketReceiver();
 
         public void OnPeerConnected(NetPeer peer)
         {
             Library.Tracer.Write("[ServerListener] Peer connected: " + peer.EndPoint);
-
-            Receiver.OnEnter(peer);
+            _receiver.OnEnter(peer);
             //var peers = Server.GetPeers(ConnectionState.Connected);
             //foreach (var netPeer in peers)
             //{
@@ -29,8 +24,7 @@ namespace SpeakingLanguage.Server.Networks
         public void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
         {
             Library.Tracer.Write("[ServerListener] Peer disconnected: " + peer.EndPoint + ", reason: " + disconnectInfo.Reason);
-
-            Receiver.OnLeave(peer);
+            _receiver.OnLeave(peer);
         }
 
         public void OnNetworkError(IPEndPoint endPoint, SocketError socketErrorCode)
@@ -41,8 +35,7 @@ namespace SpeakingLanguage.Server.Networks
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, DeliveryMethod deliveryMethod)
         {
             Library.Tracer.Write($"[ServerListener] Peer reveived: {peer.EndPoint}, count: {reader.AvailableBytes.ToString()}");
-
-            Receiver.OnReceive(peer, reader);
+            _receiver.OnReceive(peer, reader);
         }
 
         public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
@@ -52,7 +45,6 @@ namespace SpeakingLanguage.Server.Networks
 
         public void OnNetworkLatencyUpdate(NetPeer peer, int latency)
         {
-
         }
 
         public void OnConnectionRequest(ConnectionRequest request)

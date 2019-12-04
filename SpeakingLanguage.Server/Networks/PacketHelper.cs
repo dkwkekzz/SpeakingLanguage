@@ -17,16 +17,17 @@ namespace SpeakingLanguage.Server.Networks
 
     internal static class PacketHelper
     {
-        public static void CastFailure(Agent agent, NetDataWriter writer, Protocol.Code.Packet code, Protocol.Code.Error err)
+        public static void CastFailure(Agent agent, Protocol.Code.Packet code, Protocol.Code.Error err)
         {
             Library.Tracer.Error($"[CastFailure] id: {agent.Id.ToString()}, " +
                    $"code: {code.ToString()}, " +
                    $"err: {err.ToString()}");
 
-            writer.Reset();
-            writer.Put((int)Protocol.Code.Packet.Error);
-            writer.Put(new Protocol.Packet.Error { code = code, error = err });
-            agent.Send(writer.Data, 0, writer.Length);
+            var writer = World.Instance.WriteHolder.NewWriter;
+            writer.WriteInt((int)Protocol.Code.Packet.Error);
+            writer.WriteInt((int)code);
+            writer.WriteInt((int)err);
+            agent.Send(writer.Buffer, 0, writer.Offset);
         }
     }
 }

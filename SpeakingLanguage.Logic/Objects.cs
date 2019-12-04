@@ -17,6 +17,20 @@ namespace SpeakingLanguage.Logic
         }
     }
 
+    public struct slControl
+    {
+        public int handle;
+        public bool press;
+        public int key;
+
+        public slControl(int h, bool p, int k)
+        {
+            handle = h;
+            press = p;
+            key = k;
+        }
+    }
+
     public abstract class Archetype
     {
         public struct PropertySet
@@ -66,21 +80,13 @@ namespace SpeakingLanguage.Logic
         protected abstract void OnConstruct(out PropertySet property);
     }
 
-    public abstract class ArchetypeValue<T> : Archetype where T : Archetype
+    public abstract class ArchetypeHolder<T> : Archetype where T : Archetype
     {
         public static T Value { get; private set; }
 
-        public ArchetypeValue()
+        public ArchetypeHolder()
         {
-            ArchetypeValue<T>.Value = this as T;
-        }
-    }
-
-    public sealed class AccountArchetype : ArchetypeValue<AccountArchetype>
-    {
-        protected override void OnConstruct(out PropertySet property)
-        {
-            property = new PropertySet(typeof(Property.Selector), typeof(Property.Position));
+            ArchetypeHolder<T>.Value = this as T;
         }
     }
 
@@ -116,10 +122,35 @@ namespace SpeakingLanguage.Logic
         protected virtual void OnExecute(PropertyPair pair) { }
     }
 
-    sealed class DamageLaw : Law
+    public sealed class DamageLaw : Law
     {
         protected override void OnExecute(PropertyPair pair)
         {
         }
     }
+
+    internal class Controller
+    {
+        public bool changed;
+        public int left;
+        public int right;
+        public int up;
+        public int down;
+        public int fire_a;
+        public int fire_b;
+        public int space;
+
+        public unsafe void CopyTo(Property.Controller* dest)
+        {
+            dest->left = left;
+            dest->right = right;
+            dest->up = up;
+            dest->down = down;
+            dest->fire_a = fire_a;
+            dest->fire_b = fire_b;
+            dest->space = space;
+            changed = false;
+        }
+    }
+
 }

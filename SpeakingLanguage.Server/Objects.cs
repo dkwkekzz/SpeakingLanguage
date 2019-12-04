@@ -30,11 +30,10 @@ namespace SpeakingLanguage.Server
         public const int WIDTH = 1 << 10;
         public const int HEIGHT = 1 << 9;
 
-        private Scene[] _sideRefs = new Scene[9];
-        private Dictionary<int, WeakReference<Agent>> _subscriberDic = new Dictionary<int, WeakReference<Agent>>(16);
-        private List<WeakReference<Agent>> _reservers = new List<WeakReference<Agent>>(8);
-        private List<Visitor> _visitors = new List<Visitor>(16);
-        private Library.Writer _stateWriter = new Library.Writer(1 << 10);
+        private readonly Scene[] _sideRefs = new Scene[9];
+        private readonly Dictionary<int, WeakReference<Agent>> _subscriberDic = new Dictionary<int, WeakReference<Agent>>(16);
+        private readonly List<WeakReference<Agent>> _reservers = new List<WeakReference<Agent>>(8);
+        private readonly List<Visitor> _visitors = new List<Visitor>(16);
 
         public int Index { get; }
         public NetDataWriter DataWriter { get; } = new NetDataWriter();
@@ -68,82 +67,49 @@ namespace SpeakingLanguage.Server
             this._sideRefs[(int)ESide.Center] = this;
         }
 
-        public void AddSubscriber(Agent agent)
+        public int SubscriberCount => _subscriberDic.Count;
+        public int VisitorCount => _visitors.Count;
+
+        public Dictionary<int, WeakReference<Agent>>.ValueCollection.Enumerator Subscribers
+            => _subscriberDic.Values.GetEnumerator();
+
+        public List<WeakReference<Agent>>.Enumerator Reservers
+            => _reservers.GetEnumerator();
+
+        public List<Visitor>.Enumerator Visitors
+            => _visitors.GetEnumerator();
+
+        public void Reset()
+        {
+            _visitors.Clear();
+            _reservers.Clear();
+        }
+
+        public void ReserveSubscriber(Agent agent)
         {
             for (int i = 0; i != 9; i++)
                 this._sideRefs[i]._reservers.Add(new WeakReference<Agent>(agent));
         }
 
-        public void RemoveSubscriber(Agent agent)
+        public void CancelSubscriber(Agent agent)
         {
             for (int i = 0; i != 9; i++)
                 this._sideRefs[i]._subscriberDic.Remove(agent.Id);
         }
 
+        public void AddSubscriber(int id, WeakReference<Agent> wAgent)
+        {
+            _subscriberDic[id] = wAgent;
+        }
+
+        public void RemoveSubscriber(int id)
+        {
+            _subscriberDic.Remove(id);
+        }
+
         public void AddVisitor(int handle)
         {
             _visitors.Add(new Visitor { handle = handle });
-        }
-
-        public void Notify()
-        {
-            var cntReserver = _reservers.Count;
-            if (cntReserver != 0)
-            {
-                var cntVisitor = _visitors.Count;
-                if (cntVisitor != 0)
-                {
-                    _stateWriter.WriteInt((int)Protocol.Code.Packet.Synchronization);
-                    _stateWriter.WriteInt(cntVisitor);
-                    for (int i = 0; i != cntVisitor; i++)
-                    {
-                        Logic.Synchronization.Serialize(_visitors[i].handle, ref _stateWriter);
-                    }
-
-                    for (int i = 0; i != cntReserver; i++)
-                    {
-                        if (!_reservers[i].TryGetTarget(out Agent agent))
-                            continue;
-
-                        agent.Send(_stateWriter.Buffer, 0, _stateWriter.Offset);
-                        _subscriberDic[agent.Id] = _reservers[i];
-                    }
-                }
-            }
-
-            var lenData = this.DataWriter.Length;
-            if (lenData > 4)
-            {
-                unsafe
-                {
-                    var checkIds = stackalloc int[_subscriberDic.Count];
-                    var checkCnt = 0;
-
-                    var subIter = _subscriberDic.Values.GetEnumerator();
-                    while (subIter.MoveNext())
-                    {
-                        if (!subIter.Current.TryGetTarget(out Agent agent))
-                        {
-                            checkIds[checkCnt++] = agent.Id;
-                            continue;
-                        }
-
-                        agent.Send(this.DataWriter.Data, 0, lenData);
-                    }
-
-                    for (int i = 0; i != checkCnt; i++)
-                    {
-                        _subscriberDic.Remove(checkIds[i]);
-                    }
-                }
-            }
-
-            this.DataWriter.Reset();
-            this.DataWriter.Put((int)Protocol.Code.Packet.Subscribe);
-
-            _reservers.Clear();
-            _visitors.Clear();
-            _stateWriter.Reset();
         }
     }
 
@@ -157,17 +123,31 @@ namespace SpeakingLanguage.Server
     internal class Agent
     {
         private NetPeer _peer;
+        private Logic.PropertyTable.Row _logicObject;
 
-        public AuthData Auth { get; set; }
+        public AuthData Auth { get; private set; }
         public Scene CurrentScene { get; set; }
-        public Logic.PropertyTable.Row LogicObject { get; set; }
+        public Logic.Property.Controller LogicController { get; private set; }
+        public Logic.Property.Position LogicPosition { get; private set; }
 
         public int Id => _peer.Id;
-        public bool Authenticated => this.Auth != null;
+        public bool IsAlive => this.Auth != null;
 
         public Agent(NetPeer peer)
         {
             _peer = peer;
+        }
+
+        public void Construct(string id, string pswd, int newHandle)
+        {
+            this.Auth = new AuthData { id = id, pswd = pswd, handle = newHandle };
+            this._logicObject = Logic.Factory.CreateNew(newHandle, Logic.ObserverArchetype.Value);
+        }
+
+        public void LogicUpdate()
+        {
+            this.LogicController = Logic.PropertyHelper.GetReadonly<Logic.Property.Controller>(this._logicObject);
+            this.LogicPosition = Logic.PropertyHelper.GetReadonly<Logic.Property.Position>(this._logicObject);
         }
 
         public void Send(byte[] data, int ofs, int cnt, byte channel = 0)

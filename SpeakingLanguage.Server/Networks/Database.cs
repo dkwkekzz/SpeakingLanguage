@@ -7,19 +7,6 @@ using System.Threading.Tasks;
 
 namespace SpeakingLanguage.Server.Networks
 {
-    internal enum DBError
-    {
-        None,
-        NoExist,
-        EmptyBytes,
-    }
-
-    internal enum RequestType
-    {
-        Read_User,
-        Write_User,
-    }
-
     internal interface IDatabase
     {
         void RequestLoad(Agent agent, Protocol.Code.Packet from, string key);
@@ -46,14 +33,8 @@ namespace SpeakingLanguage.Server.Networks
         private readonly ConcurrentQueue<ReadRequest> _readRequests = new ConcurrentQueue<ReadRequest>();
         private readonly ConcurrentQueue<WriteRequest> _writeRequests = new ConcurrentQueue<WriteRequest>();
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
-        private readonly PostResponsor _responses;
         private Task _readWorker;
         private Task _writeWorker;
-
-        public FileDatabase(PostResponsor responsor)
-        {
-            _responses = responsor;
-        }
 
         public void Dispose()
         {

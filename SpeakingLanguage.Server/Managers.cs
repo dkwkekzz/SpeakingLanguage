@@ -11,4 +11,10 @@ namespace SpeakingLanguage.Server
         public long NewUniqueKey => (Library.Ticker.GlobalTicks << 4) + (_keyNum & 0xF);
     }
 
+    public class WriteHolder
+    {
+        private byte[] _buffer = new byte[1 << 10];
+
+        public Library.Writer NewWriter => new Library.Writer(_buffer, 0);
+    }
 }
